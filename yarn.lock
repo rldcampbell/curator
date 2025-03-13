@@ -1704,6 +1704,14 @@
   dependencies:
     nanoid "3.3.8"
 
+"@react-navigation/stack@^7.1.2":
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@react-navigation/stack/-/stack-7.1.2.tgz#ea170bd15f4b8ee9bfcaff49ee9fc83bad0d0ab7"
+  integrity sha512-uRFec2SeZP7Urgekzake5AbWt1llsfxZdRqd9plOKnUTpSDhRO45d1XidgnB4eguJF4Yvdb8c2Ge3ZB3rvfCxg==
+  dependencies:
+    "@react-navigation/elements" "^2.2.6"
+    color "^4.2.3"
+
 "@segment/loosely-validate-event@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@segment/loosely-validate-event/-/loosely-validate-event-2.0.0.tgz#87dfc979e5b4e7b82c5f1d8b722dfd5d77644681"
