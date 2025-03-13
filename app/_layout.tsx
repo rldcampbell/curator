@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
 
 export default function Layout() {
   return (
@@ -33,5 +33,5 @@ export default function Layout() {
         }}
       />
     </Tabs>
-  );
+  )
 }

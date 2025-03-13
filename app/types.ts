@@ -10,19 +10,19 @@ type BaseField = {
 }
 
 type TextField = BaseField & {
-  type: 'text'
+  type: "text"
   charLim: number
 }
 
 type NumberField = BaseField & {
-  type: 'number'
+  type: "number"
   min?: number
   max?: number
-  // format?: NumberFormat // TODO: determin what this should look like - scientific, SF, DP etc. etc.
+  // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
 }
 
 type DateField = BaseField & {
-  type: 'date'
+  type: "date"
   min?: DateArray
   max?: DateArray
 }
