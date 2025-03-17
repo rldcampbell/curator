@@ -1,0 +1,61 @@
+{
+  "collectionOrder": ["c-abc0-1234-def1-5678", "c-xyz0-2345-hij2-6789"],
+  "collections": {
+    "c-abc0-1234-def1-5678": {
+      "name": "Books Collection",
+      "fieldOrder": ["f-abc0-1234-def1-5678", "f-abc0-1234-def1-6789"],
+      "fields": {
+        "f-abc0-1234-def1-5678": {
+          "name": "Title",
+          "type": "text",
+          "charLim": 100
+        },
+        "f-abc0-1234-def1-6789": {
+          "name": "Published Date",
+          "type": "date",
+          "min": [1990, 1, 1],
+          "max": [2025, 12, 31]
+        }
+      },
+      "itemOrder": ["i-abc0-1234-def1-7890", "i-abc0-1234-def1-7891"],
+      "items": {
+        "i-abc0-1234-def1-7890": {
+          "f-abc0-1234-def1-5678": "Harry Potter and the Philosopher's Stone",
+          "f-abc0-1234-def1-6789": [1997, 6, 26]
+        },
+        "i-abc0-1234-def1-7891": {
+          "f-abc0-1234-def1-5678": "The Hobbit",
+          "f-abc0-1234-def1-6789": [1937, 9, 21]
+        }
+      }
+    },
+    "c-xyz0-2345-hij2-6789": {
+      "name": "Movies Collection",
+      "fieldOrder": ["f-xyz0-2345-hij2-5678", "f-xyz0-2345-hij2-6789"],
+      "fields": {
+        "f-xyz0-2345-hij2-5678": {
+          "name": "Title",
+          "type": "text",
+          "charLim": 100
+        },
+        "f-xyz0-2345-hij2-6789": {
+          "name": "Release Date",
+          "type": "date",
+          "min": [1900, 1, 1],
+          "max": [2025, 12, 31]
+        }
+      },
+      "itemOrder": ["i-xyz0-2345-hij2-7890", "i-xyz0-2345-hij2-7891"],
+      "items": {
+        "i-xyz0-2345-hij2-7890": {
+          "f-xyz0-2345-hij2-5678": "The Matrix",
+          "f-xyz0-2345-hij2-6789": [1999, 3, 31]
+        },
+        "i-xyz0-2345-hij2-7891": {
+          "f-xyz0-2345-hij2-5678": "Inception",
+          "f-xyz0-2345-hij2-6789": [2010, 7, 16]
+        }
+      }
+    }
+  }
+}

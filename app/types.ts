@@ -1,11 +1,12 @@
-type CollectionId = `c${number}`
-type FieldId = `f${number}`
-type ItemId = `i${number}`
+type RawId = `${string}-${string}-${string}-${string}` // future: https://github.com/microsoft/TypeScript/issues/41160
+
+export type CollectionId = `c-${RawId}`
+type FieldId = `f-${RawId}`
+type ItemId = `i-${RawId}`
 
 type DateArray = [y: number, m: number, d: number]
 
 type BaseField = {
-  id: FieldId
   name: string
 }
 
@@ -29,16 +30,17 @@ type DateField = BaseField & {
 
 type Field = TextField | NumberField | DateField
 
-type Item = {
-  id: ItemId
-  fieldValues: Record<FieldId, any>
-}
+type Item = Record<FieldId, any>
 
-type Collection = {
-  id: CollectionId
+export type Collection = {
   name: string
   fieldOrder: FieldId[]
   fields: Record<FieldId, Field>
   itemOrder: ItemId[]
   items: Record<ItemId, Item>
+}
+
+export type CollectionsData = {
+  collectionOrder: CollectionId[]
+  collections: Record<CollectionId, Collection>
 }

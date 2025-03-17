@@ -33,5 +33,5 @@ export const genId = ({ date, prefix = "" }: GenIdOptions) => {
     rawId = toBase62(Math.round(d.getTime() / 1000), 6) + nanoid10()
   }
 
-  return prefix + rawId
+  return prefix + rawId.match(/.{1,4}/g)?.join("-")
 }

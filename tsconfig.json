@@ -1,6 +1,8 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "module": "ESNext",
+    "resolveJsonModule": true,
     "strict": true,
     "paths": {
       "@/*": ["./*"]

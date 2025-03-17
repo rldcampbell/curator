@@ -1,22 +1,27 @@
-import { View, Text, Button } from "react-native"
+import { View, Button, ScrollView } from "react-native"
 import { router } from "expo-router"
+import collectionsData from "../data.json" with { type: "json" }
+import { CollectionsData } from "../types.js"
+
+const { collectionOrder, collections } =
+  collectionsData as unknown as CollectionsData
 
 export default function CollectionsScreen() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Collections</Text>
-      <Button
-        title="Go to Collection 1"
-        onPress={
-          () => router.push("/(collections)/1" as any) /* to fix properly! */
-        }
-      />
-      <Button
-        title="Go to Collection 2"
-        onPress={
-          () => router.push("/(collections)/2" as any) /* to fix properly! */
-        }
-      />
+      <ScrollView style={{ width: "100%" }}>
+        {collectionOrder.map(collectionId => {
+          const collection = collections[collectionId]
+
+          return (
+            <Button
+              key={collectionId}
+              title={`Go to ${collection.name}`}
+              onPress={() => router.push(`/(collections)/${collectionId}`)}
+            />
+          )
+        })}
+      </ScrollView>
     </View>
   )
 }
