@@ -29,16 +29,11 @@ export default function CollectionDetailScreen() {
 
         return (
           <View key={itemId} style={styles.itemCard}>
-            {collection.fieldOrder.map(fieldId => {
-              return (
-                <FieldDisplay
-                  key={fieldId}
-                  collectionId={collectionId}
-                  itemId={itemId}
-                  collection={collection}
-                />
-              )
-            })}
+            <FieldDisplay
+              collectionId={collectionId}
+              itemId={itemId}
+              collection={collection}
+            />
           </View>
         )
       })}

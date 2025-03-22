@@ -1,5 +1,9 @@
 {
-  "collectionOrder": ["c-abc0-1234-def1-5678", "c-xyz0-2345-hij2-6789"],
+  "collectionOrder": [
+    "c-abc0-1234-def1-5678",
+    "c-xyz0-2345-hij2-6789",
+    "c-ani0-3456-klm3-7890"
+  ],
   "collections": {
     "c-abc0-1234-def1-5678": {
       "name": "Books Collection",
@@ -54,6 +58,46 @@
         "i-xyz0-2345-hij2-7891": {
           "f-xyz0-2345-hij2-5678": "Inception",
           "f-xyz0-2345-hij2-6789": [2010, 7, 16]
+        }
+      }
+    },
+    "c-ani0-3456-klm3-7890": {
+      "name": "Animals Collection",
+      "fieldOrder": ["f-ani0-3456-klm3-5678", "f-ani0-3456-klm3-6789"],
+      "fields": {
+        "f-ani0-3456-klm3-5678": {
+          "name": "Animal",
+          "type": "text",
+          "charLim": 50
+        },
+        "f-ani0-3456-klm3-6789": {
+          "name": "Favourite Food",
+          "type": "text",
+          "charLim": 50
+        }
+      },
+      "itemOrder": [
+        "i-ani0-3456-klm3-7891",
+        "i-ani0-3456-klm3-7890",
+        "i-ani0-3456-klm3-7893",
+        "i-ani0-3456-klm3-7892"
+      ],
+      "items": {
+        "i-ani0-3456-klm3-7890": {
+          "f-ani0-3456-klm3-5678": "Sloth",
+          "f-ani0-3456-klm3-6789": "Leaves"
+        },
+        "i-ani0-3456-klm3-7891": {
+          "f-ani0-3456-klm3-5678": "Seagull",
+          "f-ani0-3456-klm3-6789": "Chips"
+        },
+        "i-ani0-3456-klm3-7892": {
+          "f-ani0-3456-klm3-5678": "Llama",
+          "f-ani0-3456-klm3-6789": "Grass or something"
+        },
+        "i-ani0-3456-klm3-7893": {
+          "f-ani0-3456-klm3-5678": "Turtle",
+          "f-ani0-3456-klm3-6789": "Aquatic plants"
         }
       }
     }
