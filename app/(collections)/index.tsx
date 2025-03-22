@@ -16,7 +16,7 @@ export default function CollectionsScreen() {
           return (
             <Button
               key={collectionId}
-              title={`Go to ${collection.name}`}
+              title={collection.name}
               onPress={() => router.push(`/(collections)/${collectionId}`)}
             />
           )

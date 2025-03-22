@@ -44,8 +44,9 @@ export default function ItemDetailScreen() {
         }}
       >
         <View style={{ flex: 1, padding: 20, alignItems: "center" }}>
-          <Button title="Back to Collection" onPress={goBack} />
-          <Text style={{ fontSize: 24, fontWeight: "bold" }}>Item Details</Text>
+          <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+            {collection.name}
+          </Text>
           <FlatList
             data={Object.entries(itemData)}
             keyExtractor={([key]) => key}

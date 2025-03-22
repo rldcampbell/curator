@@ -6,7 +6,7 @@
   ],
   "collections": {
     "c-abc0-1234-def1-5678": {
-      "name": "Books Collection",
+      "name": "Books",
       "fieldOrder": ["f-abc0-1234-def1-5678", "f-abc0-1234-def1-6789"],
       "fields": {
         "f-abc0-1234-def1-5678": {
@@ -34,7 +34,7 @@
       }
     },
     "c-xyz0-2345-hij2-6789": {
-      "name": "Movies Collection",
+      "name": "Movies",
       "fieldOrder": ["f-xyz0-2345-hij2-5678", "f-xyz0-2345-hij2-6789"],
       "fields": {
         "f-xyz0-2345-hij2-5678": {
@@ -62,7 +62,7 @@
       }
     },
     "c-ani0-3456-klm3-7890": {
-      "name": "Animals Collection",
+      "name": "Animals",
       "fieldOrder": [
         "f-ani0-3456-klm3-5678",
         "f-ani0-3456-klm3-6789",
