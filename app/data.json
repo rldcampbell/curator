@@ -63,7 +63,11 @@
     },
     "c-ani0-3456-klm3-7890": {
       "name": "Animals Collection",
-      "fieldOrder": ["f-ani0-3456-klm3-5678", "f-ani0-3456-klm3-6789"],
+      "fieldOrder": [
+        "f-ani0-3456-klm3-5678",
+        "f-ani0-3456-klm3-6789",
+        "f-ani0-3456-klm3-6790"
+      ],
       "fields": {
         "f-ani0-3456-klm3-5678": {
           "name": "Animal",
@@ -72,6 +76,11 @@
         },
         "f-ani0-3456-klm3-6789": {
           "name": "Favourite Food",
+          "type": "text",
+          "charLim": 50
+        },
+        "f-ani0-3456-klm3-6790": {
+          "name": "Colour",
           "type": "text",
           "charLim": 50
         }
@@ -85,19 +94,23 @@
       "items": {
         "i-ani0-3456-klm3-7890": {
           "f-ani0-3456-klm3-5678": "Sloth",
-          "f-ani0-3456-klm3-6789": "Leaves"
+          "f-ani0-3456-klm3-6789": "Leaves",
+          "f-ani0-3456-klm3-6790": "Grey"
         },
         "i-ani0-3456-klm3-7891": {
           "f-ani0-3456-klm3-5678": "Seagull",
-          "f-ani0-3456-klm3-6789": "Chips"
+          "f-ani0-3456-klm3-6789": "Chips",
+          "f-ani0-3456-klm3-6790": "White and grey"
         },
         "i-ani0-3456-klm3-7892": {
           "f-ani0-3456-klm3-5678": "Llama",
-          "f-ani0-3456-klm3-6789": "Grass or something"
+          "f-ani0-3456-klm3-6789": "Grass or something",
+          "f-ani0-3456-klm3-6790": "Yellow"
         },
         "i-ani0-3456-klm3-7893": {
           "f-ani0-3456-klm3-5678": "Turtle",
-          "f-ani0-3456-klm3-6789": "Aquatic plants"
+          "f-ani0-3456-klm3-6789": "Aquatic plants",
+          "f-ani0-3456-klm3-6790": "Emerald"
         }
       }
     }
