@@ -25,7 +25,6 @@ export default function ItemDetailScreen() {
   const itemIndex = items.indexOf(itemId)
   const itemData = collection.items[itemId]
 
-  const goBack = () => router.back()
   const goToItem = (newIndex: number) => {
     if (newIndex >= 0 && newIndex < items.length) {
       router.replace(`/${collectionId}/${items[newIndex]}`)
