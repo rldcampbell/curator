@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 import { useLocalSearchParams } from "expo-router"
 import { collections } from "../data.json" with { type: "json" }
-import { Collection, CollectionId, ItemId } from "../types.js"
+import { CollectionId, CollectionsData, ItemId } from "../types.js"
 import FieldDisplay from "../../components/FieldDisplay"
 import DraggableFlatList, {
   RenderItemParams,
@@ -11,8 +11,8 @@ import { useState } from "react"
 export default function CollectionDetailScreen() {
   const { cId } = useLocalSearchParams() // Get collection ID from URL
   const collectionId = cId as unknown as CollectionId
-  const collection = (collections as unknown as Record<string, Collection>)[
-    collectionId as any
+  const collection = (collections as unknown as CollectionsData["collections"])[
+    collectionId
   ]
 
   const [itemOrder, setItemOrder] = useState(collection?.itemOrder || [])
