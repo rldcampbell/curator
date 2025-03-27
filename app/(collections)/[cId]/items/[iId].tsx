@@ -1,4 +1,4 @@
-import { View, Text, Button, FlatList } from "react-native"
+import { View, Text, FlatList } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import collectionData from "../../../data.json"
 import {
