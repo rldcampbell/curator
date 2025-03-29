@@ -4,3 +4,4 @@
   - Maybe these could be special fields with fixed ids that are either toggled on or off.
   - Add default values for a collection when defining a collection?
   - Allow standard properties to have default values too...
+- When in process of creating new collection allow navigation back out - but the screen will then show a collection that is not yet complete. You can go back in and finish it / discard it as required.
