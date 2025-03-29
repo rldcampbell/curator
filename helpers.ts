@@ -35,3 +35,9 @@ export const genId = ({ date, prefix = "" }: GenIdOptions) => {
 
   return prefix + rawId.match(/.{1,4}/g)?.join("-")
 }
+
+const normaliseIndex = (index: number, length: number) =>
+  ((index % length) + length) % length
+
+export const safeAccess = <T>(array: T[], index: number): T =>
+  array[normaliseIndex(index, array.length)]

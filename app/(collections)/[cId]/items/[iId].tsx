@@ -8,6 +8,7 @@ import {
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler"
 import { CollectionId, CollectionsData, FieldId, ItemId } from "../../../types"
+import { safeAccess } from "../../../../helpers"
 
 export default function ItemDetailScreen() {
   const { cId, iId } = useLocalSearchParams()
@@ -21,14 +22,12 @@ export default function ItemDetailScreen() {
   console.log(collectionId)
 
   const collection = collections[collectionId]
-  const items = collection.itemOrder
-  const itemIndex = items.indexOf(itemId)
+  const { itemOrder } = collection
+  const itemIndex = itemOrder.indexOf(itemId)
   const itemData = collection.items[itemId]
 
   const goToItem = (newIndex: number) => {
-    if (newIndex >= 0 && newIndex < items.length) {
-      router.replace(`/${collectionId}/${items[newIndex]}`)
-    }
+    router.replace(`/${collectionId}/items/${safeAccess(itemOrder, newIndex)}`)
   }
 
   return (
