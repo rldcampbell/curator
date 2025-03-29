@@ -1,8 +1,6 @@
-import { View, Text, Pressable } from "react-native"
-import { useRouter } from "expo-router"
+import { View, Text } from "react-native"
 import {
   Collection,
-  CollectionId,
   DateArray,
   Field,
   FieldValue,
@@ -11,39 +9,30 @@ import {
 import styles from "../styles/FieldDisplayStyles" // Import the styles
 
 type FieldDisplayProps = {
-  collectionId: CollectionId
   itemId: ItemId
   collection: Collection
 }
 
 export default function FieldDisplay({
-  collectionId,
   itemId,
   collection,
 }: FieldDisplayProps) {
-  const router = useRouter()
   const item = collection.items[itemId]
 
-  // Get the first 2 fields to display
   const fieldEntries = collection.fieldOrder.slice(0, 2).map(fieldId => ({
     name: collection.fields[fieldId].name,
     value: format(collection.fields[fieldId], item[fieldId]),
   }))
 
   return (
-    <Pressable
-      style={styles.container}
-      onPress={() =>
-        router.push(`/(collections)/${collectionId}/items/${itemId}`)
-      }
-    >
+    <View style={styles.container}>
       {fieldEntries.map(({ name, value }) => (
         <View key={name} style={styles.fieldRow}>
           <Text style={styles.label}>{name}:</Text>
           <Text style={styles.value}>{String(value)}</Text>
         </View>
       ))}
-    </Pressable>
+    </View>
   )
 }
 

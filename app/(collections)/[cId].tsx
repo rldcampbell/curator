@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
-import { useLocalSearchParams } from "expo-router"
+import { router, useLocalSearchParams } from "expo-router"
 import { collections } from "../data.json" with { type: "json" }
-import { Collection, CollectionId, ItemId } from "../types.js"
-import FieldDisplay from "../../components/FieldDisplay"
+import { CollectionId, CollectionsData, ItemId } from "../types.js"
+import FieldDisplay from "@/components/FieldDisplay"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -11,8 +11,8 @@ import { useState } from "react"
 export default function CollectionDetailScreen() {
   const { cId } = useLocalSearchParams() // Get collection ID from URL
   const collectionId = cId as unknown as CollectionId
-  const collection = (collections as unknown as Record<string, Collection>)[
-    collectionId as any
+  const collection = (collections as unknown as CollectionsData["collections"])[
+    collectionId
   ]
 
   const [itemOrder, setItemOrder] = useState(collection?.itemOrder || [])
@@ -31,19 +31,19 @@ export default function CollectionDetailScreen() {
       <DraggableFlatList
         data={itemOrder}
         keyExtractor={item => item}
-        onDragEnd={({ data }) => setItemOrder(data)}
+        onDragEnd={({ data }) => setItemOrder([...data])}
         renderItem={({ item, drag, isActive }: RenderItemParams<string>) => {
           return (
             <TouchableOpacity
               key={item}
               style={[styles.itemCard, isActive ? styles.activeItemCard : null]}
-              onLongPress={drag} // Enable dragging when long-pressed
+              onLongPress={drag}
+              delayLongPress={300}
+              onPress={() =>
+                router.push(`/(collections)/${collectionId}/items/${item}`)
+              }
             >
-              <FieldDisplay
-                collectionId={collectionId}
-                itemId={item as ItemId}
-                collection={collection}
-              />
+              <FieldDisplay itemId={item as ItemId} collection={collection} />
             </TouchableOpacity>
           )
         }}

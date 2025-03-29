@@ -1,13 +1,14 @@
-import { View, Text, Button, FlatList } from "react-native"
+import { View, Text, FlatList } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import collectionData from "../../../data.json"
+import collectionData from "@/app/data.json"
 import {
   GestureEvent,
   GestureHandlerRootView,
   PanGestureHandler,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler"
-import { CollectionId, CollectionsData, FieldId, ItemId } from "../../../types"
+import { CollectionId, CollectionsData, FieldId, ItemId } from "@/app/types"
+import { safeAccess } from "@/helpers"
 
 export default function ItemDetailScreen() {
   const { cId, iId } = useLocalSearchParams()
@@ -21,14 +22,12 @@ export default function ItemDetailScreen() {
   console.log(collectionId)
 
   const collection = collections[collectionId]
-  const items = collection.itemOrder
-  const itemIndex = items.indexOf(itemId)
+  const { itemOrder } = collection
+  const itemIndex = itemOrder.indexOf(itemId)
   const itemData = collection.items[itemId]
 
   const goToItem = (newIndex: number) => {
-    if (newIndex >= 0 && newIndex < items.length) {
-      router.replace(`/${collectionId}/${items[newIndex]}`)
-    }
+    router.replace(`/${collectionId}/items/${safeAccess(itemOrder, newIndex)}`)
   }
 
   return (
