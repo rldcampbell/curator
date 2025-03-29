@@ -10,6 +10,13 @@ export default function CollectionsScreen() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <ScrollView style={{ width: "100%" }}>
+        {/* Add Collection Button */}
+        <Button
+          title="+ Add New Collection"
+          onPress={() => router.push("/new-collection")}
+        />
+
+        {/* Existing Collections */}
         {collectionOrder.map(collectionId => {
           const collection = collections[collectionId]
 
