@@ -1,14 +1,14 @@
 import { View, Text, FlatList } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import collectionData from "../../../data.json"
+import collectionData from "@/app/data.json"
 import {
   GestureEvent,
   GestureHandlerRootView,
   PanGestureHandler,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler"
-import { CollectionId, CollectionsData, FieldId, ItemId } from "../../../types"
-import { safeAccess } from "../../../../helpers"
+import { CollectionId, CollectionsData, FieldId, ItemId } from "@/app/types"
+import { safeAccess } from "@/helpers"
 
 export default function ItemDetailScreen() {
   const { cId, iId } = useLocalSearchParams()

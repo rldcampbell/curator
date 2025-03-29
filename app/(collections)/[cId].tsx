@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 import { router, useLocalSearchParams } from "expo-router"
 import { collections } from "../data.json" with { type: "json" }
 import { CollectionId, CollectionsData, ItemId } from "../types.js"
-import FieldDisplay from "../../components/FieldDisplay"
+import FieldDisplay from "@/components/FieldDisplay"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
