@@ -30,6 +30,9 @@ export const sharedStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
   },
+  activeCard: {
+    backgroundColor: "#d0f0ff",
+  },
   container: {
     flex: 1,
     alignItems: "center",

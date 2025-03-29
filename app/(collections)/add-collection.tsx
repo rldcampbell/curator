@@ -1,5 +1,4 @@
 import { sharedStyles } from "@/styles/shared"
-import { modalStyles } from "@/styles/modalStyles"
 import { useState } from "react"
 import {
   Text,
@@ -8,13 +7,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Modal,
-  View,
+  TouchableOpacity,
 } from "react-native"
+import AddFieldModal from "@/components/AddFieldModal"
+import { genId } from "@/helpers"
+import DraggableFlatList from "react-native-draggable-flatlist"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")
   const [modalVisible, setModalVisible] = useState(false)
+  const [fieldOrder, setFieldOrder] = useState<string[]>([])
+  const [fields, setFields] = useState<
+    Record<string, { name: string; type: string }>
+  >({})
 
   return (
     <KeyboardAvoidingView
@@ -25,7 +30,7 @@ export default function AddCollectionScreen() {
         {/* Input for collection name */}
         <TextInput
           style={sharedStyles.inputCard}
-          placeholder="New Collection"
+          placeholder="Collection Name"
           placeholderTextColor="#999"
           value={collectionName}
           onChangeText={setCollectionName}
@@ -39,30 +44,45 @@ export default function AddCollectionScreen() {
         >
           <Text style={sharedStyles.addText}>＋</Text>
         </Pressable>
+
+        <DraggableFlatList
+          data={fieldOrder}
+          keyExtractor={item => item}
+          onDragEnd={({ data }) => setFieldOrder([...data])}
+          scrollEnabled={false} // since we're inside a ScrollView
+          renderItem={({ item, drag, isActive }) => {
+            const field = fields[item]
+
+            return (
+              <TouchableOpacity
+                key={item}
+                style={[
+                  sharedStyles.card,
+                  isActive ? sharedStyles.activeCard : null,
+                ]}
+                onLongPress={drag}
+                delayLongPress={300}
+              >
+                <Text style={sharedStyles.cardText}>
+                  {field.name} (
+                  {field.type.charAt(0).toUpperCase() + field.type.slice(1)})
+                </Text>
+              </TouchableOpacity>
+            )
+          }}
+        />
       </ScrollView>
-
-      {/* Modal for adding a field */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={modalStyles.overlay}>
-          <View style={modalStyles.content}>
-            <Text style={modalStyles.title}>Add Field</Text>
-
-            <Text>Field name and type picker coming soon!</Text>
-
-            <Pressable
-              style={[sharedStyles.card, modalStyles.closeButton]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={{ fontWeight: "bold", color: "#333" }}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      {modalVisible && (
+        <AddFieldModal
+          visible={true} // optional — can omit this if you like
+          onClose={() => setModalVisible(false)}
+          onSubmit={field => {
+            const id = genId({ prefix: "f-" })
+            setFieldOrder(prev => [...prev, id])
+            setFields(prev => ({ ...prev, [id]: field }))
+          }}
+        />
+      )}
     </KeyboardAvoidingView>
   )
 }
