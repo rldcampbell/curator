@@ -11,17 +11,22 @@ import {
   View,
 } from "react-native"
 import AddFieldModal from "@/components/AddFieldModal"
-import { genId } from "@/helpers"
+import { genFieldId } from "@/helpers"
 import DraggableFlatList from "react-native-draggable-flatlist"
 import Divider from "@/components/Divider"
+import ConfirmModal from "@/components/ConfirmModal"
+import { useCollections } from "@/context/CollectionsContext"
+import { router } from "expo-router"
+import { Field, FieldId } from "../types"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")
   const [modalVisible, setModalVisible] = useState(false)
-  const [fieldOrder, setFieldOrder] = useState<string[]>([])
-  const [fields, setFields] = useState<
-    Record<string, { name: string; type: string }>
-  >({})
+  const [fieldOrder, setFieldOrder] = useState<FieldId[]>([])
+  const [fields, setFields] = useState<Record<FieldId, Field>>({})
+  const [confirmDiscardVisible, setConfirmDiscardVisible] = useState(false)
+  const [confirmCreateVisible, setConfirmCreateVisible] = useState(false)
+  const { saveCollection } = useCollections()
 
   return (
     <KeyboardAvoidingView
@@ -29,6 +34,28 @@ export default function AddCollectionScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={addCollectionStyles.topPanel}>
+        <View style={addCollectionStyles.topActionsRow}>
+          <Pressable
+            style={[
+              addCollectionStyles.topCardButton,
+              addCollectionStyles.discardButton,
+            ]}
+            onPress={() => setConfirmDiscardVisible(true)}
+          >
+            <Text style={addCollectionStyles.topButtonText}>Discard</Text>
+          </Pressable>
+
+          <Pressable
+            style={[
+              addCollectionStyles.topCardButton,
+              addCollectionStyles.createButton,
+            ]}
+            onPress={() => setConfirmCreateVisible(true)}
+          >
+            <Text style={addCollectionStyles.topButtonText}>Create</Text>
+          </Pressable>
+        </View>
+
         <TextInput
           style={sharedStyles.inputCard}
           placeholder="Collection Name"
@@ -82,12 +109,41 @@ export default function AddCollectionScreen() {
           visible={true}
           onClose={() => setModalVisible(false)}
           onSubmit={field => {
-            const id = genId({ prefix: "f-" })
+            const id = genFieldId()
             setFieldOrder(prev => [...prev, id])
             setFields(prev => ({ ...prev, [id]: field }))
           }}
         />
       )}
+
+      <ConfirmModal
+        visible={confirmDiscardVisible}
+        title="Discard collection?"
+        message="This will clear all fields you've added."
+        confirmText="Discard"
+        onConfirm={() => {
+          setConfirmDiscardVisible(false)
+          router.back()
+        }}
+        onCancel={() => setConfirmDiscardVisible(false)}
+      />
+
+      <ConfirmModal
+        visible={confirmCreateVisible}
+        title="Create collection?"
+        message="You won't be able to edit fields later (yet)."
+        confirmText="Create"
+        onConfirm={() => {
+          saveCollection({
+            name: collectionName,
+            fieldOrder,
+            fields,
+          })
+          setConfirmCreateVisible(false)
+          router.back()
+        }}
+        onCancel={() => setConfirmCreateVisible(false)}
+      />
     </KeyboardAvoidingView>
   )
 }

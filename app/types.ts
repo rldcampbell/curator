@@ -1,4 +1,4 @@
-type RawId = `${string}-${string}-${string}-${string}` // future: https://github.com/microsoft/TypeScript/issues/41160
+export type RawId = `${string}-${string}-${string}-${string}` // future: https://github.com/microsoft/TypeScript/issues/41160
 
 export type CollectionId = `c-${RawId}`
 export type FieldId = `f-${RawId}`
@@ -12,7 +12,7 @@ type BaseField = {
 
 type TextField = BaseField & {
   type: "text"
-  charLim: number
+  charLim?: number
 }
 
 type NumberField = BaseField & {

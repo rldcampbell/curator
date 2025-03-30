@@ -11,4 +11,30 @@ export const addCollectionStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
+  topButtonText: {
+    fontWeight: "600",
+    color: "#333",
+    fontSize: 14,
+  },
+  topCardButton: {
+    flex: 1,
+    marginHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  createButton: {
+    backgroundColor: "#e0f7fa", // match addCard style
+  },
+  discardButton: {
+    backgroundColor: "#eee", // neutral grey for now
+  },
+  topActionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
 })
