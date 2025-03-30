@@ -1,13 +1,11 @@
 import { View, Text, Pressable, ScrollView } from "react-native"
 import { router } from "expo-router"
-import collectionsData from "../data.json" with { type: "json" }
-import { CollectionsData } from "../types.js"
 import { sharedStyles } from "@/styles/sharedStyles"
-
-const { collectionOrder, collections } =
-  collectionsData as unknown as CollectionsData
+import { useCollections } from "@/context/CollectionsContext"
 
 export default function CollectionsScreen() {
+  const { collections, collectionOrder } = useCollections()
+
   return (
     <View style={sharedStyles.container}>
       <ScrollView contentContainerStyle={sharedStyles.scrollContainer}>
