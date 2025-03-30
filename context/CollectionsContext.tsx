@@ -1,17 +1,21 @@
 import { createContext, useContext, useState } from "react"
-import { CollectionId, CollectionsData, Field, FieldId } from "@/app/types"
-import { genCollectionId } from "@/helpers"
+import {
+  Collection,
+  CollectionId,
+  CollectionsData,
+  Item,
+  ItemId,
+} from "@/app/types"
+import { genCollectionId, genItemId } from "@/helpers"
 
-type NewCollectionInput = {
-  name: string
-  fieldOrder: FieldId[]
-  fields: Record<FieldId, Field>
-}
+type NewCollectionInput = Omit<Collection, "itemOrder" | "items">
 
 type CollectionsContextValue = {
   collections: CollectionsData["collections"]
   collectionOrder: CollectionId[]
   saveCollection: (data: NewCollectionInput) => void
+  addItem: (collectionId: CollectionId, item: Item) => ItemId
+  updateItemOrder: (collectionId: CollectionId, itemOrder: ItemId[]) => void
 }
 
 const CollectionsContext = createContext<CollectionsContextValue | undefined>(
@@ -36,14 +40,51 @@ export const CollectionsProvider = ({
         name,
         fieldOrder,
         fields,
+        itemOrder: [],
+        items: {},
       },
     }))
     setCollectionOrder(prev => [...prev, id])
   }
 
+  const addItem = (collectionId: CollectionId, item: Item) => {
+    const itemId = genItemId()
+    setCollections(prev => {
+      const collection = prev[collectionId]
+      return {
+        ...prev,
+        [collectionId]: {
+          ...collection,
+          itemOrder: [...collection.itemOrder, itemId],
+          items: {
+            ...collection.items,
+            [itemId]: item,
+          },
+        },
+      }
+    })
+    return itemId
+  }
+
+  const updateItemOrder = (collectionId: CollectionId, newOrder: ItemId[]) => {
+    setCollections(prev => ({
+      ...prev,
+      [collectionId]: {
+        ...prev[collectionId],
+        itemOrder: newOrder,
+      },
+    }))
+  }
+
   return (
     <CollectionsContext.Provider
-      value={{ collections, collectionOrder, saveCollection }}
+      value={{
+        collections,
+        collectionOrder,
+        saveCollection,
+        addItem,
+        updateItemOrder,
+      }}
     >
       {children}
     </CollectionsContext.Provider>

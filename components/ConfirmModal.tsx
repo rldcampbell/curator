@@ -1,4 +1,5 @@
-import { Modal, Text, View, Pressable } from "react-native"
+import { Modal, Pressable, Text, View } from "react-native"
+
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 

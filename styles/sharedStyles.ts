@@ -72,4 +72,10 @@ export const sharedStyles = StyleSheet.create({
     textAlign: "center",
     padding: 20,
   },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 4,
+    color: "#333",
+  },
 })

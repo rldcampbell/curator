@@ -1,12 +1,13 @@
-import { View, Text, FlatList } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
-import collectionData from "@/app/data.json"
+import { FlatList, Text, View } from "react-native"
 import {
   GestureEvent,
   GestureHandlerRootView,
   PanGestureHandler,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler"
+
+import { useLocalSearchParams, useRouter } from "expo-router"
+
 import { CollectionId, CollectionsData, FieldId, ItemId } from "@/app/types"
 import { safeAccess } from "@/helpers"
 

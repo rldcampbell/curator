@@ -9,17 +9,24 @@ import DraggableFlatList, {
 } from "react-native-draggable-flatlist"
 import { CollectionId, ItemId } from "@/app/types"
 import AddButton from "@/components/AddButton"
+import CreateItemModal from "@/components/CreateItemModal"
 
 export default function CollectionDetailScreen() {
   const { cId } = useLocalSearchParams()
   const collectionId = cId as CollectionId
-  const collection = useCollection(collectionId)
+  const {
+    addItem,
+    fieldOrder,
+    fields,
+    itemOrder,
+    items,
+    name,
+    updateItemOrder,
+  } = useCollection(collectionId)
 
-  const [itemOrder, setItemOrder] = useState<ItemId[]>(
-    collection?.itemOrder || [],
-  )
+  const [itemModalVisible, setItemModalVisible] = useState(false)
 
-  if (!collection) {
+  if (!name) {
     return (
       <View style={collectionDetailStyles.container}>
         <Text style={sharedStyles.errorText}>Collection not found</Text>
@@ -30,13 +37,13 @@ export default function CollectionDetailScreen() {
   return (
     <View style={collectionDetailStyles.container}>
       <View style={collectionDetailStyles.header}>
-        <AddButton onPress={() => {}} />
+        <AddButton onPress={() => setItemModalVisible(true)} />
       </View>
 
       <DraggableFlatList
         data={itemOrder}
         keyExtractor={item => item}
-        onDragEnd={({ data }) => setItemOrder([...data])}
+        onDragEnd={({ data }) => updateItemOrder([...data])}
         contentContainerStyle={collectionDetailStyles.listContainer}
         renderItem={({ item, drag, isActive }: RenderItemParams<ItemId>) => (
           <TouchableOpacity
@@ -51,10 +58,24 @@ export default function CollectionDetailScreen() {
               router.push(`/(collections)/${collectionId}/items/${item}`)
             }
           >
-            <Text style={sharedStyles.cardText}>Item: {item}</Text>
+            <Text style={sharedStyles.cardText}>
+              {items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"}
+            </Text>
           </TouchableOpacity>
         )}
       />
+      {itemModalVisible && (
+        <CreateItemModal
+          visible={itemModalVisible}
+          fieldOrder={fieldOrder}
+          fields={fields}
+          onCreate={inputValues => {
+            addItem(inputValues)
+            setItemModalVisible(false)
+          }}
+          onDiscard={() => setItemModalVisible(false)}
+        />
+      )}
     </View>
   )
 }
