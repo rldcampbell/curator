@@ -1,19 +1,23 @@
 // components/CreateItemModal.tsx
 import { useState } from "react"
 import {
-  Modal,
-  Text,
-  View,
-  TextInput,
-  Platform,
   KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from "react-native"
+
 import DateTimePicker from "@react-native-community/datetimepicker"
+
+import { Field, FieldId, FieldValue, Item } from "@/app/types"
+import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
-import { Field, FieldId, FieldValue, Item } from "@/app/types"
+
 import ModalButtonRow from "./ModalButtonRow"
-import { dateArrayToUTCDate, dateToDateArray } from "@/helpers"
 
 type CreateItemModalProps = {
   visible: boolean
@@ -31,6 +35,9 @@ export default function CreateItemModal({
   onDiscard,
 }: CreateItemModalProps) {
   const [inputValues, setInputValues] = useState<Item>({})
+  const [activePickerField, setActivePickerField] = useState<FieldId | null>(
+    null,
+  )
 
   const updateField = (id: FieldId, value: FieldValue) => {
     setInputValues(prev => ({ ...prev, [id]: value }))
@@ -52,10 +59,9 @@ export default function CreateItemModal({
             switch (field.type) {
               case "text":
                 return (
-                  <View>
+                  <View key={fieldId} style={{ width: "100%" }}>
                     <Text style={sharedStyles.label}>{field.name}</Text>
                     <TextInput
-                      key={fieldId}
                       style={[
                         sharedStyles.inputCard,
                         modalStyles.buttonInModal,
@@ -68,10 +74,9 @@ export default function CreateItemModal({
                 )
               case "number":
                 return (
-                  <View>
+                  <View key={fieldId} style={{ width: "100%" }}>
                     <Text style={sharedStyles.label}>{field.name}</Text>
                     <TextInput
-                      key={fieldId}
                       style={[
                         sharedStyles.inputCard,
                         modalStyles.buttonInModal,
@@ -87,25 +92,43 @@ export default function CreateItemModal({
                 )
               case "date":
                 return (
-                  <View>
+                  <View key={fieldId} style={modalStyles.formFieldWrapper}>
                     <Text style={sharedStyles.label}>{field.name}</Text>
-                    <DateTimePicker
-                      key={fieldId}
-                      value={
-                        Array.isArray(value)
-                          ? dateArrayToUTCDate(value)
-                          : new Date()
-                      }
-                      mode="date"
-                      display="default"
-                      onChange={(_, selectedDate) => {
-                        if (selectedDate) {
-                          updateField(fieldId, dateToDateArray(selectedDate))
+
+                    <Pressable
+                      onPress={() => setActivePickerField(fieldId)}
+                      style={[
+                        sharedStyles.inputCard,
+                        modalStyles.buttonInModal,
+                      ]}
+                    >
+                      <Text>
+                        {Array.isArray(value)
+                          ? formatDate(dateArrayToUTCDate(value))
+                          : "Select date"}
+                      </Text>
+                    </Pressable>
+
+                    {activePickerField === fieldId && (
+                      <DateTimePicker
+                        value={
+                          Array.isArray(value)
+                            ? dateArrayToUTCDate(value)
+                            : new Date()
                         }
-                      }}
-                    />
+                        mode="date"
+                        display="default"
+                        onChange={(_, selectedDate) => {
+                          setActivePickerField(null)
+                          if (selectedDate) {
+                            updateField(fieldId, dateToDateArray(selectedDate))
+                          }
+                        }}
+                      />
+                    )}
                   </View>
                 )
+
               default:
                 return null
             }

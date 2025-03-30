@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from "react-native"
+import { Dimensions, StyleSheet } from "react-native"
 
 const screenWidth = Dimensions.get("window").width
 
@@ -31,5 +31,9 @@ export const modalStyles = StyleSheet.create({
   },
   buttonInModal: {
     width: "100%", // fits modal width instead of screen width
+  },
+  formFieldWrapper: {
+    width: "100%",
+    marginBottom: 12,
   },
 })

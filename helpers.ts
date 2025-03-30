@@ -1,4 +1,5 @@
 import { customAlphabet } from "nanoid"
+
 import { CollectionId, DateArray, FieldId, ItemId, RawId } from "./app/types"
 
 const BASE62_ALPHABET =
@@ -60,3 +61,8 @@ export function dateToDateArray(date: Date): DateArray {
 export function dateArrayToUTCDate([y, m, d]: DateArray): Date {
   return new Date(Date.UTC(y, m - 1, d))
 }
+
+export const formatDate = (date: Date) =>
+  `${date.getDate()} ${date.toLocaleString("default", {
+    month: "short",
+  })} ${date.getFullYear()}`
