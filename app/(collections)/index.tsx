@@ -2,6 +2,7 @@ import { View, Text, Pressable, ScrollView } from "react-native"
 import { router } from "expo-router"
 import { sharedStyles } from "@/styles/sharedStyles"
 import { useCollections } from "@/context/CollectionsContext"
+import AddButton from "@/components/AddButton"
 
 export default function CollectionsScreen() {
   const { collections, collectionOrder } = useCollections()
@@ -9,13 +10,7 @@ export default function CollectionsScreen() {
   return (
     <View style={sharedStyles.container}>
       <ScrollView contentContainerStyle={sharedStyles.scrollContainer}>
-        {/* Add New Collection Card */}
-        <Pressable
-          style={[sharedStyles.card, sharedStyles.addCard]}
-          onPress={() => router.push("/add-collection")}
-        >
-          <Text style={sharedStyles.addText}>＋</Text>
-        </Pressable>
+        <AddButton onPress={() => router.push("/add-collection")} />
 
         {/* Collection Cards */}
         {collectionOrder.map(collectionId => {

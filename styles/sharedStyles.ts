@@ -65,4 +65,11 @@ export const sharedStyles = StyleSheet.create({
     elevation: 6,
     zIndex: 1,
   },
+  errorText: {
+    color: "red",
+    fontSize: 18,
+    fontWeight: "500",
+    textAlign: "center",
+    padding: 20,
+  },
 })

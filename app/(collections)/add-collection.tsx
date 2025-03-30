@@ -18,6 +18,7 @@ import ConfirmModal from "@/components/ConfirmModal"
 import { useCollections } from "@/context/CollectionsContext"
 import { router } from "expo-router"
 import { Field, FieldId } from "../types"
+import AddButton from "@/components/AddButton"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")
@@ -65,12 +66,7 @@ export default function AddCollectionScreen() {
           maxLength={30}
         />
 
-        <Pressable
-          style={[sharedStyles.card, sharedStyles.addCard]}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={sharedStyles.addText}>＋</Text>
-        </Pressable>
+        <AddButton onPress={() => setModalVisible(true)} />
       </View>
 
       <Divider />
