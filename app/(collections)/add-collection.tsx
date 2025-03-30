@@ -1,4 +1,5 @@
-import { sharedStyles } from "@/styles/shared"
+import { sharedStyles } from "@/styles/sharedStyles"
+import { addCollectionStyles } from "@/styles/addCollectionStyles"
 import { useState } from "react"
 import {
   Text,
@@ -6,12 +7,13 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   TouchableOpacity,
+  View,
 } from "react-native"
 import AddFieldModal from "@/components/AddFieldModal"
 import { genId } from "@/helpers"
 import DraggableFlatList from "react-native-draggable-flatlist"
+import Divider from "@/components/Divider"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")
@@ -26,8 +28,7 @@ export default function AddCollectionScreen() {
       style={sharedStyles.container}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView contentContainerStyle={sharedStyles.scrollContainer}>
-        {/* Input for collection name */}
+      <View style={addCollectionStyles.topPanel}>
         <TextInput
           style={sharedStyles.inputCard}
           placeholder="Collection Name"
@@ -37,19 +38,22 @@ export default function AddCollectionScreen() {
           maxLength={30}
         />
 
-        {/* Add field button */}
         <Pressable
           style={[sharedStyles.card, sharedStyles.addCard]}
           onPress={() => setModalVisible(true)}
         >
           <Text style={sharedStyles.addText}>＋</Text>
         </Pressable>
+      </View>
 
+      <Divider />
+
+      <View style={{ flex: 1 }}>
         <DraggableFlatList
           data={fieldOrder}
           keyExtractor={item => item}
           onDragEnd={({ data }) => setFieldOrder([...data])}
-          scrollEnabled={false} // since we're inside a ScrollView
+          contentContainerStyle={addCollectionStyles.listContainer}
           renderItem={({ item, drag, isActive }) => {
             const field = fields[item]
 
@@ -71,10 +75,11 @@ export default function AddCollectionScreen() {
             )
           }}
         />
-      </ScrollView>
+      </View>
+
       {modalVisible && (
         <AddFieldModal
-          visible={true} // optional — can omit this if you like
+          visible={true}
           onClose={() => setModalVisible(false)}
           onSubmit={field => {
             const id = genId({ prefix: "f-" })

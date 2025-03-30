@@ -55,4 +55,14 @@ export const sharedStyles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 20,
   },
+  shadowFade: {
+    height: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
+    zIndex: 1,
+  },
 })

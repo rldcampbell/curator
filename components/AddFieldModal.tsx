@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Modal, View, Text, TextInput, Pressable } from "react-native"
-import { sharedStyles } from "@/styles/shared"
+import { sharedStyles } from "@/styles/sharedStyles"
 import { modalStyles } from "@/styles/modalStyles"
 import DropDownPicker from "react-native-dropdown-picker"
 
@@ -23,6 +23,12 @@ export default function AddFieldModal({
     { label: "Number", value: "number" },
     { label: "Date", value: "date" },
   ])
+  const inputRef = useRef<TextInput>(null)
+  useEffect(() => {
+    if (visible && inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100)
+    }
+  }, [visible])
 
   const handleAdd = () => {
     if (!fieldName.trim()) return // optional: prevent empty name
@@ -45,6 +51,7 @@ export default function AddFieldModal({
           <Text style={modalStyles.title}>Add Field</Text>
 
           <TextInput
+            ref={inputRef}
             style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
             placeholder="Field Name (e.g. Title)"
             placeholderTextColor="#999"
