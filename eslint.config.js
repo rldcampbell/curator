@@ -1,8 +1,8 @@
-import unusedImports from "eslint-plugin-unused-imports"
-import importPlugin from "eslint-plugin-import"
-import prettierConfig from "eslint-config-prettier"
-import tsParser from "@typescript-eslint/parser"
 import tsPlugin from "@typescript-eslint/eslint-plugin"
+import tsParser from "@typescript-eslint/parser"
+import prettierConfig from "eslint-config-prettier"
+import importPlugin from "eslint-plugin-import"
+import unusedImports from "eslint-plugin-unused-imports"
 
 export default [
   prettierConfig,

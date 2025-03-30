@@ -1,5 +1,6 @@
+import { StyleSheet, View } from "react-native"
+
 import { LinearGradient } from "expo-linear-gradient"
-import { View, StyleSheet } from "react-native"
 
 export default function Divider() {
   return (

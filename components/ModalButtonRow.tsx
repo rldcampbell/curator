@@ -1,7 +1,8 @@
 // components/ModalButtonRow.tsx
-import { View, Pressable, Text } from "react-native"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { Pressable, Text, View } from "react-native"
+
 import { modalStyles } from "@/styles/modalStyles"
+import { sharedStyles } from "@/styles/sharedStyles"
 
 type ModalButtonRowProps = {
   onCreate: () => void

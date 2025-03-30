@@ -1,24 +1,27 @@
-import { sharedStyles } from "@/styles/sharedStyles"
-import { addCollectionStyles } from "@/styles/addCollectionStyles"
 import { useState } from "react"
 import {
-  Text,
-  TextInput,
-  Pressable,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native"
-import AddFieldModal from "@/components/AddFieldModal"
-import { genFieldId } from "@/helpers"
 import DraggableFlatList from "react-native-draggable-flatlist"
-import Divider from "@/components/Divider"
-import ConfirmModal from "@/components/ConfirmModal"
-import { useCollections } from "@/context/CollectionsContext"
+
 import { router } from "expo-router"
-import { Field, FieldId } from "../types"
+
 import AddButton from "@/components/AddButton"
+import AddFieldModal from "@/components/AddFieldModal"
+import ConfirmModal from "@/components/ConfirmModal"
+import Divider from "@/components/Divider"
+import { useCollections } from "@/context/CollectionsContext"
+import { genFieldId } from "@/helpers"
+import { addCollectionStyles } from "@/styles/addCollectionStyles"
+import { sharedStyles } from "@/styles/sharedStyles"
+
+import { Field, FieldId } from "../types"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")

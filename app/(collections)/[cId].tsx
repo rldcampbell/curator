@@ -1,15 +1,17 @@
-import { View, Text, TouchableOpacity } from "react-native"
-import { router, useLocalSearchParams } from "expo-router"
 import { useState } from "react"
-import { useCollection } from "@/hooks/useCollection"
-import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { Text, TouchableOpacity, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
+
+import { router, useLocalSearchParams } from "expo-router"
+
 import { CollectionId, ItemId } from "@/app/types"
 import AddButton from "@/components/AddButton"
 import CreateItemModal from "@/components/CreateItemModal"
+import { useCollection } from "@/hooks/useCollection"
+import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
+import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionDetailScreen() {
   const { cId } = useLocalSearchParams()

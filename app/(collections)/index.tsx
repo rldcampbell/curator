@@ -1,8 +1,10 @@
-import { View, Text, Pressable, ScrollView } from "react-native"
+import { Pressable, ScrollView, Text, View } from "react-native"
+
 import { router } from "expo-router"
-import { sharedStyles } from "@/styles/sharedStyles"
-import { useCollections } from "@/context/CollectionsContext"
+
 import AddButton from "@/components/AddButton"
+import { useCollections } from "@/context/CollectionsContext"
+import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionsScreen() {
   const { collections, collectionOrder } = useCollections()

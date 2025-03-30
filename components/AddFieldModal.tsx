@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import { Modal, View, Text, TextInput, Pressable } from "react-native"
-import { sharedStyles } from "@/styles/sharedStyles"
-import { modalStyles } from "@/styles/modalStyles"
+import { Modal, Pressable, Text, TextInput, View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
+
+import { modalStyles } from "@/styles/modalStyles"
+import { sharedStyles } from "@/styles/sharedStyles"
 
 type AddFieldModalProps = {
   visible: boolean
