@@ -1,68 +1,165 @@
-import { sharedStyles } from "@/styles/shared"
-import { modalStyles } from "@/styles/modalStyles"
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import {
-  Text,
-  TextInput,
-  Pressable,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
-  Modal,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native"
+import DraggableFlatList from "react-native-draggable-flatlist"
+
+import { router } from "expo-router"
+
+import { useFocusEffect } from "@react-navigation/native"
+
+import AddButton from "@/components/AddButton"
+import AddFieldModal from "@/components/AddFieldModal"
+import ConfirmModal from "@/components/ConfirmModal"
+import Divider from "@/components/Divider"
+import { useCollections } from "@/context/CollectionsContext"
+import { genFieldId } from "@/helpers"
+import { addCollectionStyles } from "@/styles/addCollectionStyles"
+import { sharedStyles } from "@/styles/sharedStyles"
+
+import { Field, FieldId } from "../types"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")
   const [modalVisible, setModalVisible] = useState(false)
+  const [fieldOrder, setFieldOrder] = useState<FieldId[]>([])
+  const [fields, setFields] = useState<Record<FieldId, Field>>({})
+  const [confirmDiscardVisible, setConfirmDiscardVisible] = useState(false)
+  const [confirmCreateVisible, setConfirmCreateVisible] = useState(false)
+  const { addCollection } = useCollections()
+  const inputRef = useRef<TextInput>(null)
+  useFocusEffect(
+    useCallback(() => {
+      const timeout = setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100) // A small delay helps ensure it's after layout
+
+      return () => clearTimeout(timeout)
+    }, []),
+  )
 
   return (
-    <KeyboardAvoidingView
-      style={sharedStyles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView contentContainerStyle={sharedStyles.scrollContainer}>
-        {/* Input for collection name */}
-        <TextInput
-          style={sharedStyles.inputCard}
-          placeholder="New Collection"
-          placeholderTextColor="#999"
-          value={collectionName}
-          onChangeText={setCollectionName}
-          maxLength={30}
-        />
-
-        {/* Add field button */}
-        <Pressable
-          style={[sharedStyles.card, sharedStyles.addCard]}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={sharedStyles.addText}>＋</Text>
-        </Pressable>
-      </ScrollView>
-
-      {/* Modal for adding a field */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        style={sharedStyles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={modalStyles.overlay}>
-          <View style={modalStyles.content}>
-            <Text style={modalStyles.title}>Add Field</Text>
-
-            <Text>Field name and type picker coming soon!</Text>
+        <View style={addCollectionStyles.topPanel}>
+          <View style={addCollectionStyles.topActionsRow}>
+            <Pressable
+              style={[
+                addCollectionStyles.topCardButton,
+                addCollectionStyles.discardButton,
+              ]}
+              onPress={() => setConfirmDiscardVisible(true)}
+            >
+              <Text style={addCollectionStyles.topButtonText}>Discard</Text>
+            </Pressable>
 
             <Pressable
-              style={[sharedStyles.card, modalStyles.closeButton]}
-              onPress={() => setModalVisible(false)}
+              style={[
+                addCollectionStyles.topCardButton,
+                addCollectionStyles.createButton,
+              ]}
+              onPress={() => setConfirmCreateVisible(true)}
             >
-              <Text style={{ fontWeight: "bold", color: "#333" }}>Close</Text>
+              <Text style={addCollectionStyles.topButtonText}>Create</Text>
             </Pressable>
           </View>
+
+          <TextInput
+            ref={inputRef}
+            style={sharedStyles.inputCard}
+            placeholder="Collection Name"
+            placeholderTextColor="#999"
+            value={collectionName}
+            onChangeText={setCollectionName}
+            maxLength={30}
+          />
+
+          <AddButton onPress={() => setModalVisible(true)} />
         </View>
-      </Modal>
-    </KeyboardAvoidingView>
+
+        <Divider />
+
+        <View style={{ flex: 1 }}>
+          <DraggableFlatList
+            data={fieldOrder}
+            keyExtractor={item => item}
+            onDragEnd={({ data }) => setFieldOrder([...data])}
+            contentContainerStyle={addCollectionStyles.listContainer}
+            renderItem={({ item, drag, isActive }) => {
+              const field = fields[item]
+
+              return (
+                <TouchableOpacity
+                  key={item}
+                  style={[
+                    sharedStyles.card,
+                    isActive ? sharedStyles.activeCard : null,
+                  ]}
+                  onLongPress={drag}
+                  delayLongPress={300}
+                >
+                  <Text style={sharedStyles.cardText}>
+                    {field.name} (
+                    {field.type.charAt(0).toUpperCase() + field.type.slice(1)})
+                  </Text>
+                </TouchableOpacity>
+              )
+            }}
+          />
+        </View>
+
+        {modalVisible && (
+          <AddFieldModal
+            visible={true}
+            onClose={() => setModalVisible(false)}
+            onSubmit={field => {
+              const id = genFieldId()
+              setFieldOrder(prev => [...prev, id])
+              setFields(prev => ({ ...prev, [id]: field }))
+            }}
+          />
+        )}
+
+        <ConfirmModal
+          visible={confirmDiscardVisible}
+          title="Discard collection?"
+          message="This will clear all fields you've added."
+          confirmText="Discard"
+          onConfirm={() => {
+            setConfirmDiscardVisible(false)
+            router.back()
+          }}
+          onCancel={() => setConfirmDiscardVisible(false)}
+        />
+
+        <ConfirmModal
+          visible={confirmCreateVisible}
+          title="Create collection?"
+          message="You won't be able to edit fields later (yet)."
+          confirmText="Create"
+          onConfirm={() => {
+            addCollection({
+              name: collectionName,
+              fieldOrder,
+              fields,
+            })
+            setConfirmCreateVisible(false)
+            router.back()
+          }}
+          onCancel={() => setConfirmCreateVisible(false)}
+        />
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   )
 }

@@ -1,12 +1,9 @@
-import { View, Text } from "react-native"
-import {
-  Collection,
-  DateArray,
-  Field,
-  FieldValue,
-  ItemId,
-} from "../app/types"
-import styles from "../styles/FieldDisplayStyles" // Import the styles
+import { Text, View } from "react-native"
+
+import { Collection, DateArray, Field, FieldValue, ItemId } from "../app/types"
+import styles from "../styles/FieldDisplayStyles"
+
+// Import the styles
 
 type FieldDisplayProps = {
   itemId: ItemId

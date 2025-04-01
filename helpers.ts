@@ -1,5 +1,7 @@
 import { customAlphabet } from "nanoid"
 
+import { CollectionId, DateArray, FieldId, ItemId, RawId } from "./app/types"
+
 const BASE62_ALPHABET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -18,26 +20,49 @@ function toBase62(num: number, length: number): string {
   return result.padStart(length, "0").slice(-length)
 }
 
-type GenIdOptions = {
+type GenIdOptions<P extends string = ""> = {
   date?: true | Date
-  prefix?: string
+  prefix: P
 }
 
-export const genId = ({ date, prefix = "" }: GenIdOptions) => {
+export const genId = <P extends string>({
+  date,
+  prefix,
+}: GenIdOptions<P>): `${P}${RawId}` => {
   let rawId
   if (!date) {
     rawId = nanoid16()
   } else {
     const d = date === true ? new Date() : date
-
     rawId = toBase62(Math.round(d.getTime() / 1000), 6) + nanoid10()
   }
 
-  return prefix + rawId.match(/.{1,4}/g)?.join("-")
+  const rawFormatted = rawId.match(/.{1,4}/g)?.join("-") as RawId
+  return `${prefix}${rawFormatted}`
 }
+
+export const genCollectionId = (): CollectionId =>
+  genId({ date: true, prefix: "c-" })
+
+export const genFieldId = (): FieldId => genId({ date: true, prefix: "f-" })
+
+export const genItemId = (): ItemId => genId({ date: true, prefix: "i-" })
 
 const normaliseIndex = (index: number, length: number) =>
   ((index % length) + length) % length
 
 export const safeAccess = <T>(array: T[], index: number): T =>
   array[normaliseIndex(index, array.length)]
+
+export function dateToDateArray(date: Date): DateArray {
+  return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+}
+
+export function dateArrayToUTCDate([y, m, d]: DateArray): Date {
+  return new Date(Date.UTC(y, m - 1, d))
+}
+
+export const formatDate = (date: Date) =>
+  `${date.getDate()} ${date.toLocaleString("default", {
+    month: "short",
+  })} ${date.getFullYear()}`

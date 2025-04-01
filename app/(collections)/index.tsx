@@ -1,39 +1,52 @@
-import { View, Text, Pressable, ScrollView } from "react-native"
-import { router } from "expo-router"
-import collectionsData from "../data.json" with { type: "json" }
-import { CollectionsData } from "../types.js"
-import { sharedStyles } from "@/styles/shared"
+import { Text, TouchableOpacity, View } from "react-native"
+import DraggableFlatList, {
+  RenderItemParams,
+} from "react-native-draggable-flatlist"
 
-const { collectionOrder, collections } =
-  collectionsData as unknown as CollectionsData
+import { router } from "expo-router"
+
+import { CollectionId } from "@/app/types"
+import AddButton from "@/components/AddButton"
+import { useCollections } from "@/context/CollectionsContext"
+import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionsScreen() {
+  const { collections, collectionOrder, updateCollectionOrder } =
+    useCollections()
+
   return (
     <View style={sharedStyles.container}>
-      <ScrollView contentContainerStyle={sharedStyles.scrollContainer}>
-        {/* Add New Collection Card */}
-        <Pressable
-          style={[sharedStyles.card, sharedStyles.addCard]}
-          onPress={() => router.push("/add-collection")}
-        >
-          <Text style={sharedStyles.addText}>＋</Text>
-        </Pressable>
+      <View style={sharedStyles.scrollContainer}>
+        <AddButton onPress={() => router.push("/add-collection")} />
+      </View>
 
-        {/* Collection Cards */}
-        {collectionOrder.map(collectionId => {
-          const collection = collections[collectionId]
-
+      <DraggableFlatList
+        data={collectionOrder}
+        keyExtractor={item => item}
+        onDragEnd={({ data }) => updateCollectionOrder(data)}
+        contentContainerStyle={sharedStyles.scrollContainer}
+        renderItem={({
+          item,
+          drag,
+          isActive,
+        }: RenderItemParams<CollectionId>) => {
+          const collection = collections[item]
           return (
-            <Pressable
-              key={collectionId}
-              style={sharedStyles.card}
-              onPress={() => router.push(`/(collections)/${collectionId}`)}
+            <TouchableOpacity
+              key={item}
+              style={[
+                sharedStyles.card,
+                isActive ? sharedStyles.activeCard : null,
+              ]}
+              onLongPress={drag}
+              delayLongPress={300}
+              onPress={() => router.push(`/(collections)/${item}`)}
             >
               <Text style={sharedStyles.cardText}>{collection.name}</Text>
-            </Pressable>
+            </TouchableOpacity>
           )
-        })}
-      </ScrollView>
+        }}
+      />
     </View>
   )
 }

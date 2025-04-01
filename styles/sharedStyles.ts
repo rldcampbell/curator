@@ -1,9 +1,13 @@
 // styles/shared.ts
-import { StyleSheet, Dimensions } from "react-native"
+import { Dimensions, StyleSheet } from "react-native"
 
 const screenWidth = Dimensions.get("window").width
 
 export const sharedStyles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
   addCard: {
     backgroundColor: "#e0f7fa",
   },
@@ -30,6 +34,9 @@ export const sharedStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
   },
+  activeCard: {
+    backgroundColor: "#d0f0ff",
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -51,5 +58,28 @@ export const sharedStyles = StyleSheet.create({
   scrollContainer: {
     alignItems: "center",
     paddingVertical: 20,
+  },
+  shadowFade: {
+    height: 10,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
+    zIndex: 1,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 18,
+    fontWeight: "500",
+    textAlign: "center",
+    padding: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 4,
+    color: "#333",
   },
 })

@@ -1,30 +1,29 @@
-import { View, Text, FlatList } from "react-native"
-import { useLocalSearchParams, useRouter } from "expo-router"
-import collectionData from "@/app/data.json"
+import { FlatList, Text, View } from "react-native"
 import {
   GestureEvent,
   GestureHandlerRootView,
   PanGestureHandler,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler"
-import { CollectionId, CollectionsData, FieldId, ItemId } from "@/app/types"
+
+import { useLocalSearchParams, useRouter } from "expo-router"
+
+import { CollectionId, FieldId, FieldValue, ItemId } from "@/app/types"
 import { safeAccess } from "@/helpers"
+import { useCollection } from "@/hooks/useCollection"
 
 export default function ItemDetailScreen() {
   const { cId, iId } = useLocalSearchParams()
 
   const collectionId = cId as unknown as CollectionId
   const itemId = iId as unknown as ItemId
-  const { collections } = collectionData as unknown as CollectionsData
 
   const router = useRouter()
 
-  console.log(collectionId)
-
-  const collection = collections[collectionId]
-  const { itemOrder } = collection
-  const itemIndex = itemOrder.indexOf(itemId)
-  const itemData = collection.items[itemId]
+  const { getItem, getItemIndex, itemOrder, name, fields } =
+    useCollection(collectionId)
+  const itemIndex = getItemIndex(itemId)
+  const itemData = getItem(itemId)
 
   const goToItem = (newIndex: number) => {
     router.replace(`/${collectionId}/items/${safeAccess(itemOrder, newIndex)}`)
@@ -42,16 +41,14 @@ export default function ItemDetailScreen() {
         }}
       >
         <View style={{ flex: 1, padding: 20, alignItems: "center" }}>
-          <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-            {collection.name}
-          </Text>
+          <Text style={{ fontSize: 24, fontWeight: "bold" }}>{name}</Text>
           <FlatList
-            data={Object.entries(itemData)}
+            data={Object.entries(itemData) as [FieldId, FieldValue][]}
             keyExtractor={([key]) => key}
             renderItem={({ item: [fieldId, value] }) => (
               <Text>
                 <Text style={{ fontWeight: "bold" }}>
-                  {collection.fields[fieldId as unknown as FieldId].name}:{" "}
+                  {fields[fieldId].name}:{" "}
                 </Text>
                 {value}
               </Text>
