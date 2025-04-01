@@ -7,6 +7,7 @@ import { router } from "expo-router"
 
 import { CollectionId } from "@/app/types"
 import AddButton from "@/components/AddButton"
+import Divider from "@/components/Divider"
 import { useCollections } from "@/context/CollectionsContext"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -19,6 +20,8 @@ export default function CollectionsScreen() {
       <View style={sharedStyles.scrollContainer}>
         <AddButton onPress={() => router.push("/add-collection")} />
       </View>
+
+      <Divider />
 
       <DraggableFlatList
         data={collectionOrder}

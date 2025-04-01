@@ -9,6 +9,7 @@ import { router, useLocalSearchParams } from "expo-router"
 import { CollectionId, ItemId } from "@/app/types"
 import AddButton from "@/components/AddButton"
 import CreateItemModal from "@/components/CreateItemModal"
+import Divider from "@/components/Divider"
 import { useCollection } from "@/hooks/useCollection"
 import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -41,6 +42,8 @@ export default function CollectionDetailScreen() {
       <View style={collectionDetailStyles.header}>
         <AddButton onPress={() => setItemModalVisible(true)} />
       </View>
+
+      <Divider />
 
       <DraggableFlatList
         data={itemOrder}

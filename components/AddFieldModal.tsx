@@ -10,6 +10,7 @@ import {
 } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
+import { FieldType } from "@/app/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -26,11 +27,11 @@ export default function AddFieldModal({
 }: AddFieldModalProps) {
   const [open, setOpen] = useState(false)
   const [fieldName, setFieldName] = useState("")
-  const [fieldType, setFieldType] = useState("text")
+  const [fieldType, setFieldType] = useState(FieldType.Text)
   const [items, setItems] = useState([
-    { label: "Text", value: "text" },
-    { label: "Number", value: "number" },
-    { label: "Date", value: "date" },
+    { label: "Text", value: FieldType.Text },
+    { label: "Number", value: FieldType.Number },
+    { label: "Date", value: FieldType.Date },
   ])
   const inputRef = useRef<TextInput>(null)
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function AddFieldModal({
     if (!fieldName.trim()) return
     onSubmit({ name: fieldName.trim(), type: fieldType })
     setFieldName("")
-    setFieldType("text")
+    setFieldType(FieldType.Text)
     onClose()
   }
 

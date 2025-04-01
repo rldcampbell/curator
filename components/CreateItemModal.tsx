@@ -1,4 +1,3 @@
-// components/CreateItemModal.tsx
 import { useState } from "react"
 import {
   KeyboardAvoidingView,
@@ -12,7 +11,7 @@ import {
 
 import DateTimePicker from "@react-native-community/datetimepicker"
 
-import { Field, FieldId, FieldValue, Item } from "@/app/types"
+import { Field, FieldId, FieldType, FieldValue, Item } from "@/app/types"
 import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -57,7 +56,7 @@ export default function CreateItemModal({
             const value = inputValues[fieldId] ?? ""
 
             switch (field.type) {
-              case "text":
+              case FieldType.Text:
                 return (
                   <View key={fieldId} style={{ width: "100%" }}>
                     <Text style={sharedStyles.label}>{field.name}</Text>
@@ -72,7 +71,7 @@ export default function CreateItemModal({
                     />
                   </View>
                 )
-              case "number":
+              case FieldType.Number:
                 return (
                   <View key={fieldId} style={{ width: "100%" }}>
                     <Text style={sharedStyles.label}>{field.name}</Text>
@@ -90,7 +89,7 @@ export default function CreateItemModal({
                     />
                   </View>
                 )
-              case "date":
+              case FieldType.Date:
                 return (
                   <View key={fieldId} style={modalStyles.formFieldWrapper}>
                     <Text style={sharedStyles.label}>{field.name}</Text>

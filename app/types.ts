@@ -6,24 +6,32 @@ export type ItemId = `i-${RawId}`
 
 export type DateArray = [y: number, m: number, d: number]
 
+export const FieldType = {
+  Text: "text",
+  Number: "number",
+  Date: "date",
+} as const
+
+type FieldType = (typeof FieldType)[keyof typeof FieldType]
+
 type BaseField = {
   name: string
 }
 
 type TextField = BaseField & {
-  type: "text"
+  type: typeof FieldType.Text
   charLim?: number
 }
 
 type NumberField = BaseField & {
-  type: "number"
+  type: typeof FieldType.Number
   min?: number
   max?: number
   // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
 }
 
 type DateField = BaseField & {
-  type: "date"
+  type: typeof FieldType.Date
   min?: DateArray
   max?: DateArray
 }

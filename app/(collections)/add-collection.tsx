@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -13,8 +13,6 @@ import {
 import DraggableFlatList from "react-native-draggable-flatlist"
 
 import { router } from "expo-router"
-
-import { useFocusEffect } from "@react-navigation/native"
 
 import AddButton from "@/components/AddButton"
 import AddFieldModal from "@/components/AddFieldModal"
@@ -36,15 +34,11 @@ export default function AddCollectionScreen() {
   const [confirmCreateVisible, setConfirmCreateVisible] = useState(false)
   const { addCollection } = useCollections()
   const inputRef = useRef<TextInput>(null)
-  useFocusEffect(
-    useCallback(() => {
-      const timeout = setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100) // A small delay helps ensure it's after layout
-
-      return () => clearTimeout(timeout)
-    }, []),
-  )
+  useEffect(() => {
+    if (inputRef.current) {
+      setTimeout(() => inputRef.current?.focus(), 100)
+    }
+  }, [])
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
