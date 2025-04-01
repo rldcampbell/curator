@@ -30,7 +30,7 @@ export default function AddCollectionScreen() {
   const [fields, setFields] = useState<Record<FieldId, Field>>({})
   const [confirmDiscardVisible, setConfirmDiscardVisible] = useState(false)
   const [confirmCreateVisible, setConfirmCreateVisible] = useState(false)
-  const { saveCollection } = useCollections()
+  const { addCollection } = useCollections()
 
   return (
     <KeyboardAvoidingView
@@ -133,7 +133,7 @@ export default function AddCollectionScreen() {
         message="You won't be able to edit fields later (yet)."
         confirmText="Create"
         onConfirm={() => {
-          saveCollection({
+          addCollection({
             name: collectionName,
             fieldOrder,
             fields,

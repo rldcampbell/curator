@@ -1,34 +1,52 @@
-import { Pressable, ScrollView, Text, View } from "react-native"
+import { Text, TouchableOpacity, View } from "react-native"
+import DraggableFlatList, {
+  RenderItemParams,
+} from "react-native-draggable-flatlist"
 
 import { router } from "expo-router"
 
+import { CollectionId } from "@/app/types"
 import AddButton from "@/components/AddButton"
 import { useCollections } from "@/context/CollectionsContext"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionsScreen() {
-  const { collections, collectionOrder } = useCollections()
+  const { collections, collectionOrder, updateCollectionOrder } =
+    useCollections()
 
   return (
     <View style={sharedStyles.container}>
-      <ScrollView contentContainerStyle={sharedStyles.scrollContainer}>
+      <View style={sharedStyles.scrollContainer}>
         <AddButton onPress={() => router.push("/add-collection")} />
+      </View>
 
-        {/* Collection Cards */}
-        {collectionOrder.map(collectionId => {
-          const collection = collections[collectionId]
-
+      <DraggableFlatList
+        data={collectionOrder}
+        keyExtractor={item => item}
+        onDragEnd={({ data }) => updateCollectionOrder(data)}
+        contentContainerStyle={sharedStyles.scrollContainer}
+        renderItem={({
+          item,
+          drag,
+          isActive,
+        }: RenderItemParams<CollectionId>) => {
+          const collection = collections[item]
           return (
-            <Pressable
-              key={collectionId}
-              style={sharedStyles.card}
-              onPress={() => router.push(`/(collections)/${collectionId}`)}
+            <TouchableOpacity
+              key={item}
+              style={[
+                sharedStyles.card,
+                isActive ? sharedStyles.activeCard : null,
+              ]}
+              onLongPress={drag}
+              delayLongPress={300}
+              onPress={() => router.push(`/(collections)/${item}`)}
             >
               <Text style={sharedStyles.cardText}>{collection.name}</Text>
-            </Pressable>
+            </TouchableOpacity>
           )
-        })}
-      </ScrollView>
+        }}
+      />
     </View>
   )
 }

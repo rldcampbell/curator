@@ -12,6 +12,7 @@ import {
   initDatabase,
   loadCollections,
   saveCollection,
+  saveCollectionOrder,
 } from "@/services/database"
 
 type NewCollectionInput = Omit<Collection, "itemOrder" | "items">
@@ -19,7 +20,8 @@ type NewCollectionInput = Omit<Collection, "itemOrder" | "items">
 type CollectionsContextValue = {
   collections: CollectionsData["collections"]
   collectionOrder: CollectionId[]
-  saveCollection: (data: NewCollectionInput) => void
+  addCollection: (data: NewCollectionInput) => void
+  updateCollectionOrder: (order: CollectionId[]) => void
   addItem: (collectionId: CollectionId, item: Item) => ItemId
   updateItemOrder: (collectionId: CollectionId, itemOrder: ItemId[]) => void
   isLoading: boolean
@@ -61,11 +63,7 @@ export const CollectionsProvider = ({
     initializeData()
   }, [])
 
-  const saveCollectionHandler = ({
-    name,
-    fieldOrder,
-    fields,
-  }: NewCollectionInput) => {
+  const addCollection = ({ name, fieldOrder, fields }: NewCollectionInput) => {
     const id = genCollectionId()
     const newCollection: Collection = {
       name,
@@ -123,6 +121,18 @@ export const CollectionsProvider = ({
     return itemId
   }
 
+  const updateCollectionOrder = (newOrder: CollectionId[]) => {
+    setCollectionOrder(newOrder)
+
+    saveCollectionOrder(newOrder).catch(err => {
+      setError(
+        err instanceof Error
+          ? err
+          : new Error("Failed to save collection order"),
+      )
+    })
+  }
+
   const updateItemOrder = (collectionId: CollectionId, newOrder: ItemId[]) => {
     setCollections(prev => {
       const updated: Record<CollectionId, Collection> = {
@@ -148,9 +158,10 @@ export const CollectionsProvider = ({
       value={{
         collections,
         collectionOrder,
-        saveCollection: saveCollectionHandler,
+        addCollection,
         addItem,
         updateItemOrder,
+        updateCollectionOrder,
         isLoading,
         error,
       }}

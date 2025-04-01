@@ -1,3 +1,4 @@
+import { deleteAsync, documentDirectory } from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
@@ -153,4 +154,9 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
   )
 
   log("Collection deleted and order updated:", id)
+}
+
+export const resetDatabase = async (): Promise<void> => {
+  await deleteAsync(`${documentDirectory}SQLite/curator.db`)
+  await initDatabase()
 }

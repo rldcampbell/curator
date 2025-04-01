@@ -21,6 +21,7 @@ export default [
       "@typescript-eslint": tsPlugin,
     },
     rules: {
+      "object-shorthand": ["error", "always"],
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",

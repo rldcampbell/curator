@@ -79,6 +79,15 @@ export default function Layout() {
                 ),
               }}
             />
+            <Tabs.Screen
+              name="dev"
+              options={{
+                title: "Dev",
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="bug-outline" size={size} color={color} />
+                ),
+              }}
+            />
           </Tabs>
         </CollectionsProviderWrapper>
       </CollectionsProvider>
