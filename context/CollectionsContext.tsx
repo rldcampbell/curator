@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
 import {
   Collection,
@@ -8,6 +8,11 @@ import {
   ItemId,
 } from "@/app/types"
 import { genCollectionId, genItemId } from "@/helpers"
+import {
+  initDatabase,
+  loadCollections,
+  saveCollection,
+} from "@/services/database"
 
 type NewCollectionInput = Omit<Collection, "itemOrder" | "items">
 
@@ -17,6 +22,8 @@ type CollectionsContextValue = {
   saveCollection: (data: NewCollectionInput) => void
   addItem: (collectionId: CollectionId, item: Item) => ItemId
   updateItemOrder: (collectionId: CollectionId, itemOrder: ItemId[]) => void
+  isLoading: boolean
+  error: Error | null
 }
 
 const CollectionsContext = createContext<CollectionsContextValue | undefined>(
@@ -29,30 +36,68 @@ export const CollectionsProvider = ({
   children: React.ReactNode
 }) => {
   const [collections, setCollections] = useState<
-    CollectionsContextValue["collections"]
+    CollectionsData["collections"]
   >({})
   const [collectionOrder, setCollectionOrder] = useState<CollectionId[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const saveCollection = ({ name, fieldOrder, fields }: NewCollectionInput) => {
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        await initDatabase()
+        const data = await loadCollections()
+        setCollections(data.collections)
+        setCollectionOrder(data.collectionOrder)
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to load collections"),
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    initializeData()
+  }, [])
+
+  const saveCollectionHandler = ({
+    name,
+    fieldOrder,
+    fields,
+  }: NewCollectionInput) => {
     const id = genCollectionId()
-    setCollections(prev => ({
-      ...prev,
-      [id]: {
-        name,
-        fieldOrder,
-        fields,
-        itemOrder: [],
-        items: {},
-      },
-    }))
+    const newCollection: Collection = {
+      name,
+      fieldOrder,
+      fields,
+      itemOrder: [],
+      items: {},
+    }
+
+    setCollections(prev => {
+      const updated = { ...prev, [id]: newCollection }
+
+      saveCollection(id, newCollection, true).catch(err => {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to save new collection"),
+        )
+      })
+
+      return updated
+    })
+
     setCollectionOrder(prev => [...prev, id])
   }
 
   const addItem = (collectionId: CollectionId, item: Item) => {
     const itemId = genItemId()
+
     setCollections(prev => {
       const collection = prev[collectionId]
-      return {
+      const updated: Record<CollectionId, Collection> = {
         ...prev,
         [collectionId]: {
           ...collection,
@@ -63,18 +108,39 @@ export const CollectionsProvider = ({
           },
         },
       }
+
+      saveCollection(collectionId, updated[collectionId]).catch(err => {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to save item to collection"),
+        )
+      })
+
+      return updated
     })
+
     return itemId
   }
 
   const updateItemOrder = (collectionId: CollectionId, newOrder: ItemId[]) => {
-    setCollections(prev => ({
-      ...prev,
-      [collectionId]: {
-        ...prev[collectionId],
-        itemOrder: newOrder,
-      },
-    }))
+    setCollections(prev => {
+      const updated: Record<CollectionId, Collection> = {
+        ...prev,
+        [collectionId]: {
+          ...prev[collectionId],
+          itemOrder: newOrder,
+        },
+      }
+
+      saveCollection(collectionId, updated[collectionId]).catch(err => {
+        setError(
+          err instanceof Error ? err : new Error("Failed to update item order"),
+        )
+      })
+
+      return updated
+    })
   }
 
   return (
@@ -82,9 +148,11 @@ export const CollectionsProvider = ({
       value={{
         collections,
         collectionOrder,
-        saveCollection,
+        saveCollection: saveCollectionHandler,
         addItem,
         updateItemOrder,
+        isLoading,
+        error,
       }}
     >
       {children}
