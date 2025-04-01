@@ -23,6 +23,11 @@ type CollectionsContextValue = {
   addCollection: (data: NewCollectionInput) => void
   updateCollectionOrder: (order: CollectionId[]) => void
   addItem: (collectionId: CollectionId, item: Item) => ItemId
+  updateItem: (
+    collectionId: CollectionId,
+    itemId: ItemId,
+    updatedItem: Item,
+  ) => void
   updateItemOrder: (collectionId: CollectionId, itemOrder: ItemId[]) => void
   isLoading: boolean
   error: Error | null
@@ -121,6 +126,36 @@ export const CollectionsProvider = ({
     return itemId
   }
 
+  const updateItem = (
+    collectionId: CollectionId,
+    itemId: ItemId,
+    updatedItem: Item,
+  ) => {
+    setCollections(prev => {
+      const collection = prev[collectionId]
+      const updated: Record<CollectionId, Collection> = {
+        ...prev,
+        [collectionId]: {
+          ...collection,
+          items: {
+            ...collection.items,
+            [itemId]: updatedItem,
+          },
+        },
+      }
+
+      saveCollection(collectionId, updated[collectionId]).catch(err => {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to update item in collection"),
+        )
+      })
+
+      return updated
+    })
+  }
+
   const updateCollectionOrder = (newOrder: CollectionId[]) => {
     setCollectionOrder(newOrder)
 
@@ -160,6 +195,7 @@ export const CollectionsProvider = ({
         collectionOrder,
         addCollection,
         addItem,
+        updateItem,
         updateItemOrder,
         updateCollectionOrder,
         isLoading,

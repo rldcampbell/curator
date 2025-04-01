@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   KeyboardAvoidingView,
   Modal,
@@ -18,25 +18,37 @@ import { sharedStyles } from "@/styles/sharedStyles"
 
 import ModalButtonRow from "./ModalButtonRow"
 
-type CreateItemModalProps = {
+type ItemFormModalProps = {
+  mode: "create" | "edit"
   visible: boolean
+  initialValues?: Item
   fieldOrder: FieldId[]
   fields: Record<FieldId, Field>
-  onCreate: (item: Item) => void
+  onSubmit: (item: Item) => void
   onDiscard: () => void
 }
 
-export default function CreateItemModal({
+export default function ItemFormModal({
+  mode,
   visible,
+  initialValues,
   fieldOrder,
   fields,
-  onCreate,
+  onSubmit,
   onDiscard,
-}: CreateItemModalProps) {
+}: ItemFormModalProps) {
   const [inputValues, setInputValues] = useState<Item>({})
   const [activePickerField, setActivePickerField] = useState<FieldId | null>(
     null,
   )
+
+  useEffect(() => {
+    if (visible && mode === "edit" && initialValues) {
+      setInputValues(initialValues)
+    } else if (visible && mode === "create") {
+      setInputValues({})
+    }
+  }, [visible, mode, initialValues])
 
   const updateField = (id: FieldId, value: FieldValue) => {
     setInputValues(prev => ({ ...prev, [id]: value }))
@@ -49,7 +61,9 @@ export default function CreateItemModal({
         style={modalStyles.overlay}
       >
         <View style={modalStyles.content}>
-          <Text style={modalStyles.title}>New Item</Text>
+          <Text style={modalStyles.title}>
+            {mode === "create" ? "New Item" : "Edit Item"}
+          </Text>
 
           {fieldOrder.map(fieldId => {
             const field = fields[fieldId]
@@ -93,7 +107,6 @@ export default function CreateItemModal({
                 return (
                   <View key={fieldId} style={modalStyles.formFieldWrapper}>
                     <Text style={sharedStyles.label}>{field.name}</Text>
-
                     <Pressable
                       onPress={() => setActivePickerField(fieldId)}
                       style={[
@@ -107,7 +120,6 @@ export default function CreateItemModal({
                           : "Select date"}
                       </Text>
                     </Pressable>
-
                     {activePickerField === fieldId && (
                       <DateTimePicker
                         value={
@@ -127,16 +139,14 @@ export default function CreateItemModal({
                     )}
                   </View>
                 )
-
               default:
                 return null
             }
           })}
 
           <ModalButtonRow
-            onCreate={() => {
-              onCreate(inputValues)
-            }}
+            onApply={() => onSubmit(inputValues)}
+            applyLabel={mode === "create" ? "Create" : "Update"}
             onDiscard={onDiscard}
           />
         </View>

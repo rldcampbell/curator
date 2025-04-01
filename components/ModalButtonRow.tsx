@@ -5,16 +5,16 @@ import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 type ModalButtonRowProps = {
-  onCreate: () => void
+  onApply: () => void
   onDiscard: () => void
-  createLabel?: string
+  applyLabel?: string
   discardLabel?: string
 }
 
 export default function ModalButtonRow({
-  onCreate,
+  onApply,
   onDiscard,
-  createLabel = "Create",
+  applyLabel = "Apply",
   discardLabel = "Discard",
 }: ModalButtonRowProps) {
   return (
@@ -25,9 +25,9 @@ export default function ModalButtonRow({
           modalStyles.addButton,
           modalStyles.buttonInModal,
         ]}
-        onPress={onCreate}
+        onPress={onApply}
       >
-        <Text>{createLabel}</Text>
+        <Text>{applyLabel}</Text>
       </Pressable>
 
       <Pressable

@@ -1,15 +1,15 @@
 import { useState } from "react"
-import { Text, TouchableOpacity, View } from "react-native"
+import { Switch, Text, TouchableOpacity, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
 
 import { router, useLocalSearchParams } from "expo-router"
 
-import { CollectionId, ItemId } from "@/app/types"
+import { CollectionId, Item, ItemId } from "@/app/types"
 import AddButton from "@/components/AddButton"
-import CreateItemModal from "@/components/CreateItemModal"
 import Divider from "@/components/Divider"
+import ItemFormModal from "@/components/ItemFormModal"
 import { useCollection } from "@/hooks/useCollection"
 import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -19,6 +19,7 @@ export default function CollectionDetailScreen() {
   const collectionId = cId as CollectionId
   const {
     addItem,
+    updateItem,
     fieldOrder,
     fields,
     itemOrder,
@@ -27,7 +28,9 @@ export default function CollectionDetailScreen() {
     updateItemOrder,
   } = useCollection(collectionId)
 
+  const [editMode, setEditMode] = useState(false)
   const [itemModalVisible, setItemModalVisible] = useState(false)
+  const [editingItemId, setEditingItemId] = useState<ItemId | null>(null)
 
   if (!name) {
     return (
@@ -37,10 +40,27 @@ export default function CollectionDetailScreen() {
     )
   }
 
+  const handleItemSubmit = (item: Item) => {
+    if (editingItemId) {
+      updateItem(editingItemId, item)
+    } else {
+      addItem(item)
+    }
+    setEditingItemId(null)
+    setItemModalVisible(false)
+  }
+
+  const handleItemDiscard = () => {
+    setEditingItemId(null)
+    setItemModalVisible(false)
+  }
+
   return (
     <View style={collectionDetailStyles.container}>
       <View style={collectionDetailStyles.header}>
-        <AddButton onPress={() => setItemModalVisible(true)} />
+        <Text style={sharedStyles.label}>Edit Mode</Text>
+        <Switch value={editMode} onValueChange={setEditMode} />
+        {editMode && <AddButton onPress={() => setItemModalVisible(true)} />}
       </View>
 
       <Divider />
@@ -59,9 +79,14 @@ export default function CollectionDetailScreen() {
             ]}
             onLongPress={drag}
             delayLongPress={300}
-            onPress={() =>
-              router.push(`/(collections)/${collectionId}/items/${item}`)
-            }
+            onPress={() => {
+              if (editMode) {
+                setEditingItemId(item)
+                setItemModalVisible(true)
+              } else {
+                router.push(`/(collections)/${collectionId}/items/${item}`)
+              }
+            }}
           >
             <Text style={sharedStyles.cardText}>
               {items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"}
@@ -69,16 +94,16 @@ export default function CollectionDetailScreen() {
           </TouchableOpacity>
         )}
       />
+
       {itemModalVisible && (
-        <CreateItemModal
+        <ItemFormModal
+          mode={editingItemId ? "edit" : "create"}
           visible={itemModalVisible}
           fieldOrder={fieldOrder}
           fields={fields}
-          onCreate={inputValues => {
-            addItem(inputValues)
-            setItemModalVisible(false)
-          }}
-          onDiscard={() => setItemModalVisible(false)}
+          initialValues={editingItemId ? items[editingItemId] : undefined}
+          onSubmit={handleItemSubmit}
+          onDiscard={handleItemDiscard}
         />
       )}
     </View>

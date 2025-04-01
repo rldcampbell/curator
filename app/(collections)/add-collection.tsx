@@ -27,11 +27,13 @@ import { Field, FieldId } from "../types"
 
 export default function AddCollectionScreen() {
   const [collectionName, setCollectionName] = useState("")
-  const [modalVisible, setModalVisible] = useState(false)
   const [fieldOrder, setFieldOrder] = useState<FieldId[]>([])
   const [fields, setFields] = useState<Record<FieldId, Field>>({})
+
+  const [modalVisible, setModalVisible] = useState(false)
   const [confirmDiscardVisible, setConfirmDiscardVisible] = useState(false)
   const [confirmCreateVisible, setConfirmCreateVisible] = useState(false)
+
   const { addCollection } = useCollections()
   const inputRef = useRef<TextInput>(null)
   useEffect(() => {
@@ -39,6 +41,9 @@ export default function AddCollectionScreen() {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [])
+
+  const validCollection =
+    collectionName.trim() !== "" && fieldOrder.length !== 0
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -62,8 +67,10 @@ export default function AddCollectionScreen() {
               style={[
                 addCollectionStyles.topCardButton,
                 addCollectionStyles.createButton,
+                !validCollection && sharedStyles.disabled,
               ]}
               onPress={() => setConfirmCreateVisible(true)}
+              disabled={!validCollection}
             >
               <Text style={addCollectionStyles.topButtonText}>Create</Text>
             </Pressable>
