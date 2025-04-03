@@ -38,6 +38,7 @@ export default function SwaggableRow<T>({
   const idealTotalWidth = buttons.length * idealButtonWidth
 
   const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])
     .onChange(event => {
       const newX = translateX.value + event.changeX
       translateX.value = Math.max(Math.min(newX, 0), -SCREEN_WIDTH)
