@@ -1,7 +1,8 @@
 import React from "react"
-import { Pressable, StyleSheet, View } from "react-native"
+import { Dimensions, Pressable, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -18,6 +19,7 @@ type Props<T> = {
   buttons: SwipeButton<T>[]
 }
 
+const SCREEN_WIDTH = Dimensions.get("window").width
 export const ROW_HEIGHT = 60
 
 export default function SwipeableDraggableRow<T>({
@@ -26,44 +28,56 @@ export default function SwipeableDraggableRow<T>({
   buttons,
 }: Props<T>) {
   const translateX = useSharedValue(0)
-  const buttonWidth = 64
-  const totalButtonWidth = buttonWidth * buttons.length
+  const idealButtonWidth = 60
+  const idealTotalWidth = buttons.length * idealButtonWidth
 
   const panGesture = Gesture.Pan()
     .onChange(event => {
       const newX = translateX.value + event.changeX
-      translateX.value = Math.max(Math.min(newX, 0), -totalButtonWidth)
+      translateX.value = Math.max(Math.min(newX, 0), -SCREEN_WIDTH)
     })
     .onEnd(() => {
       const snapPoint =
-        Math.abs(translateX.value) > totalButtonWidth / 2
-          ? -totalButtonWidth
-          : 0
-      translateX.value = withSpring(snapPoint, { damping: 20, stiffness: 200 })
+        Math.abs(translateX.value) > idealTotalWidth / 2 ? -idealTotalWidth : 0
+
+      translateX.value = withSpring(snapPoint, {
+        damping: 20,
+        stiffness: 200,
+      })
     })
 
-  const animatedStyle = useAnimatedStyle(() => ({
+  const rowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }))
 
+  const buttonStripStyle = useAnimatedStyle(() => {
+    const totalDrag = Math.abs(translateX.value)
+
+    return {
+      width: totalDrag,
+      flexDirection: "row",
+    }
+  })
+
   return (
     <View style={styles.rowContainer}>
-      {/* Buttons behind swiped row */}
-      <View style={[styles.buttonRow, { width: totalButtonWidth }]}>
+      {/* Buttons behind the swipable row */}
+      <Animated.View style={[styles.buttonRow, buttonStripStyle]}>
         {buttons.map((btn, index) => (
-          <Pressable
-            key={index}
-            style={[styles.iconButton, { width: buttonWidth }]}
-            onPress={() => btn.onPress(item)}
-          >
-            {btn.icon}
-          </Pressable>
+          <Animated.View key={index} style={[styles.iconButton, { flex: 1 }]}>
+            <Pressable
+              onPress={() => runOnJS(btn.onPress)(item)}
+              style={styles.pressable}
+            >
+              {btn.icon}
+            </Pressable>
+          </Animated.View>
         ))}
-      </View>
+      </Animated.View>
 
       {/* Foreground swipable row */}
       <GestureDetector gesture={panGesture}>
-        <Animated.View style={[styles.swipeable, animatedStyle]}>
+        <Animated.View style={[styles.swipeable, rowStyle]}>
           {renderContent(item)}
         </Animated.View>
       </GestureDetector>
@@ -89,7 +103,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 0,
     height: ROW_HEIGHT,
-    flexDirection: "row",
     backgroundColor: "#eee",
     alignItems: "center",
   },
@@ -97,5 +110,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     height: ROW_HEIGHT,
+  },
+  pressable: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 })
