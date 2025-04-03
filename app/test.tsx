@@ -3,9 +3,7 @@ import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native"
 
 import { Feather } from "@expo/vector-icons"
 
-import SwipeableDraggableRow, {
-  ROW_HEIGHT,
-} from "../components/SwipeableDraggableRow"
+import SwaggableRow, { ROW_HEIGHT } from "../components/SwaggableRow"
 
 export default function TestScreen() {
   const [items] = useState(
@@ -16,6 +14,7 @@ export default function TestScreen() {
     {
       icon: <Feather name="trash-2" size={20} color="black" />,
       onPress: (item: string) => console.log("Delete:", item),
+      backgroundColor: "#e74c3c", // red
     },
     {
       icon: <Feather name="edit-3" size={20} color="black" />,
@@ -31,7 +30,7 @@ export default function TestScreen() {
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={{ paddingBottom: 32 }}
         renderItem={({ item }) => (
-          <SwipeableDraggableRow
+          <SwaggableRow
             item={item}
             renderContent={text => <Text style={styles.text}>{text}</Text>}
             buttons={buttons}

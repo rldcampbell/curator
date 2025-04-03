@@ -11,6 +11,7 @@ import Animated, {
 type SwipeButton<T> = {
   icon: React.ReactNode
   onPress: (item: T) => void
+  backgroundColor?: string
 }
 
 type Props<T> = {
@@ -22,7 +23,7 @@ type Props<T> = {
 const SCREEN_WIDTH = Dimensions.get("window").width
 export const ROW_HEIGHT = 60
 
-export default function SwipeableDraggableRow<T>({
+export default function SwaggableRow<T>({
   item,
   renderContent,
   buttons,
@@ -52,7 +53,6 @@ export default function SwipeableDraggableRow<T>({
 
   const buttonStripStyle = useAnimatedStyle(() => {
     const totalDrag = Math.abs(translateX.value)
-
     return {
       width: totalDrag,
       flexDirection: "row",
@@ -61,10 +61,19 @@ export default function SwipeableDraggableRow<T>({
 
   return (
     <View style={styles.rowContainer}>
-      {/* Buttons behind the swipable row */}
+      {/* Buttons revealed behind swiped row */}
       <Animated.View style={[styles.buttonRow, buttonStripStyle]}>
         {buttons.map((btn, index) => (
-          <Animated.View key={index} style={[styles.iconButton, { flex: 1 }]}>
+          <Animated.View
+            key={index}
+            style={[
+              styles.iconButton,
+              {
+                flex: 1,
+                backgroundColor: btn.backgroundColor ?? "#ccc",
+              },
+            ]}
+          >
             <Pressable
               onPress={() => runOnJS(btn.onPress)(item)}
               style={styles.pressable}
