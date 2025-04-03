@@ -1,15 +1,19 @@
 import { useLayoutEffect, useState } from "react"
-import { Text, TouchableOpacity, View } from "react-native"
+import { Animated, Text, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
 
-import { useNavigation } from "expo-router"
-import { router, useLocalSearchParams } from "expo-router"
+import * as Haptics from "expo-haptics"
+import { router, useNavigation } from "expo-router"
+import { useLocalSearchParams } from "expo-router"
+
+import { Feather } from "@expo/vector-icons"
 
 import { CollectionId, Item, ItemId } from "@/app/types"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
+import SwaggableRow from "@/components/SwaggableRow"
 import { useCollection } from "@/hooks/useCollection"
 import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -78,21 +82,45 @@ export default function CollectionDetailScreen() {
           const value =
             items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"
 
+          const buttons = [
+            {
+              icon: <Feather name="trash-2" size={20} color="black" />,
+              onPress: (itemId: ItemId) =>
+                console.log("🗑️ Delete item:", itemId),
+              backgroundColor: "#e74c3c",
+            },
+            {
+              icon: <Feather name="edit-3" size={20} color="black" />,
+              onPress: (itemId: ItemId) => {
+                console.log("✏️ Edit item:", itemId)
+                setEditingItemId(itemId)
+                setItemModalVisible(true)
+              },
+            },
+          ]
+
           return (
-            <TouchableOpacity
-              key={item}
-              style={[
-                collectionDetailStyles.itemRow,
-                isActive && collectionDetailStyles.activeItemRow,
-              ]}
-              onLongPress={drag}
-              delayLongPress={300}
+            <SwaggableRow
+              item={item}
+              onDrag={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                drag()
+              }}
               onPress={() =>
                 router.push(`/(collections)/${collectionId}/items/${item}`)
               }
-            >
-              <Text style={collectionDetailStyles.itemText}>{value}</Text>
-            </TouchableOpacity>
+              buttons={buttons}
+              renderContent={() => (
+                <Animated.View
+                  style={{
+                    backgroundColor: isActive ? "#d0ebff" : "#fff",
+                    padding: 16,
+                  }}
+                >
+                  <Text style={collectionDetailStyles.itemText}>{value}</Text>
+                </Animated.View>
+              )}
+            />
           )
         }}
       />

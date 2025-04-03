@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef } from "react"
 import { Dimensions, Pressable, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, {
@@ -35,8 +35,7 @@ type Props<T> = {
   item: T
   renderContent: (item: T) => React.ReactElement
   buttons: SwipeButton<T>[]
-
-  // Drag support
+  onPress?: () => void
   onDrag: () => void
 }
 
@@ -47,10 +46,13 @@ export default function SwaggableRow<T>({
   renderContent,
   buttons,
   onDrag,
+  onPress,
 }: Props<T>) {
   const translateX = useSharedValue(0)
   const idealButtonWidth = 60
   const idealTotalWidth = buttons.length * idealButtonWidth
+
+  const wasOpenOnTouchStart = useRef(false)
 
   const closeRow = () => {
     translateX.value = withSpring(0, {
@@ -124,10 +126,14 @@ export default function SwaggableRow<T>({
       <GestureDetector gesture={panGesture}>
         <Animated.View style={swipeStyle}>
           <Pressable
-            onTouchStart={() => {
-              if (closeOpenRow) {
-                runOnJS(closeOpenRow)()
+            onPress={() => {
+              if (!wasOpenOnTouchStart.current && onPress) {
+                onPress()
               }
+            }}
+            onTouchStart={() => {
+              wasOpenOnTouchStart.current = !!closeOpenRow
+              if (closeOpenRow) runOnJS(closeOpenRow)()
             }}
             onLongPress={onDrag}
             delayLongPress={200}
