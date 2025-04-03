@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react"
-import { Switch, Text, TouchableOpacity, View } from "react-native"
+import { Text, TouchableOpacity, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -8,7 +8,6 @@ import { useNavigation } from "expo-router"
 import { router, useLocalSearchParams } from "expo-router"
 
 import { CollectionId, Item, ItemId } from "@/app/types"
-import AddButton from "@/components/AddButton"
 import Divider from "@/components/Divider"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
@@ -30,7 +29,6 @@ export default function CollectionDetailScreen() {
     updateItemOrder,
   } = useCollection(collectionId)
 
-  const [editMode, setEditMode] = useState(false)
   const [itemModalVisible, setItemModalVisible] = useState(false)
   const [editingItemId, setEditingItemId] = useState<ItemId | null>(null)
 
@@ -72,14 +70,7 @@ export default function CollectionDetailScreen() {
 
   return (
     <View style={collectionDetailStyles.container}>
-      <View style={collectionDetailStyles.header}>
-        <Text style={sharedStyles.label}>Edit Mode</Text>
-        <Switch value={editMode} onValueChange={setEditMode} />
-        {editMode && <AddButton onPress={() => setItemModalVisible(true)} />}
-      </View>
-
       <Divider />
-
       <DraggableFlatList
         data={itemOrder}
         keyExtractor={item => item}
