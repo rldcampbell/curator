@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Animated, SafeAreaView, StyleSheet, Text } from "react-native"
-import DraggableFlatList from "react-native-draggable-flatlist"
+import DraggableFlatList, { RenderItem } from "react-native-draggable-flatlist"
 
 import * as Haptics from "expo-haptics"
 
@@ -25,6 +25,27 @@ export default function TestScreen() {
     },
   ]
 
+  const renderItem: RenderItem<string> = ({ item, drag, isActive }) => (
+    <SwaggableRow
+      item={item}
+      onDrag={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+        drag()
+      }}
+      buttons={buttons}
+      renderContent={item => (
+        <Animated.View
+          style={{
+            backgroundColor: isActive ? "#d0ebff" : "#fff",
+            padding: 16,
+          }}
+        >
+          <Text>{item}</Text>
+        </Animated.View>
+      )}
+    />
+  )
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>🧪 Swipe to Reveal Actions</Text>
@@ -32,26 +53,7 @@ export default function TestScreen() {
         data={items}
         onDragEnd={({ data }) => setItems(data)}
         keyExtractor={item => item}
-        renderItem={({ item, drag, isActive }) => (
-          <SwaggableRow
-            item={item}
-            onDrag={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-              drag()
-            }}
-            buttons={buttons}
-            renderContent={item => (
-              <Animated.View
-                style={{
-                  backgroundColor: isActive ? "#d0ebff" : "#fff",
-                  padding: 16,
-                }}
-              >
-                <Text>{item}</Text>
-              </Animated.View>
-            )}
-          />
-        )}
+        renderItem={renderItem}
       />
     </SafeAreaView>
   )
