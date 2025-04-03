@@ -19,4 +19,18 @@ export const collectionDetailStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
+  itemRow: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ccc",
+    backgroundColor: "#fff",
+  },
+  activeItemRow: {
+    backgroundColor: "#f0f0f0",
+  },
+  itemText: {
+    fontSize: 16,
+    color: "#222",
+  },
 })

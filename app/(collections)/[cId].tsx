@@ -1,14 +1,16 @@
-import { useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { Switch, Text, TouchableOpacity, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
 
+import { useNavigation } from "expo-router"
 import { router, useLocalSearchParams } from "expo-router"
 
 import { CollectionId, Item, ItemId } from "@/app/types"
 import AddButton from "@/components/AddButton"
 import Divider from "@/components/Divider"
+import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
 import { useCollection } from "@/hooks/useCollection"
 import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
@@ -31,6 +33,19 @@ export default function CollectionDetailScreen() {
   const [editMode, setEditMode] = useState(false)
   const [itemModalVisible, setItemModalVisible] = useState(false)
   const [editingItemId, setEditingItemId] = useState<ItemId | null>(null)
+
+  const navigation = useNavigation()
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <HeaderButton
+          iconName="add"
+          onPress={() => setItemModalVisible(true)}
+        />
+      ),
+      title: name,
+    })
+  }, [navigation, name])
 
   if (!name) {
     return (
@@ -70,29 +85,27 @@ export default function CollectionDetailScreen() {
         keyExtractor={item => item}
         onDragEnd={({ data }) => updateItemOrder([...data])}
         contentContainerStyle={collectionDetailStyles.listContainer}
-        renderItem={({ item, drag, isActive }: RenderItemParams<ItemId>) => (
-          <TouchableOpacity
-            key={item}
-            style={[
-              sharedStyles.card,
-              isActive ? sharedStyles.activeCard : null,
-            ]}
-            onLongPress={drag}
-            delayLongPress={300}
-            onPress={() => {
-              if (editMode) {
-                setEditingItemId(item)
-                setItemModalVisible(true)
-              } else {
+        renderItem={({ item, drag, isActive }: RenderItemParams<ItemId>) => {
+          const value =
+            items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"
+
+          return (
+            <TouchableOpacity
+              key={item}
+              style={[
+                collectionDetailStyles.itemRow,
+                isActive && collectionDetailStyles.activeItemRow,
+              ]}
+              onLongPress={drag}
+              delayLongPress={300}
+              onPress={() =>
                 router.push(`/(collections)/${collectionId}/items/${item}`)
               }
-            }}
-          >
-            <Text style={sharedStyles.cardText}>
-              {items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"}
-            </Text>
-          </TouchableOpacity>
-        )}
+            >
+              <Text style={collectionDetailStyles.itemText}>{value}</Text>
+            </TouchableOpacity>
+          )
+        }}
       />
 
       {itemModalVisible && (
