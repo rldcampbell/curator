@@ -1,12 +1,13 @@
 import React, { useState } from "react"
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native"
+import { Animated, SafeAreaView, StyleSheet, Text } from "react-native"
+import DraggableFlatList from "react-native-draggable-flatlist"
 
 import { Feather } from "@expo/vector-icons"
 
-import SwaggableRow, { ROW_HEIGHT } from "../components/SwaggableRow"
+import SwaggableRow from "@/components/SwaggableRow"
 
 export default function TestScreen() {
-  const [items] = useState(
+  const [items, setItems] = useState(
     Array.from({ length: 10 }, (_, i) => `Item ${i + 1}`),
   )
 
@@ -25,25 +26,30 @@ export default function TestScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>🧪 Swipe to Reveal Actions</Text>
-      <FlatList
+      <DraggableFlatList
         data={items}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{ paddingBottom: 32 }}
-        renderItem={({ item }) => (
+        onDragEnd={({ data }) => setItems(data)}
+        keyExtractor={item => item}
+        renderItem={({ item, drag, isActive }) => (
           <SwaggableRow
             item={item}
-            renderContent={text => <Text style={styles.text}>{text}</Text>}
+            renderContent={(item, isActive) => (
+              <Animated.View
+                style={{
+                  backgroundColor: isActive ? "#cce7ff" : "#fff",
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderColor: "#ddd",
+                }}
+              >
+                <Text>{item}</Text>
+              </Animated.View>
+            )}
             buttons={buttons}
+            onDrag={drag}
+            isActive={isActive}
           />
         )}
-        ItemSeparatorComponent={() => (
-          <View style={{ height: 1, backgroundColor: "#ddd" }} />
-        )}
-        getItemLayout={(_, index) => ({
-          length: ROW_HEIGHT + 1,
-          offset: index * (ROW_HEIGHT + 1),
-          index,
-        })}
       />
     </SafeAreaView>
   )

@@ -8,6 +8,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated"
 
+import * as Haptics from "expo-haptics"
+
 type SwipeButton<T> = {
   icon: React.ReactNode
   onPress: (item: T) => void
@@ -16,17 +18,29 @@ type SwipeButton<T> = {
 
 type Props<T> = {
   item: T
-  renderContent: (item: T) => React.ReactNode
+  renderContent: (item: T, isActive: boolean) => React.ReactElement
   buttons: SwipeButton<T>[]
+
+  // 🔁 Drag support
+  onDrag: () => void
+  onDragStart?: () => void
+  onDragEnd?: () => void
+
+  isActive?: boolean
+  enableHaptics?: boolean
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width
-export const ROW_HEIGHT = 60
 
 export default function SwaggableRow<T>({
   item,
   renderContent,
   buttons,
+  onDrag,
+  onDragStart,
+  onDragEnd,
+  isActive = false,
+  enableHaptics = true,
 }: Props<T>) {
   const translateX = useSharedValue(0)
   const idealButtonWidth = 60
@@ -47,7 +61,22 @@ export default function SwaggableRow<T>({
       })
     })
 
-  const rowStyle = useAnimatedStyle(() => ({
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(200)
+    .onStart(() => {
+      if (enableHaptics) {
+        runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium)
+      }
+      if (onDragStart) runOnJS(onDragStart)()
+      runOnJS(onDrag)()
+    })
+    .onEnd(() => {
+      if (onDragEnd) runOnJS(onDragEnd)()
+    })
+
+  const combinedGesture = Gesture.Simultaneous(panGesture, longPressGesture)
+
+  const swipeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }))
 
@@ -60,17 +89,18 @@ export default function SwaggableRow<T>({
   })
 
   return (
-    <View style={styles.rowContainer}>
-      {/* Buttons revealed behind swiped row */}
+    <View style={styles.container}>
+      {/* Swipe-revealed buttons behind */}
       <Animated.View style={[styles.buttonRow, buttonStripStyle]}>
         {buttons.map((btn, index) => (
           <Animated.View
             key={index}
             style={[
-              styles.iconButton,
               {
                 flex: 1,
                 backgroundColor: btn.backgroundColor ?? "#ccc",
+                justifyContent: "center",
+                alignItems: "center",
               },
             ]}
           >
@@ -84,10 +114,10 @@ export default function SwaggableRow<T>({
         ))}
       </Animated.View>
 
-      {/* Foreground swipable row */}
-      <GestureDetector gesture={panGesture}>
-        <Animated.View style={[styles.swipeable, rowStyle]}>
-          {renderContent(item)}
+      {/* Foreground draggable/swipeable layer */}
+      <GestureDetector gesture={combinedGesture}>
+        <Animated.View style={swipeStyle}>
+          {renderContent(item, isActive)}
         </Animated.View>
       </GestureDetector>
     </View>
@@ -95,30 +125,16 @@ export default function SwaggableRow<T>({
 }
 
 const styles = StyleSheet.create({
-  rowContainer: {
-    height: ROW_HEIGHT,
+  container: {
     overflow: "hidden",
-    backgroundColor: "#fff",
-  },
-  swipeable: {
-    position: "absolute",
-    width: "100%",
-    height: ROW_HEIGHT,
-    backgroundColor: "white",
-    justifyContent: "center",
-    paddingHorizontal: 16,
   },
   buttonRow: {
     position: "absolute",
     right: 0,
-    height: ROW_HEIGHT,
+    top: 0,
+    bottom: 0,
     backgroundColor: "#eee",
     alignItems: "center",
-  },
-  iconButton: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: ROW_HEIGHT,
   },
   pressable: {
     flex: 1,
