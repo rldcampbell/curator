@@ -8,7 +8,6 @@ import { useNavigation } from "expo-router"
 import { router, useLocalSearchParams } from "expo-router"
 
 import { CollectionId, Item, ItemId } from "@/app/types"
-import Divider from "@/components/Divider"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
 import { useCollection } from "@/hooks/useCollection"
@@ -70,7 +69,6 @@ export default function CollectionDetailScreen() {
 
   return (
     <View style={collectionDetailStyles.container}>
-      <Divider />
       <DraggableFlatList
         data={itemOrder}
         keyExtractor={item => item}
