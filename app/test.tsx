@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import { Animated, SafeAreaView, StyleSheet, Text } from "react-native"
 import DraggableFlatList from "react-native-draggable-flatlist"
 
+import * as Haptics from "expo-haptics"
+
 import { Feather } from "@expo/vector-icons"
 
 import SwaggableRow from "@/components/SwaggableRow"
@@ -33,21 +35,22 @@ export default function TestScreen() {
         renderItem={({ item, drag, isActive }) => (
           <SwaggableRow
             item={item}
+            isActive={isActive}
+            onDrag={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+              drag()
+            }}
+            buttons={buttons}
             renderContent={(item, isActive) => (
               <Animated.View
                 style={{
-                  backgroundColor: isActive ? "#cce7ff" : "#fff",
+                  backgroundColor: isActive ? "#d0ebff" : "#fff",
                   padding: 16,
-                  borderBottomWidth: 1,
-                  borderColor: "#ddd",
                 }}
               >
                 <Text>{item}</Text>
               </Animated.View>
             )}
-            buttons={buttons}
-            onDrag={drag}
-            isActive={isActive}
           />
         )}
       />

@@ -8,8 +8,6 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated"
 
-import * as Haptics from "expo-haptics"
-
 type SwipeButton<T> = {
   icon: React.ReactNode
   onPress: (item: T) => void
@@ -21,13 +19,9 @@ type Props<T> = {
   renderContent: (item: T, isActive: boolean) => React.ReactElement
   buttons: SwipeButton<T>[]
 
-  // 🔁 Drag support
+  // Drag support
   onDrag: () => void
-  onDragStart?: () => void
-  onDragEnd?: () => void
-
   isActive?: boolean
-  enableHaptics?: boolean
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width
@@ -37,10 +31,7 @@ export default function SwaggableRow<T>({
   renderContent,
   buttons,
   onDrag,
-  onDragStart,
-  onDragEnd,
   isActive = false,
-  enableHaptics = true,
 }: Props<T>) {
   const translateX = useSharedValue(0)
   const idealButtonWidth = 60
@@ -61,21 +52,6 @@ export default function SwaggableRow<T>({
       })
     })
 
-  const longPressGesture = Gesture.LongPress()
-    .minDuration(200)
-    .onStart(() => {
-      if (enableHaptics) {
-        runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Medium)
-      }
-      if (onDragStart) runOnJS(onDragStart)()
-      runOnJS(onDrag)()
-    })
-    .onEnd(() => {
-      if (onDragEnd) runOnJS(onDragEnd)()
-    })
-
-  const combinedGesture = Gesture.Simultaneous(panGesture, longPressGesture)
-
   const swipeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }))
@@ -90,7 +66,7 @@ export default function SwaggableRow<T>({
 
   return (
     <View style={styles.container}>
-      {/* Swipe-revealed buttons behind */}
+      {/* Buttons behind the row */}
       <Animated.View style={[styles.buttonRow, buttonStripStyle]}>
         {buttons.map((btn, index) => (
           <Animated.View
@@ -114,10 +90,12 @@ export default function SwaggableRow<T>({
         ))}
       </Animated.View>
 
-      {/* Foreground draggable/swipeable layer */}
-      <GestureDetector gesture={combinedGesture}>
+      {/* Swipeable foreground that supports drag on long press */}
+      <GestureDetector gesture={panGesture}>
         <Animated.View style={swipeStyle}>
-          {renderContent(item, isActive)}
+          <Pressable onLongPress={onDrag} delayLongPress={200}>
+            {renderContent(item, isActive)}
+          </Pressable>
         </Animated.View>
       </GestureDetector>
     </View>
