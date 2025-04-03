@@ -22,6 +22,7 @@ type CollectionsContextValue = {
   collectionOrder: CollectionId[]
   addCollection: (data: NewCollectionInput) => void
   updateCollectionOrder: (order: CollectionId[]) => void
+  deleteItem: (collectionId: CollectionId, itemId: ItemId) => void
   addItem: (collectionId: CollectionId, item: Item) => ItemId
   updateItem: (
     collectionId: CollectionId,
@@ -188,6 +189,40 @@ export const CollectionsProvider = ({
     })
   }
 
+  const deleteItem = (collectionId: CollectionId, itemId: ItemId) => {
+    setCollections(prev => {
+      const collection = prev[collectionId]
+
+      if (!collection) return prev
+
+      const updatedItems = { ...collection.items }
+      delete updatedItems[itemId]
+
+      const updatedItemOrder = collection.itemOrder.filter(id => id !== itemId)
+
+      const updatedCollection: Collection = {
+        ...collection,
+        items: updatedItems,
+        itemOrder: updatedItemOrder,
+      }
+
+      const updated = {
+        ...prev,
+        [collectionId]: updatedCollection,
+      }
+
+      saveCollection(collectionId, updatedCollection).catch(err => {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to delete item from collection"),
+        )
+      })
+
+      return updated
+    })
+  }
+
   return (
     <CollectionsContext.Provider
       value={{
@@ -195,6 +230,7 @@ export const CollectionsProvider = ({
         collectionOrder,
         addCollection,
         addItem,
+        deleteItem,
         updateItem,
         updateItemOrder,
         updateCollectionOrder,

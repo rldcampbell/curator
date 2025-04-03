@@ -11,6 +11,7 @@ import { useLocalSearchParams } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 
 import { CollectionId, Item, ItemId } from "@/app/types"
+import ConfirmModal from "@/components/ConfirmModal"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
 import SwaggableRow from "@/components/SwaggableRow"
@@ -23,6 +24,7 @@ export default function CollectionDetailScreen() {
   const collectionId = cId as CollectionId
   const {
     addItem,
+    deleteItem,
     updateItem,
     fieldOrder,
     fields,
@@ -34,6 +36,7 @@ export default function CollectionDetailScreen() {
 
   const [itemModalVisible, setItemModalVisible] = useState(false)
   const [editingItemId, setEditingItemId] = useState<ItemId | null>(null)
+  const [deleteItemId, setDeleteItemId] = useState<ItemId | null>(null)
 
   const navigation = useNavigation()
   useLayoutEffect(() => {
@@ -85,14 +88,14 @@ export default function CollectionDetailScreen() {
           const buttons = [
             {
               icon: <Feather name="trash-2" size={20} color="black" />,
-              onPress: (itemId: ItemId) =>
-                console.log("🗑️ Delete item:", itemId),
+              onPress: (itemId: ItemId) => {
+                setDeleteItemId(itemId)
+              },
               backgroundColor: "#e74c3c",
             },
             {
               icon: <Feather name="edit-3" size={20} color="black" />,
               onPress: (itemId: ItemId) => {
-                console.log("✏️ Edit item:", itemId)
                 setEditingItemId(itemId)
                 setItemModalVisible(true)
               },
@@ -123,6 +126,21 @@ export default function CollectionDetailScreen() {
             />
           )
         }}
+      />
+
+      <ConfirmModal
+        visible={!!deleteItemId}
+        title="Delete item?"
+        message="Are you sure you want to permanently delete this item?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => {
+          if (deleteItemId) {
+            deleteItem(deleteItemId)
+            setDeleteItemId(null)
+          }
+        }}
+        onCancel={() => setDeleteItemId(null)}
       />
 
       {itemModalVisible && (
