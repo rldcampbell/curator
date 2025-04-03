@@ -8,6 +8,23 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated"
 
+// Module-level shared ref to track open row
+// 🔐 Module-scoped row manager (private to this file)
+let closeOpenRow: (() => void) | null = null
+
+function registerOpenRow(closeFn: () => void) {
+  if (closeOpenRow && closeOpenRow !== closeFn) {
+    closeOpenRow()
+  }
+  closeOpenRow = closeFn
+}
+
+function deregisterOpenRow(closeFn: () => void) {
+  if (closeOpenRow === closeFn) {
+    closeOpenRow = null
+  }
+}
+
 type SwipeButton<T> = {
   icon: React.ReactNode
   onPress: (item: T) => void
@@ -37,6 +54,16 @@ export default function SwaggableRow<T>({
   const idealButtonWidth = 60
   const idealTotalWidth = buttons.length * idealButtonWidth
 
+  const closeRow = () => {
+    translateX.value = withSpring(0, {
+      damping: 20,
+      stiffness: 200,
+    })
+
+    // 🧹 Clear if we're the currently open row
+    runOnJS(deregisterOpenRow)(closeRow)
+  }
+
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
     .onChange(event => {
@@ -46,6 +73,10 @@ export default function SwaggableRow<T>({
     .onEnd(() => {
       const snapPoint =
         Math.abs(translateX.value) > idealTotalWidth / 2 ? -idealTotalWidth : 0
+
+      if (snapPoint !== 0) {
+        runOnJS(registerOpenRow)(closeRow)
+      }
 
       translateX.value = withSpring(snapPoint, {
         damping: 20,
@@ -94,7 +125,15 @@ export default function SwaggableRow<T>({
       {/* Swipeable foreground that supports drag on long press */}
       <GestureDetector gesture={panGesture}>
         <Animated.View style={swipeStyle}>
-          <Pressable onLongPress={onDrag} delayLongPress={200}>
+          <Pressable
+            onTouchStart={() => {
+              if (closeOpenRow) {
+                runOnJS(closeOpenRow)()
+              }
+            }}
+            onLongPress={onDrag}
+            delayLongPress={200}
+          >
             {renderContent(item, isActive)}
           </Pressable>
         </Animated.View>
