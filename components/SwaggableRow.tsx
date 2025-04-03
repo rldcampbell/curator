@@ -33,12 +33,11 @@ type SwipeButton<T> = {
 
 type Props<T> = {
   item: T
-  renderContent: (item: T, isActive: boolean) => React.ReactElement
+  renderContent: (item: T) => React.ReactElement
   buttons: SwipeButton<T>[]
 
   // Drag support
   onDrag: () => void
-  isActive?: boolean
 }
 
 const SCREEN_WIDTH = Dimensions.get("window").width
@@ -48,7 +47,6 @@ export default function SwaggableRow<T>({
   renderContent,
   buttons,
   onDrag,
-  isActive = false,
 }: Props<T>) {
   const translateX = useSharedValue(0)
   const idealButtonWidth = 60
@@ -134,7 +132,7 @@ export default function SwaggableRow<T>({
             onLongPress={onDrag}
             delayLongPress={200}
           >
-            {renderContent(item, isActive)}
+            {renderContent(item)}
           </Pressable>
         </Animated.View>
       </GestureDetector>

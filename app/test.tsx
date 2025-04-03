@@ -35,13 +35,12 @@ export default function TestScreen() {
         renderItem={({ item, drag, isActive }) => (
           <SwaggableRow
             item={item}
-            isActive={isActive}
             onDrag={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
               drag()
             }}
             buttons={buttons}
-            renderContent={(item, isActive) => (
+            renderContent={item => (
               <Animated.View
                 style={{
                   backgroundColor: isActive ? "#d0ebff" : "#fff",
