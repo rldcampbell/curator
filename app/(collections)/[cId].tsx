@@ -87,18 +87,18 @@ export default function CollectionDetailScreen() {
 
           const buttons = [
             {
-              icon: <Feather name="trash-2" size={20} color="black" />,
-              onPress: (itemId: ItemId) => {
-                setDeleteItemId(itemId)
-              },
-              backgroundColor: "#e74c3c",
-            },
-            {
               icon: <Feather name="edit-3" size={20} color="black" />,
               onPress: (itemId: ItemId) => {
                 setEditingItemId(itemId)
                 setItemModalVisible(true)
               },
+            },
+            {
+              icon: <Feather name="trash-2" size={20} color="black" />,
+              onPress: (itemId: ItemId) => {
+                setDeleteItemId(itemId)
+              },
+              backgroundColor: "#e74c3c",
             },
           ]
 
