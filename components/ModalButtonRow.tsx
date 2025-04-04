@@ -1,4 +1,3 @@
-// components/ModalButtonRow.tsx
 import { Pressable, Text, View } from "react-native"
 
 import { modalStyles } from "@/styles/modalStyles"
@@ -18,12 +17,15 @@ export default function ModalButtonRow({
   discardLabel = "Discard",
 }: ModalButtonRowProps) {
   return (
-    <View style={{ width: "100%" }}>
+    <View
+      style={{ flexDirection: "row", gap: 12, width: "100%", marginTop: 8 }}
+    >
       <Pressable
         style={[
           sharedStyles.card,
           modalStyles.addButton,
           modalStyles.buttonInModal,
+          { flex: 1 },
         ]}
         onPress={onApply}
       >
@@ -35,6 +37,7 @@ export default function ModalButtonRow({
           sharedStyles.card,
           modalStyles.closeButton,
           modalStyles.buttonInModal,
+          { flex: 1 },
         ]}
         onPress={onDiscard}
       >

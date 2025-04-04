@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import {
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
-  Pressable,
+  Platform,
+  SafeAreaView,
+  ScrollView,
   Text,
   TextInput,
   TouchableWithoutFeedback,
@@ -13,6 +16,8 @@ import DropDownPicker from "react-native-dropdown-picker"
 import { FieldType } from "@/app/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
+
+import ModalButtonRow from "./ModalButtonRow"
 
 type AddFieldModalProps = {
   visible: boolean
@@ -33,7 +38,9 @@ export default function AddFieldModal({
     { label: "Number", value: FieldType.Number },
     { label: "Date", value: FieldType.Date },
   ])
+
   const inputRef = useRef<TextInput>(null)
+
   useEffect(() => {
     if (visible && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100)
@@ -51,70 +58,72 @@ export default function AddFieldModal({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
-      transparent={true}
+      animationType="fade"
+      transparent
       onRequestClose={onClose}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={modalStyles.overlay}>
-          <View style={modalStyles.content}>
-            <Text style={modalStyles.title}>Add Field</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={[modalStyles.overlay, { flex: 1 }]}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <SafeAreaView style={{ flex: 1 }}>
+            <View style={[modalStyles.content, { flex: 1, maxHeight: "90%" }]}>
+              <ScrollView
+                contentContainerStyle={{
+                  paddingBottom: 24,
+                  paddingHorizontal: 24,
+                  paddingTop: 24,
+                }}
+                keyboardShouldPersistTaps="handled"
+              >
+                <Text style={modalStyles.title}>Add Field</Text>
 
-            <TextInput
-              ref={inputRef}
-              style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
-              placeholder="Field Name (e.g. Title)"
-              placeholderTextColor="#999"
-              value={fieldName}
-              onChangeText={setFieldName}
-              maxLength={50}
-            />
+                <View style={{ width: "100%", marginBottom: 12 }}>
+                  <Text style={sharedStyles.label}>Field Name</Text>
+                  <TextInput
+                    ref={inputRef}
+                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+                    placeholder="e.g. Title"
+                    placeholderTextColor="#999"
+                    value={fieldName}
+                    onChangeText={setFieldName}
+                    maxLength={50}
+                  />
+                </View>
 
-            <DropDownPicker
-              open={open}
-              value={fieldType}
-              items={items}
-              setOpen={setOpen}
-              setValue={setFieldType}
-              setItems={setItems}
-              style={{
-                marginBottom: open ? 120 : 20,
-                borderRadius: 12,
-                borderColor: "#ccc",
-              }}
-              containerStyle={{ width: "100%", marginBottom: 20 }}
-              dropDownContainerStyle={{
-                borderRadius: 12,
-                borderColor: "#ccc",
-              }}
-            />
+                <View style={{ width: "100%", marginBottom: 24 }}>
+                  <Text style={sharedStyles.label}>Field Type</Text>
+                  <DropDownPicker
+                    open={open}
+                    value={fieldType}
+                    items={items}
+                    setOpen={setOpen}
+                    setValue={setFieldType}
+                    setItems={setItems}
+                    style={{
+                      borderRadius: 12,
+                      borderColor: "#ccc",
+                    }}
+                    containerStyle={{ width: "100%" }}
+                    dropDownContainerStyle={{
+                      borderRadius: 12,
+                      borderColor: "#ccc",
+                    }}
+                  />
+                </View>
 
-            <Pressable
-              style={[
-                sharedStyles.card,
-                modalStyles.addButton,
-                modalStyles.buttonInModal,
-              ]}
-              onPress={handleAdd}
-            >
-              <Text style={{ fontWeight: "bold", color: "#007aff" }}>
-                Add Field
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                sharedStyles.card,
-                modalStyles.closeButton,
-                modalStyles.buttonInModal,
-              ]}
-              onPress={onClose}
-            >
-              <Text style={{ fontWeight: "bold", color: "#333" }}>Cancel</Text>
-            </Pressable>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
+                <ModalButtonRow
+                  onApply={handleAdd}
+                  applyLabel="Add Field"
+                  onDiscard={onClose}
+                  discardLabel="Cancel"
+                />
+              </ScrollView>
+            </View>
+          </SafeAreaView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }

@@ -11,10 +11,11 @@ export const modalStyles = StyleSheet.create({
   },
   content: {
     width: screenWidth * 0.9,
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    margin: 16,
+    flex: 1,
+    maxHeight: "90%",
   },
   title: {
     fontSize: 20,
@@ -26,7 +27,7 @@ export const modalStyles = StyleSheet.create({
     marginTop: 10,
   },
   closeButton: {
-    marginTop: 20,
+    marginTop: 10,
     backgroundColor: "#eee",
   },
   buttonInModal: {
