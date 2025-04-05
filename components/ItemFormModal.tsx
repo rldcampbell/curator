@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react"
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native"
+import { Modal, Pressable, Text, TextInput, View } from "react-native"
 
 import DateTimePicker from "@react-native-community/datetimepicker"
 
@@ -19,6 +9,7 @@ import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import ModalButtonRow from "./ModalButtonRow"
+import ScrollableModalLayout from "./ScrollableModalLayout"
 
 type ItemFormModalProps = {
   mode: "create" | "edit"
@@ -58,124 +49,86 @@ export default function ItemFormModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={[modalStyles.overlay, { flex: 1 }]}
+      <ScrollableModalLayout
+        title={mode === "create" ? "New Item" : "Edit Item"}
+        footer={
+          <ModalButtonRow
+            onApply={() => onSubmit(inputValues)}
+            applyLabel={mode === "create" ? "Create" : "Update"}
+            onDiscard={onDiscard}
+          />
+        }
       >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={[modalStyles.content, { flex: 1, maxHeight: "90%" }]}>
-            <ScrollView
-              contentContainerStyle={{
-                paddingBottom: 24,
-                paddingHorizontal: 24,
-                paddingTop: 24,
-              }}
-              keyboardShouldPersistTaps="handled"
-            >
-              <Text style={modalStyles.title}>
-                {mode === "create" ? "New Item" : "Edit Item"}
-              </Text>
+        {fieldOrder.map(fieldId => {
+          const field = fields[fieldId]
+          const value = inputValues[fieldId] ?? ""
 
-              {fieldOrder.map(fieldId => {
-                const field = fields[fieldId]
-                const value = inputValues[fieldId] ?? ""
-
-                switch (field.type) {
-                  case FieldType.Text:
-                    return (
-                      <View
-                        key={fieldId}
-                        style={{ width: "100%", marginBottom: 8 }}
-                      >
-                        <Text style={sharedStyles.label}>{field.name}</Text>
-                        <TextInput
-                          style={[
-                            sharedStyles.inputCard,
-                            modalStyles.buttonInModal,
-                          ]}
-                          placeholder={field.name}
-                          value={value as string}
-                          onChangeText={text => updateField(fieldId, text)}
-                        />
-                      </View>
-                    )
-                  case FieldType.Number:
-                    return (
-                      <View
-                        key={fieldId}
-                        style={{ width: "100%", marginBottom: 8 }}
-                      >
-                        <Text style={sharedStyles.label}>{field.name}</Text>
-                        <TextInput
-                          style={[
-                            sharedStyles.inputCard,
-                            modalStyles.buttonInModal,
-                          ]}
-                          placeholder={field.name}
-                          value={value?.toString() ?? ""}
-                          keyboardType="numeric"
-                          onChangeText={text =>
-                            updateField(fieldId, parseFloat(text))
-                          }
-                        />
-                      </View>
-                    )
-                  case FieldType.Date:
-                    return (
-                      <View
-                        key={fieldId}
-                        style={{ width: "100%", marginBottom: 8 }}
-                      >
-                        <Text style={sharedStyles.label}>{field.name}</Text>
-                        <Pressable
-                          onPress={() => setActivePickerField(fieldId)}
-                          style={[
-                            sharedStyles.inputCard,
-                            modalStyles.buttonInModal,
-                          ]}
-                        >
-                          <Text>
-                            {Array.isArray(value)
-                              ? formatDate(dateArrayToUTCDate(value))
-                              : "Select date"}
-                          </Text>
-                        </Pressable>
-                        {activePickerField === fieldId && (
-                          <DateTimePicker
-                            value={
-                              Array.isArray(value)
-                                ? dateArrayToUTCDate(value)
-                                : new Date()
-                            }
-                            mode="date"
-                            display="default"
-                            onChange={(_, selectedDate) => {
-                              setActivePickerField(null)
-                              if (selectedDate) {
-                                updateField(
-                                  fieldId,
-                                  dateToDateArray(selectedDate),
-                                )
-                              }
-                            }}
-                          />
-                        )}
-                      </View>
-                    )
-                  default:
-                    return null
-                }
-              })}
-
-              <ModalButtonRow
-                onApply={() => onSubmit(inputValues)}
-                applyLabel={mode === "create" ? "Create" : "Update"}
-                onDiscard={onDiscard}
-              />
-            </ScrollView>
-          </View>
-        </SafeAreaView>
-      </KeyboardAvoidingView>
+          switch (field.type) {
+            case FieldType.Text:
+              return (
+                <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+                  <Text style={sharedStyles.label}>{field.name}</Text>
+                  <TextInput
+                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+                    placeholder={field.name}
+                    value={value as string}
+                    onChangeText={text => updateField(fieldId, text)}
+                  />
+                </View>
+              )
+            case FieldType.Number:
+              return (
+                <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+                  <Text style={sharedStyles.label}>{field.name}</Text>
+                  <TextInput
+                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+                    placeholder={field.name}
+                    value={value?.toString() ?? ""}
+                    keyboardType="numeric"
+                    onChangeText={text =>
+                      updateField(fieldId, parseFloat(text))
+                    }
+                  />
+                </View>
+              )
+            case FieldType.Date:
+              return (
+                <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+                  <Text style={sharedStyles.label}>{field.name}</Text>
+                  <Pressable
+                    onPress={() => setActivePickerField(fieldId)}
+                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+                  >
+                    <Text>
+                      {Array.isArray(value)
+                        ? formatDate(dateArrayToUTCDate(value))
+                        : "Select date"}
+                    </Text>
+                  </Pressable>
+                  {activePickerField === fieldId && (
+                    <DateTimePicker
+                      value={
+                        Array.isArray(value)
+                          ? dateArrayToUTCDate(value)
+                          : new Date()
+                      }
+                      mode="date"
+                      display="default"
+                      onChange={(_, selectedDate) => {
+                        setActivePickerField(null)
+                        if (selectedDate) {
+                          updateField(fieldId, dateToDateArray(selectedDate))
+                        }
+                      }}
+                    />
+                  )}
+                </View>
+              )
+            default:
+              return null
+          }
+        })}
+      </ScrollableModalLayout>
     </Modal>
   )
 }
