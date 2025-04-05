@@ -16,7 +16,7 @@ export default function ModalOverlay({ children }: ModalOverlayProps) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={[modalStyles.overlay, { flex: 1 }]}
+      style={[modalStyles.overlay]}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <View

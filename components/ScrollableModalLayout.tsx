@@ -25,7 +25,6 @@ export default function ScrollableModalLayout({
           modalStyles.content,
           {
             flex: 1,
-            maxHeight: "90%",
           },
           contentStyle,
         ]}

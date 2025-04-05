@@ -14,7 +14,6 @@ export const modalStyles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 16,
     margin: 16,
-    flex: 1,
     maxHeight: "90%",
   },
   title: {
