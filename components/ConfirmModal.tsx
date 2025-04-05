@@ -41,11 +41,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           />
         }
       >
-        {message && (
-          <Text style={{ marginBottom: 16, textAlign: "center", fontSize: 16 }}>
-            {message}
-          </Text>
-        )}
+        {message && <Text style={{ fontSize: 16 }}>{message}</Text>}
       </CompactModalLayout>
     </Modal>
   )

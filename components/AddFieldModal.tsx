@@ -13,8 +13,8 @@ import { FieldType } from "@/app/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
+import CompactModalLayout from "./CompactModalLayout"
 import ModalButtonRow from "./ModalButtonRow"
-import ScrollableModalLayout from "./ScrollableModalLayout"
 
 type AddFieldModalProps = {
   visible: boolean
@@ -60,7 +60,7 @@ export default function AddFieldModal({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <ScrollableModalLayout
+        <CompactModalLayout
           title="Add Field"
           footer={
             <ModalButtonRow
@@ -104,7 +104,7 @@ export default function AddFieldModal({
               }}
             />
           </View>
-        </ScrollableModalLayout>
+        </CompactModalLayout>
       </TouchableWithoutFeedback>
     </Modal>
   )

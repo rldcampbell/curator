@@ -3,7 +3,6 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   Text,
   TextInput,
   TouchableOpacity,
@@ -18,6 +17,7 @@ import AddButton from "@/components/AddButton"
 import AddFieldModal from "@/components/AddFieldModal"
 import ConfirmModal from "@/components/ConfirmModal"
 import Divider from "@/components/Divider"
+import ModalButtonRow from "@/components/ModalButtonRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
 import { addCollectionStyles } from "@/styles/addCollectionStyles"
@@ -52,29 +52,13 @@ export default function AddCollectionScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={addCollectionStyles.topPanel}>
-          <View style={addCollectionStyles.topActionsRow}>
-            <Pressable
-              style={[
-                addCollectionStyles.topCardButton,
-                addCollectionStyles.discardButton,
-              ]}
-              onPress={() => setConfirmDiscardVisible(true)}
-            >
-              <Text style={addCollectionStyles.topButtonText}>Discard</Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                addCollectionStyles.topCardButton,
-                addCollectionStyles.createButton,
-                !validCollection && sharedStyles.disabled,
-              ]}
-              onPress={() => setConfirmCreateVisible(true)}
-              disabled={!validCollection}
-            >
-              <Text style={addCollectionStyles.topButtonText}>Create</Text>
-            </Pressable>
-          </View>
+          <ModalButtonRow
+            onDiscard={() => setConfirmDiscardVisible(true)}
+            discardLabel="Discard"
+            onApply={() => setConfirmCreateVisible(true)}
+            applyLabel="Create"
+            applyDisabled={!validCollection}
+          />
 
           <TextInput
             ref={inputRef}

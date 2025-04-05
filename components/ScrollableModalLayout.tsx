@@ -32,9 +32,7 @@ export default function ScrollableModalLayout({
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
-            paddingBottom: 24,
-            paddingHorizontal: 24,
-            paddingTop: 24,
+            padding: 16,
           }}
           keyboardShouldPersistTaps="handled"
         >
@@ -45,7 +43,8 @@ export default function ScrollableModalLayout({
         {footer && (
           <View
             style={{
-              padding: 16,
+              paddingTop: 8,
+              paddingHorizontal: 16,
               borderTopWidth: 1,
               borderColor: "#eee",
             }}

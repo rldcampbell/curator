@@ -33,9 +33,7 @@ export default function CompactModalLayout({
       >
         <View
           style={{
-            paddingHorizontal: 24,
-            paddingTop: 24,
-            paddingBottom: 24,
+            padding: 16,
           }}
         >
           {title && <Text style={modalStyles.title}>{title}</Text>}
@@ -45,7 +43,8 @@ export default function CompactModalLayout({
         {footer && (
           <View
             style={{
-              padding: 16,
+              paddingTop: 8,
+              paddingHorizontal: 16,
               borderTopWidth: 1,
               borderColor: "#eee",
             }}

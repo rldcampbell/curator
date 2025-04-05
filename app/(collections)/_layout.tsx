@@ -9,6 +9,10 @@ export default function CollectionsLayout() {
         name="[cId]/items/[iId]"
         options={{ title: "Item Details" }}
       />
+      <Stack.Screen
+        name="add-collection"
+        options={{ title: "Add Collection" }}
+      />
     </Stack>
   )
 }

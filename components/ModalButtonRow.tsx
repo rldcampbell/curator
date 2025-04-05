@@ -8,6 +8,7 @@ type ModalButtonRowProps = {
   onDiscard: () => void
   applyLabel?: string
   discardLabel?: string
+  applyDisabled?: boolean
 }
 
 export default function ModalButtonRow({
@@ -15,19 +16,21 @@ export default function ModalButtonRow({
   onDiscard,
   applyLabel = "Apply",
   discardLabel = "Discard",
+  applyDisabled,
 }: ModalButtonRowProps) {
   return (
-    <View
-      style={{ flexDirection: "row", gap: 12, width: "100%", marginTop: 8 }}
-    >
+    <View style={{ flexDirection: "row", gap: 12, width: "100%" }}>
       <Pressable
         style={[
           sharedStyles.card,
           modalStyles.addButton,
           modalStyles.buttonInModal,
+          applyDisabled ? sharedStyles.disabled : {},
           { flex: 1 },
         ]}
-        onPress={onApply}
+        onPress={() => {
+          !applyDisabled && onApply()
+        }}
       >
         <Text>{applyLabel}</Text>
       </Pressable>
