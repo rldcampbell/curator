@@ -30,10 +30,6 @@ export const modalStyles = StyleSheet.create({
     backgroundColor: "#eee",
   },
   buttonInModal: {
-    width: "100%", // fits modal width instead of screen width
-  },
-  formFieldWrapper: {
     width: "100%",
-    marginBottom: 12,
   },
 })
