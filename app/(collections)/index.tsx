@@ -1,12 +1,13 @@
+import { useLayoutEffect } from "react"
 import { Text, TouchableOpacity, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
 
-import { router } from "expo-router"
+import { router, useNavigation } from "expo-router"
 
 import { CollectionId } from "@/app/types"
-import AddButton from "@/components/AddButton"
+import { HeaderButton } from "@/components/HeaderButton"
 import { useCollections } from "@/context/CollectionsContext"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -14,12 +15,22 @@ export default function CollectionsScreen() {
   const { collections, collectionOrder, updateCollectionOrder } =
     useCollections()
 
+  const navigation = useNavigation()
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: "Collections",
+      headerRight: () => (
+        <HeaderButton
+          iconName="add"
+          onPress={() => router.push("/add-collection")}
+        />
+      ),
+    })
+  }, [navigation])
+
   return (
     <View style={sharedStyles.container}>
-      <View style={sharedStyles.scrollContainer}>
-        <AddButton onPress={() => router.push("/add-collection")} />
-      </View>
-
       <DraggableFlatList
         data={collectionOrder}
         keyExtractor={item => item}

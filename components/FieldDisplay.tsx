@@ -1,6 +1,13 @@
 import { Text, View } from "react-native"
 
-import { Collection, DateArray, Field, FieldValue, ItemId } from "../app/types"
+import {
+  Collection,
+  DateArray,
+  Field,
+  FieldType,
+  FieldValue,
+  ItemId,
+} from "../app/types"
 import styles from "../styles/FieldDisplayStyles"
 
 // Import the styles
@@ -34,11 +41,11 @@ export default function FieldDisplay({
 }
 
 const format = (field: Field, value: FieldValue) => {
-  if (field.type === "number") {
+  if (field.type === FieldType.Number) {
     return formatNumber(value as number)
   }
 
-  if (field.type === "date") {
+  if (field.type === FieldType.Date) {
     return formatDate(value as DateArray)
   }
 

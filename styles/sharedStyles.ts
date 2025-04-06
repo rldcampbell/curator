@@ -24,7 +24,7 @@ export const sharedStyles = StyleSheet.create({
     marginBottom: 15,
     elevation: 3, // Android shadow
     shadowColor: "#000", // iOS shadow
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     alignItems: "center",
@@ -51,23 +51,13 @@ export const sharedStyles = StyleSheet.create({
     fontSize: 18,
     elevation: 3,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   scrollContainer: {
     alignItems: "center",
     paddingVertical: 20,
-  },
-  shadowFade: {
-    height: 10,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
-    zIndex: 1,
   },
   errorText: {
     color: "red",
@@ -81,5 +71,8 @@ export const sharedStyles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 4,
     color: "#333",
+  },
+  disabled: {
+    opacity: 0.5,
   },
 })

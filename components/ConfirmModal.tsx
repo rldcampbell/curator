@@ -1,7 +1,8 @@
-import { Modal, Pressable, Text, View } from "react-native"
+import React from "react"
+import { Modal, Text } from "react-native"
 
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import CompactModalLayout from "./CompactModalLayout"
+import ModalButtonRow from "./ModalButtonRow"
 
 type ConfirmModalProps = {
   visible: boolean
@@ -13,7 +14,7 @@ type ConfirmModalProps = {
   onCancel: () => void
 }
 
-export default function ConfirmModal({
+const ConfirmModal: React.FC<ConfirmModalProps> = ({
   visible,
   title,
   message,
@@ -21,7 +22,7 @@ export default function ConfirmModal({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-}: ConfirmModalProps) {
+}) => {
   return (
     <Modal
       transparent
@@ -29,34 +30,21 @@ export default function ConfirmModal({
       visible={visible}
       onRequestClose={onCancel}
     >
-      <View style={modalStyles.overlay}>
-        <View style={modalStyles.content}>
-          <Text style={modalStyles.title}>{title}</Text>
-          {message && <Text style={{ marginBottom: 20 }}>{message}</Text>}
-
-          <Pressable
-            style={[
-              sharedStyles.card,
-              modalStyles.addButton,
-              modalStyles.buttonInModal,
-            ]}
-            onPress={onConfirm}
-          >
-            <Text>{confirmText}</Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              sharedStyles.card,
-              modalStyles.closeButton,
-              modalStyles.buttonInModal,
-            ]}
-            onPress={onCancel}
-          >
-            <Text>{cancelText}</Text>
-          </Pressable>
-        </View>
-      </View>
+      <CompactModalLayout
+        title={title}
+        footer={
+          <ModalButtonRow
+            onApply={onConfirm}
+            applyLabel={confirmText}
+            onDiscard={onCancel}
+            discardLabel={cancelText}
+          />
+        }
+      >
+        {message && <Text style={{ fontSize: 16 }}>{message}</Text>}
+      </CompactModalLayout>
     </Modal>
   )
 }
+
+export default ConfirmModal
