@@ -18,15 +18,12 @@ export const modalStyles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 15,
   },
   addButton: {
     backgroundColor: "#e0f7fa",
-    marginTop: 10,
   },
   closeButton: {
-    marginTop: 10,
     backgroundColor: "#eee",
   },
   buttonInModal: {

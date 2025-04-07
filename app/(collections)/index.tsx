@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react"
-import { Text, TouchableOpacity, View } from "react-native"
+import { TouchableOpacity, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -7,6 +7,7 @@ import DraggableFlatList, {
 import { router, useNavigation } from "expo-router"
 
 import { CollectionId } from "@/app/types"
+import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
 import { useCollections } from "@/context/CollectionsContext"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -53,7 +54,9 @@ export default function CollectionsScreen() {
               delayLongPress={300}
               onPress={() => router.push(`/(collections)/${item}`)}
             >
-              <Text style={sharedStyles.cardText}>{collection.name}</Text>
+              <AppText weight="medium" style={sharedStyles.cardText}>
+                {collection.name}
+              </AppText>
             </TouchableOpacity>
           )
         }}

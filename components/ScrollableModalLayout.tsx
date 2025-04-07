@@ -1,8 +1,9 @@
 import { ReactNode } from "react"
-import { ScrollView, Text, View, ViewStyle } from "react-native"
+import { ScrollView, View, ViewStyle } from "react-native"
 
 import { modalStyles } from "@/styles/modalStyles"
 
+import AppText from "./AppText"
 import ModalOverlay from "./ModalOverlay"
 
 type Props = {
@@ -36,7 +37,11 @@ export default function ScrollableModalLayout({
           }}
           keyboardShouldPersistTaps="handled"
         >
-          {title && <Text style={modalStyles.title}>{title}</Text>}
+          {title && (
+            <AppText weight="bold" style={modalStyles.title}>
+              {title}
+            </AppText>
+          )}
           {children}
         </ScrollView>
 

@@ -12,9 +12,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 6,
   },
-  label: {
-    fontWeight: "bold",
-  },
   value: {
     flexShrink: 1,
     textAlign: "right",

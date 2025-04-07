@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react"
 import {
   Keyboard,
   Modal,
-  Text,
   TextInput,
   TouchableWithoutFeedback,
   View,
@@ -13,6 +12,7 @@ import { FieldType } from "@/app/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
+import AppText from "./AppText"
 import CompactModalLayout from "./CompactModalLayout"
 import ModalButtonRow from "./ModalButtonRow"
 
@@ -72,7 +72,7 @@ export default function AddFieldModal({
           }
         >
           <View style={{ width: "100%", marginBottom: 12 }}>
-            <Text style={sharedStyles.label}>Field Name</Text>
+            <AppText style={sharedStyles.label}>Field Name</AppText>
             <TextInput
               ref={inputRef}
               style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
@@ -85,7 +85,7 @@ export default function AddFieldModal({
           </View>
 
           <View style={{ width: "100%", marginBottom: 24 }}>
-            <Text style={sharedStyles.label}>Field Type</Text>
+            <AppText style={sharedStyles.label}>Field Type</AppText>
             <DropDownPicker
               open={open}
               value={fieldType}

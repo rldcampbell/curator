@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react"
-import { Text, TextInput, TouchableOpacity, View } from "react-native"
+import { TextInput, TouchableOpacity, View } from "react-native"
 import DraggableFlatList from "react-native-draggable-flatlist"
 
 import { router } from "expo-router"
 
 import AddButton from "@/components/AddButton"
 import AddFieldModal from "@/components/AddFieldModal"
+import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import FullPageLayout from "@/components/FullPageLayout"
 import ModalButtonRow from "@/components/ModalButtonRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
-import { addCollectionStyles } from "@/styles/addCollectionStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import { Field, FieldId } from "../types"
@@ -65,7 +65,7 @@ export default function AddCollectionScreen() {
             style={{
               marginTop: 16,
               alignItems: "center",
-              paddingBottom: 80,
+              // paddingBottom: 80,
             }}
           >
             <AddButton onPress={() => setModalVisible(true)} />
@@ -74,7 +74,6 @@ export default function AddCollectionScreen() {
         data={fieldOrder}
         keyExtractor={item => item}
         onDragEnd={({ data }) => setFieldOrder([...data])}
-        contentContainerStyle={addCollectionStyles.listContainer}
         renderItem={({ item, drag, isActive }) => {
           const field = fields[item]
 
@@ -88,10 +87,10 @@ export default function AddCollectionScreen() {
               onLongPress={drag}
               delayLongPress={300}
             >
-              <Text style={sharedStyles.cardText}>
+              <AppText weight="medium" style={sharedStyles.cardText}>
                 {field.name} (
                 {field.type.charAt(0).toUpperCase() + field.type.slice(1)})
-              </Text>
+              </AppText>
             </TouchableOpacity>
           )
         }}

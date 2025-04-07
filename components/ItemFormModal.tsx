@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Modal, Pressable, Text, TextInput, View } from "react-native"
+import { Modal, Pressable, TextInput, View } from "react-native"
 
 import DateTimePicker from "@react-native-community/datetimepicker"
 
@@ -8,6 +8,7 @@ import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
+import AppText from "./AppText"
 import ModalButtonRow from "./ModalButtonRow"
 import ScrollableModalLayout from "./ScrollableModalLayout"
 
@@ -67,7 +68,7 @@ export default function ItemFormModal({
             case FieldType.Text:
               return (
                 <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-                  <Text style={sharedStyles.label}>{field.name}</Text>
+                  <AppText style={sharedStyles.label}>{field.name}</AppText>
                   <TextInput
                     style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
                     placeholder={field.name}
@@ -79,7 +80,7 @@ export default function ItemFormModal({
             case FieldType.Number:
               return (
                 <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-                  <Text style={sharedStyles.label}>{field.name}</Text>
+                  <AppText style={sharedStyles.label}>{field.name}</AppText>
                   <TextInput
                     style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
                     placeholder={field.name}
@@ -94,16 +95,16 @@ export default function ItemFormModal({
             case FieldType.Date:
               return (
                 <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-                  <Text style={sharedStyles.label}>{field.name}</Text>
+                  <AppText style={sharedStyles.label}>{field.name}</AppText>
                   <Pressable
                     onPress={() => setActivePickerField(fieldId)}
                     style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
                   >
-                    <Text>
+                    <AppText>
                       {Array.isArray(value)
                         ? formatDate(dateArrayToUTCDate(value))
                         : "Select date"}
-                    </Text>
+                    </AppText>
                   </Pressable>
                   {activePickerField === fieldId && (
                     <DateTimePicker
