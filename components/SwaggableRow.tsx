@@ -8,6 +8,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated"
 
+import * as Haptics from "expo-haptics"
+
 // Module-level shared ref to track open row
 // 🔐 Module-scoped row manager (private to this file)
 let closeOpenRow: (() => void) | null = null
@@ -135,7 +137,10 @@ export default function SwaggableRow<T>({
               wasOpenOnTouchStart.current = !!closeOpenRow
               if (closeOpenRow) runOnJS(closeOpenRow)()
             }}
-            onLongPress={onDrag}
+            onLongPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+              onDrag()
+            }}
             delayLongPress={200}
           >
             {renderContent(item)}
