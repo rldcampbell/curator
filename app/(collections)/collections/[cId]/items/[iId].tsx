@@ -42,7 +42,13 @@ export default function ItemDetailScreen() {
   const item = getItem(itemId)
 
   const goToItem = (newIndex: number) => {
-    router.replace(`/${collectionId}/items/${safeAccess(itemOrder, newIndex)}`)
+    router.replace({
+      pathname: "/collections/[cId]/items/[iId]",
+      params: {
+        cId: collectionId,
+        iId: safeAccess(itemOrder, newIndex),
+      },
+    })
   }
 
   useLayoutEffect(() => {

@@ -111,7 +111,13 @@ export default function CollectionDetailScreen() {
                 drag()
               }}
               onPress={() =>
-                router.push(`/(collections)/${collectionId}/items/${item}`)
+                router.push({
+                  pathname: "/collections/[cId]/items/[iId]",
+                  params: {
+                    cId: collectionId,
+                    iId: item,
+                  },
+                })
               }
               buttons={buttons}
               renderContent={() => (

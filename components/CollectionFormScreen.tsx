@@ -6,6 +6,7 @@ import { router } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
+import { CollectionId, Field, FieldId } from "@/app/types"
 import AddButton from "@/components/AddButton"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
@@ -17,21 +18,30 @@ import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import { Field, FieldId } from "../types"
+type Props = {
+  mode: "create" | "edit"
+  collectionId?: CollectionId
+}
 
-export default function AddCollectionScreen() {
-  const [collectionName, setCollectionName] = useState("")
-  const [fieldOrder, setFieldOrder] = useState<FieldId[]>([])
-  const [fields, setFields] = useState<Record<FieldId, Field>>({})
+export default function CollectionFormScreen({ mode, collectionId }: Props) {
+  const { collections, addCollection } = useCollections()
+  const existing =
+    mode === "edit" && collectionId ? collections[collectionId] : null
+
+  const [collectionName, setCollectionName] = useState(existing?.name ?? "")
+  const [fieldOrder, setFieldOrder] = useState<FieldId[]>(
+    existing?.fieldOrder ?? [],
+  )
+  const [fields, setFields] = useState<Record<FieldId, Field>>(
+    existing?.fields ?? {},
+  )
 
   const [modalVisible, setModalVisible] = useState(false)
   const [modalMode, setModalMode] = useState<"create" | "edit">("create")
   const [editingFieldId, setEditingFieldId] = useState<FieldId | null>(null)
 
   const [confirmDiscardVisible, setConfirmDiscardVisible] = useState(false)
-  const [confirmCreateVisible, setConfirmCreateVisible] = useState(false)
-
-  const { addCollection } = useCollections()
+  const [confirmSubmitVisible, setConfirmSubmitVisible] = useState(false)
 
   const inputRef = useRef<TextInput>(null)
   useEffect(() => {
@@ -55,7 +65,7 @@ export default function AddCollectionScreen() {
     setModalVisible(true)
   }
 
-  const handleSubmitField = (field: { name: string; type: string }) => {
+  const handleSubmitField = (field: Field) => {
     if (modalMode === "create") {
       const id = genFieldId()
       setFieldOrder(prev => [...prev, id])
@@ -66,6 +76,19 @@ export default function AddCollectionScreen() {
 
     setModalVisible(false)
     setEditingFieldId(null)
+  }
+
+  const handleSubmitCollection = () => {
+    if (mode === "create") {
+      addCollection({ name: collectionName, fieldOrder, fields })
+    } else if (collectionId) {
+      // updateCollection(collectionId, {
+      //   name: collectionName,
+      //   fieldOrder,
+      //   fields,
+      // })
+    }
+    router.back()
   }
 
   return (
@@ -85,8 +108,8 @@ export default function AddCollectionScreen() {
         <ModalButtonRow
           onDiscard={() => setConfirmDiscardVisible(true)}
           discardLabel="Discard"
-          onApply={() => setConfirmCreateVisible(true)}
-          applyLabel="Create"
+          onApply={() => setConfirmSubmitVisible(true)}
+          applyLabel={mode === "create" ? "Create" : "Save"}
           applyDisabled={!validCollection}
         />
       }
@@ -165,8 +188,8 @@ export default function AddCollectionScreen() {
 
       <ConfirmModal
         visible={confirmDiscardVisible}
-        title="Discard collection?"
-        message="This will clear all fields you've added."
+        title="Discard changes?"
+        message="This will clear all fields and unsaved data."
         confirmText="Discard"
         onConfirm={() => {
           setConfirmDiscardVisible(false)
@@ -176,20 +199,16 @@ export default function AddCollectionScreen() {
       />
 
       <ConfirmModal
-        visible={confirmCreateVisible}
-        title="Create collection?"
-        message="You’ll be able to edit this collection and its fields later."
-        confirmText="Create"
-        onConfirm={() => {
-          addCollection({
-            name: collectionName,
-            fieldOrder,
-            fields,
-          })
-          setConfirmCreateVisible(false)
-          router.back()
-        }}
-        onCancel={() => setConfirmCreateVisible(false)}
+        visible={confirmSubmitVisible}
+        title={mode === "create" ? "Create collection?" : "Save changes?"}
+        message={
+          mode === "create"
+            ? "You’ll be able to edit this collection and its fields later."
+            : "This will update the collection with your changes."
+        }
+        confirmText={mode === "create" ? "Create" : "Save"}
+        onConfirm={handleSubmitCollection}
+        onCancel={() => setConfirmSubmitVisible(false)}
       />
     </FullPageLayout>
   )

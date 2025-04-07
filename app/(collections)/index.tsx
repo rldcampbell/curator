@@ -36,7 +36,12 @@ export default function CollectionsScreen() {
       headerRight: () => (
         <HeaderButton
           iconName="add"
-          onPress={() => router.push("/add-collection")}
+          onPress={() =>
+            router.push({
+              pathname: "/(collections)/configure/[cId]",
+              params: { cId: "" },
+            })
+          }
         />
       ),
     })
@@ -74,7 +79,12 @@ export default function CollectionsScreen() {
             <SwaggableRow
               item={item}
               onDrag={drag}
-              onPress={() => router.push(`/(collections)/${item}`)}
+              onPress={() =>
+                router.push({
+                  pathname: "/collections/[cId]",
+                  params: { cId: item },
+                })
+              }
               buttons={buttons}
               renderContent={() => (
                 <Animated.View

@@ -4,13 +4,17 @@ export default function CollectionsLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: "Collections" }} />
-      <Stack.Screen name="[cId]" />
+      <Stack.Screen name="collections/[cId]" />
       <Stack.Screen
-        name="[cId]/items/[iId]"
+        name="collections/[cId]/items/[iId]"
         options={{ title: "Item Details" }}
       />
       <Stack.Screen
-        name="add-collection"
+        name="configure/[cId]"
+        options={{ title: "Edit Collection" }}
+      />
+      <Stack.Screen
+        name="configure/index"
         options={{ title: "Add Collection" }}
       />
     </Stack>
