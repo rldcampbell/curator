@@ -15,7 +15,6 @@ import FullPageLayout from "@/components/FullPageLayout"
 import { HeaderButton } from "@/components/HeaderButton"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
-import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionsScreen() {
   const {
@@ -49,7 +48,7 @@ export default function CollectionsScreen() {
         data={collectionOrder}
         keyExtractor={item => item}
         onDragEnd={({ data }) => updateCollectionOrder(data)}
-        contentContainerStyle={{ gap: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({
           item,
           drag,
@@ -65,7 +64,7 @@ export default function CollectionsScreen() {
               },
             },
             {
-              icon: <Feather name="trash-2" size={20} color="white" />,
+              icon: <Feather name="trash-2" size={20} color="black" />,
               onPress: () => setPendingDeleteId(item),
               backgroundColor: "#e74c3c",
             },
@@ -79,12 +78,14 @@ export default function CollectionsScreen() {
               buttons={buttons}
               renderContent={() => (
                 <Animated.View
-                  style={[
-                    sharedStyles.card,
-                    isActive ? sharedStyles.activeCard : null,
-                  ]}
+                  style={{
+                    backgroundColor: isActive ? "#f0f0f0" : "#fff",
+                    padding: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#ddd",
+                  }}
                 >
-                  <AppText weight="medium" style={sharedStyles.cardText}>
+                  <AppText weight="semiBold" style={{ fontSize: 18 }}>
                     {collection.name}
                   </AppText>
                 </Animated.View>
@@ -97,7 +98,7 @@ export default function CollectionsScreen() {
       <ConfirmModal
         visible={!!pendingDeleteId}
         title="Delete collection?"
-        message="Are you sure you want to permanently delete this collection and all its items?"
+        message={`Are you sure you want to permanently delete '${collections[pendingDeleteId!]?.name}' and all its items?`}
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={() => {
