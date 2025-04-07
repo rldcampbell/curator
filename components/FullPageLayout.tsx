@@ -52,9 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   content: {
-    flex: 1,
     paddingVertical: PAGE_PADDING,
-    width: "100%",
   },
   footer: {
     paddingVertical: PAGE_PADDING,

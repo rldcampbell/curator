@@ -47,10 +47,6 @@ export const sharedStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  scrollContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
   errorText: {
     color: "red",
     fontSize: 18,

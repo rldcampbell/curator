@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react"
-import { TouchableOpacity, View } from "react-native"
+import { TouchableOpacity } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -8,6 +8,7 @@ import { router, useNavigation } from "expo-router"
 
 import { CollectionId } from "@/app/types"
 import AppText from "@/components/AppText"
+import FullPageLayout from "@/components/FullPageLayout"
 import { HeaderButton } from "@/components/HeaderButton"
 import { useCollections } from "@/context/CollectionsContext"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -31,12 +32,12 @@ export default function CollectionsScreen() {
   }, [navigation])
 
   return (
-    <View style={sharedStyles.container}>
+    <FullPageLayout>
       <DraggableFlatList
         data={collectionOrder}
         keyExtractor={item => item}
         onDragEnd={({ data }) => updateCollectionOrder(data)}
-        contentContainerStyle={sharedStyles.scrollContainer}
+        contentContainerStyle={{ gap: 16, paddingBottom: 100 }}
         renderItem={({
           item,
           drag,
@@ -61,6 +62,6 @@ export default function CollectionsScreen() {
           )
         }}
       />
-    </View>
+    </FullPageLayout>
   )
 }

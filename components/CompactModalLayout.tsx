@@ -28,13 +28,14 @@ export default function CompactModalLayout({
             alignSelf: "center",
             flexShrink: 1,
             maxWidth: "90%",
+            paddingHorizontal: 16,
           },
           contentStyle,
         ]}
       >
         <View
           style={{
-            padding: 16,
+            paddingVertical: 16,
           }}
         >
           {title && (
@@ -48,8 +49,7 @@ export default function CompactModalLayout({
         {footer && (
           <View
             style={{
-              paddingTop: 8,
-              paddingHorizontal: 16,
+              paddingVertical: 16,
               borderTopWidth: 1,
               borderColor: "#eee",
             }}
