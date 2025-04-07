@@ -16,20 +16,24 @@ import AppText from "./AppText"
 import CompactModalLayout from "./CompactModalLayout"
 import ModalButtonRow from "./ModalButtonRow"
 
-type AddFieldModalProps = {
+type FieldFormModalProps = {
+  mode: "create" | "edit"
   visible: boolean
+  initialValues?: { name: string; type: FieldType }
   onClose: () => void
-  onSubmit: (field: { name: string; type: string }) => void
+  onSubmit: (field: { name: string; type: FieldType }) => void
 }
 
-export default function AddFieldModal({
+export default function FieldFormModal({
+  mode,
   visible,
+  initialValues,
   onClose,
   onSubmit,
-}: AddFieldModalProps) {
+}: FieldFormModalProps) {
   const [open, setOpen] = useState(false)
   const [fieldName, setFieldName] = useState("")
-  const [fieldType, setFieldType] = useState(FieldType.Text)
+  const [fieldType, setFieldType] = useState<FieldType>(FieldType.Text)
   const [items, setItems] = useState([
     { label: "Text", value: FieldType.Text },
     { label: "Number", value: FieldType.Number },
@@ -38,17 +42,25 @@ export default function AddFieldModal({
 
   const inputRef = useRef<TextInput>(null)
 
+  // Populate or reset values on modal open
   useEffect(() => {
-    if (visible && inputRef.current) {
+    if (visible) {
+      if (mode === "edit" && initialValues) {
+        setFieldName(initialValues.name)
+        setFieldType(initialValues.type)
+      } else {
+        setFieldName("")
+        setFieldType(FieldType.Text)
+      }
+
+      // Autofocus
       setTimeout(() => inputRef.current?.focus(), 100)
     }
-  }, [visible])
+  }, [visible, mode, initialValues])
 
-  const handleAdd = () => {
+  const handleSubmit = () => {
     if (!fieldName.trim()) return
     onSubmit({ name: fieldName.trim(), type: fieldType })
-    setFieldName("")
-    setFieldType(FieldType.Text)
     onClose()
   }
 
@@ -61,11 +73,11 @@ export default function AddFieldModal({
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <CompactModalLayout
-          title="Add Field"
+          title={mode === "create" ? "Add Field" : "Edit Field"}
           footer={
             <ModalButtonRow
-              onApply={handleAdd}
-              applyLabel="Add Field"
+              onApply={handleSubmit}
+              applyLabel={mode === "create" ? "Add Field" : "Update Field"}
               onDiscard={onClose}
               discardLabel="Cancel"
             />
