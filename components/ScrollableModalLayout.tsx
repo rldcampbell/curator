@@ -48,8 +48,7 @@ export default function ScrollableModalLayout({
         {footer && (
           <View
             style={{
-              paddingTop: 8,
-              paddingHorizontal: 16,
+              padding: 16,
               borderTopWidth: 1,
               borderColor: "#eee",
             }}
