@@ -20,6 +20,7 @@ type FieldFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
   initialValues?: { name: string; type: FieldType }
+  typeUpdateDisabled?: boolean
   onClose: () => void
   onSubmit: (field: { name: string; type: FieldType }) => void
 }
@@ -28,6 +29,7 @@ export default function FieldFormModal({
   mode,
   visible,
   initialValues,
+  typeUpdateDisabled,
   onClose,
   onSubmit,
 }: FieldFormModalProps) {
@@ -96,9 +98,15 @@ export default function FieldFormModal({
             />
           </View>
 
-          <View style={{ width: "100%", marginBottom: 24 }}>
+          <View
+            style={[
+              { width: "100%", marginBottom: 24 },
+              typeUpdateDisabled ? sharedStyles.disabled : null,
+            ]}
+          >
             <AppText style={sharedStyles.label}>Field Type</AppText>
             <DropDownPicker
+              disabled={typeUpdateDisabled}
               open={open}
               value={fieldType}
               items={items}

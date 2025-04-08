@@ -1,13 +1,20 @@
 import { CollectionId, Item, ItemId } from "@/app/types"
-import { useCollections } from "@/context/CollectionsContext"
+import { CollectionInput, useCollections } from "@/context/CollectionsContext"
 
 export function useCollection(collectionId: CollectionId) {
-  const { collections, addItem, deleteItem, updateItemOrder, updateItem } =
-    useCollections()
+  const {
+    collections,
+    updateCollection,
+    addItem,
+    deleteItem,
+    updateItemOrder,
+    updateItem,
+  } = useCollections()
   const collection = collections[collectionId]
 
   return {
     ...collection,
+    update: (data: CollectionInput) => updateCollection(collectionId, data),
     addItem: (item: Item) => addItem(collectionId, item),
     deleteItem: (itemId: ItemId) => deleteItem(collectionId, itemId),
     updateItem: (itemId: ItemId, item: Item) =>

@@ -65,7 +65,10 @@ export default function CollectionsScreen() {
             {
               icon: <Feather name="edit-3" size={20} color="black" />,
               onPress: () => {
-                // Edit action (not implemented yet)
+                router.push({
+                  pathname: "/(collections)/configure/[cId]",
+                  params: { cId: item },
+                })
               },
             },
             {

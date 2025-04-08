@@ -16,6 +16,7 @@ import ModalButtonRow from "@/components/ModalButtonRow"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
+import { changeSummary } from "@/helpers/collection"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 type Props = {
@@ -24,7 +25,7 @@ type Props = {
 }
 
 export default function CollectionFormScreen({ mode, collectionId }: Props) {
-  const { collections, addCollection } = useCollections()
+  const { collections, addCollection, updateCollection } = useCollections()
   const existing =
     mode === "edit" && collectionId ? collections[collectionId] : null
 
@@ -82,14 +83,30 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
     if (mode === "create") {
       addCollection({ name: collectionName, fieldOrder, fields })
     } else if (collectionId) {
-      // updateCollection(collectionId, {
-      //   name: collectionName,
-      //   fieldOrder,
-      //   fields,
-      // })
+      updateCollection(collectionId, {
+        name: collectionName,
+        fieldOrder,
+        fields,
+      })
     }
     router.back()
   }
+
+  const handleDiscard = () => {
+    setConfirmDiscardVisible(false)
+    router.back()
+  }
+
+  const original =
+    mode === "edit" && collectionId ? collections[collectionId] : null
+  const isDirty =
+    mode === "create" ||
+    (original &&
+      changeSummary(original, {
+        name: collectionName,
+        fields,
+        fieldOrder,
+      }).any)
 
   return (
     <FullPageLayout
@@ -106,11 +123,18 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
       }
       footer={
         <ModalButtonRow
-          onDiscard={() => setConfirmDiscardVisible(true)}
-          discardLabel="Discard"
+          onDiscard={() => {
+            if (isDirty) {
+              setConfirmDiscardVisible(true)
+            } else {
+              // no need to ask for confirmation - no changes
+              handleDiscard()
+            }
+          }}
+          discardLabel={isDirty ? "Discard" : "Cancel"}
           onApply={() => setConfirmSubmitVisible(true)}
           applyLabel={mode === "create" ? "Create" : "Save"}
-          applyDisabled={!validCollection}
+          applyDisabled={!validCollection || !isDirty}
         />
       }
     >
@@ -175,6 +199,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
       {modalVisible && (
         <FieldFormModal
           mode={modalMode}
+          typeUpdateDisabled={modalMode === "edit" && mode === "edit"}
           visible
           onClose={() => setModalVisible(false)}
           initialValues={
@@ -191,10 +216,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         title="Discard changes?"
         message="This will clear all fields and unsaved data."
         confirmText="Discard"
-        onConfirm={() => {
-          setConfirmDiscardVisible(false)
-          router.back()
-        }}
+        onConfirm={handleDiscard}
         onCancel={() => setConfirmDiscardVisible(false)}
       />
 
