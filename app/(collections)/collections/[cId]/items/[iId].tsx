@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react"
-import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, View } from "react-native"
 import {
   GestureEvent,
   GestureHandlerRootView,
@@ -10,6 +10,7 @@ import {
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 
 import { CollectionId, FieldAndValue, ItemId } from "@/app/types"
+import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
 import { safeAccess } from "@/helpers"
@@ -41,7 +42,13 @@ export default function ItemDetailScreen() {
   const item = getItem(itemId)
 
   const goToItem = (newIndex: number) => {
-    router.replace(`/${collectionId}/items/${safeAccess(itemOrder, newIndex)}`)
+    router.replace({
+      pathname: "/collections/[cId]/items/[iId]",
+      params: {
+        cId: collectionId,
+        iId: safeAccess(itemOrder, newIndex),
+      },
+    })
   }
 
   useLayoutEffect(() => {
@@ -82,9 +89,11 @@ export default function ItemDetailScreen() {
 
             return (
               <View key={fieldId} style={styles.fieldRow}>
-                <Text style={styles.label}>{label}</Text>
+                <AppText weight="bold" style={styles.label}>
+                  {label}
+                </AppText>
                 <View style={styles.valueContainer}>
-                  <Text style={styles.value}>{displayValue}</Text>
+                  <AppText style={styles.value}>{displayValue}</AppText>
                 </View>
               </View>
             )
@@ -121,7 +130,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    fontWeight: "bold",
     fontSize: 16,
     color: "#333",
     maxWidth: "40%",

@@ -37,25 +37,25 @@ export default function FullPageLayout({
   )
 }
 
+const PAGE_PADDING = 16
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#fff",
+    paddingHorizontal: PAGE_PADDING,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingVertical: PAGE_PADDING,
     borderBottomWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",
   },
   content: {
-    flex: 1,
-    width: "100%",
+    paddingVertical: PAGE_PADDING,
   },
   footer: {
-    padding: 16,
+    paddingVertical: PAGE_PADDING,
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",

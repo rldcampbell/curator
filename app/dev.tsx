@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { DevSettings, Text, View } from "react-native"
+import { DevSettings, View } from "react-native"
 
 import AddButton from "@/components/AddButton"
+import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { resetDatabase } from "@/services/database"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -11,7 +12,9 @@ export default function DevScreen() {
 
   return (
     <View style={sharedStyles.container}>
-      <Text style={sharedStyles.title}>Developer Tools</Text>
+      <AppText weight="bold" style={sharedStyles.title}>
+        Developer Tools
+      </AppText>
 
       <AddButton onPress={() => setModalVisible(true)} label="Reset Database" />
 

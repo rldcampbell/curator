@@ -1,19 +1,32 @@
-import { useLayoutEffect } from "react"
-import { Text, TouchableOpacity, View } from "react-native"
+import { useLayoutEffect, useState } from "react"
+import { Animated } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
 
 import { router, useNavigation } from "expo-router"
 
+import { Feather } from "@expo/vector-icons"
+
 import { CollectionId } from "@/app/types"
+import AppText from "@/components/AppText"
+import ConfirmModal from "@/components/ConfirmModal"
+import FullPageLayout from "@/components/FullPageLayout"
 import { HeaderButton } from "@/components/HeaderButton"
+import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
-import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionsScreen() {
-  const { collections, collectionOrder, updateCollectionOrder } =
-    useCollections()
+  const {
+    collections,
+    collectionOrder,
+    updateCollectionOrder,
+    deleteCollection,
+  } = useCollections()
+
+  const [pendingDeleteId, setPendingDeleteId] = useState<CollectionId | null>(
+    null,
+  )
 
   const navigation = useNavigation()
 
@@ -23,41 +36,92 @@ export default function CollectionsScreen() {
       headerRight: () => (
         <HeaderButton
           iconName="add"
-          onPress={() => router.push("/add-collection")}
+          onPress={() =>
+            router.push({
+              pathname: "/(collections)/configure/[cId]",
+              params: { cId: "" },
+            })
+          }
         />
       ),
     })
   }, [navigation])
 
   return (
-    <View style={sharedStyles.container}>
+    <FullPageLayout>
       <DraggableFlatList
         data={collectionOrder}
         keyExtractor={item => item}
         onDragEnd={({ data }) => updateCollectionOrder(data)}
-        contentContainerStyle={sharedStyles.scrollContainer}
+        contentContainerStyle={{ paddingBottom: 100 }}
         renderItem={({
           item,
           drag,
           isActive,
         }: RenderItemParams<CollectionId>) => {
           const collection = collections[item]
+
+          const buttons = [
+            {
+              icon: <Feather name="edit-3" size={20} color="black" />,
+              onPress: () => {
+                router.push({
+                  pathname: "/(collections)/configure/[cId]",
+                  params: { cId: item },
+                })
+              },
+            },
+            {
+              icon: <Feather name="trash-2" size={20} color="black" />,
+              onPress: () => setPendingDeleteId(item),
+              backgroundColor: "#e74c3c",
+            },
+          ]
+
           return (
-            <TouchableOpacity
-              key={item}
-              style={[
-                sharedStyles.card,
-                isActive ? sharedStyles.activeCard : null,
-              ]}
-              onLongPress={drag}
-              delayLongPress={300}
-              onPress={() => router.push(`/(collections)/${item}`)}
-            >
-              <Text style={sharedStyles.cardText}>{collection.name}</Text>
-            </TouchableOpacity>
+            <SwaggableRow
+              item={item}
+              onDrag={drag}
+              onPress={() =>
+                router.push({
+                  pathname: "/collections/[cId]",
+                  params: { cId: item },
+                })
+              }
+              buttons={buttons}
+              renderContent={() => (
+                <Animated.View
+                  style={{
+                    backgroundColor: isActive ? "#f0f0f0" : "#fff",
+                    padding: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#ddd",
+                  }}
+                >
+                  <AppText weight="semiBold" style={{ fontSize: 18 }}>
+                    {collection.name}
+                  </AppText>
+                </Animated.View>
+              )}
+            />
           )
         }}
       />
-    </View>
+
+      <ConfirmModal
+        visible={!!pendingDeleteId}
+        title="Delete collection?"
+        message={`Are you sure you want to permanently delete '${collections[pendingDeleteId!]?.name}' and all its items?`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => {
+          if (pendingDeleteId) {
+            deleteCollection(pendingDeleteId)
+            setPendingDeleteId(null)
+          }
+        }}
+        onCancel={() => setPendingDeleteId(null)}
+      />
+    </FullPageLayout>
   )
 }

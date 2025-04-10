@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react"
-import { Animated, Text, View } from "react-native"
+import { Animated, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -11,6 +11,7 @@ import { useLocalSearchParams } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 
 import { CollectionId, Item, ItemId } from "@/app/types"
+import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
@@ -54,7 +55,7 @@ export default function CollectionDetailScreen() {
   if (!name) {
     return (
       <View style={collectionDetailStyles.container}>
-        <Text style={sharedStyles.errorText}>Collection not found</Text>
+        <AppText style={sharedStyles.errorText}>Collection not found</AppText>
       </View>
     )
   }
@@ -110,7 +111,13 @@ export default function CollectionDetailScreen() {
                 drag()
               }}
               onPress={() =>
-                router.push(`/(collections)/${collectionId}/items/${item}`)
+                router.push({
+                  pathname: "/collections/[cId]/items/[iId]",
+                  params: {
+                    cId: collectionId,
+                    iId: item,
+                  },
+                })
               }
               buttons={buttons}
               renderContent={() => (
@@ -120,7 +127,9 @@ export default function CollectionDetailScreen() {
                     padding: 16,
                   }}
                 >
-                  <Text style={collectionDetailStyles.itemText}>{value}</Text>
+                  <AppText style={collectionDetailStyles.itemText}>
+                    {value}
+                  </AppText>
                 </Animated.View>
               )}
             />

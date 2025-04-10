@@ -1,4 +1,4 @@
-import { Text, View } from "react-native"
+import { View } from "react-native"
 
 import {
   Collection,
@@ -9,6 +9,7 @@ import {
   ItemId,
 } from "../app/types"
 import styles from "../styles/FieldDisplayStyles"
+import AppText from "./AppText"
 
 // Import the styles
 
@@ -32,8 +33,8 @@ export default function FieldDisplay({
     <View style={styles.container}>
       {fieldEntries.map(({ name, value }) => (
         <View key={name} style={styles.fieldRow}>
-          <Text style={styles.label}>{name}:</Text>
-          <Text style={styles.value}>{String(value)}</Text>
+          <AppText weight="bold">{name}:</AppText>
+          <AppText style={styles.value}>{String(value)}</AppText>
         </View>
       ))}
     </View>

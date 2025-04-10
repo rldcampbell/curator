@@ -5,8 +5,4 @@ export const addCollectionStyles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#f2f2f2",
   },
-  listContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
 })

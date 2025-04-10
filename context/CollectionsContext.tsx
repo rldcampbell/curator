@@ -4,23 +4,21 @@ import {
   Collection,
   CollectionId,
   CollectionsData,
+  FieldId,
   Item,
   ItemId,
 } from "@/app/types"
 import { genCollectionId, genItemId } from "@/helpers"
-import {
-  initDatabase,
-  loadCollections,
-  saveCollection,
-  saveCollectionOrder,
-} from "@/services/database"
+import * as db from "@/services/database"
 
-type NewCollectionInput = Omit<Collection, "itemOrder" | "items">
+export type CollectionInput = Pick<Collection, "name" | "fields" | "fieldOrder">
 
 type CollectionsContextValue = {
   collections: CollectionsData["collections"]
   collectionOrder: CollectionId[]
-  addCollection: (data: NewCollectionInput) => void
+  addCollection: (data: CollectionInput) => CollectionId
+  deleteCollection: (collectionId: CollectionId) => void
+  updateCollection: (collectionId: CollectionId, data: CollectionInput) => void
   updateCollectionOrder: (order: CollectionId[]) => void
   deleteItem: (collectionId: CollectionId, itemId: ItemId) => void
   addItem: (collectionId: CollectionId, item: Item) => ItemId
@@ -53,8 +51,8 @@ export const CollectionsProvider = ({
   useEffect(() => {
     const initializeData = async () => {
       try {
-        await initDatabase()
-        const data = await loadCollections()
+        await db.initDatabase()
+        const data = await db.loadCollections()
         setCollections(data.collections)
         setCollectionOrder(data.collectionOrder)
       } catch (err) {
@@ -69,8 +67,8 @@ export const CollectionsProvider = ({
     initializeData()
   }, [])
 
-  const addCollection = ({ name, fieldOrder, fields }: NewCollectionInput) => {
-    const id = genCollectionId()
+  const addCollection = ({ name, fieldOrder, fields }: CollectionInput) => {
+    const collectionId = genCollectionId()
     const newCollection: Collection = {
       name,
       fieldOrder,
@@ -80,9 +78,9 @@ export const CollectionsProvider = ({
     }
 
     setCollections(prev => {
-      const updated = { ...prev, [id]: newCollection }
+      const updated = { ...prev, [collectionId]: newCollection }
 
-      saveCollection(id, newCollection, true).catch(err => {
+      db.saveCollection(collectionId, newCollection, true).catch(err => {
         setError(
           err instanceof Error
             ? err
@@ -93,7 +91,87 @@ export const CollectionsProvider = ({
       return updated
     })
 
-    setCollectionOrder(prev => [...prev, id])
+    setCollectionOrder(prev => [...prev, collectionId])
+
+    return collectionId
+  }
+
+  const deleteCollection = (collectionId: CollectionId): void => {
+    // Optimistically update state
+    setCollections(prev => {
+      const updated = { ...prev }
+      delete updated[collectionId]
+      return updated
+    })
+
+    setCollectionOrder(prev => prev.filter(id => id !== collectionId))
+
+    // Persist deletion in background
+    db.deleteCollection(collectionId).catch(err => {
+      setError(
+        err instanceof Error
+          ? err
+          : new Error("Failed to delete collection from database"),
+      )
+      // Optional: re-sync state or notify user
+    })
+  }
+
+  const updateCollection = (
+    collectionId: CollectionId,
+    updated: CollectionInput,
+  ) => {
+    setCollections(prev => {
+      const current = prev[collectionId]
+      if (!current) return prev
+
+      // Disallow type changes for existing fields
+      for (const fieldId of Object.keys(current.fields)) {
+        const original = current.fields[fieldId as FieldId]
+        const replacement = updated.fields[fieldId as FieldId]
+        if (replacement && replacement.type !== original.type) {
+          console.warn(
+            `Field type change not allowed: ${fieldId} (${original.type} → ${replacement.type})`,
+          )
+          return prev
+        }
+      }
+
+      // Remove deleted field values from items
+      const removedFieldIds = Object.keys(current.fields).filter(
+        id => !(id in updated.fields),
+      ) as FieldId[]
+
+      const cleanedItems: Record<ItemId, Item> = {}
+      for (const [itemId, item] of Object.entries(current.items)) {
+        const cleanedItem = { ...item }
+        for (const removedId of removedFieldIds) {
+          delete cleanedItem[removedId]
+        }
+        cleanedItems[itemId as ItemId] = cleanedItem
+      }
+
+      const updatedCollection: Collection = {
+        name: updated.name,
+        fieldOrder: updated.fieldOrder,
+        fields: updated.fields,
+        itemOrder: current.itemOrder,
+        items: cleanedItems,
+      }
+
+      db.saveCollection(collectionId, updatedCollection).catch(err => {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to persist updated collection"),
+        )
+      })
+
+      return {
+        ...prev,
+        [collectionId]: updatedCollection,
+      }
+    })
   }
 
   const addItem = (collectionId: CollectionId, item: Item) => {
@@ -113,7 +191,7 @@ export const CollectionsProvider = ({
         },
       }
 
-      saveCollection(collectionId, updated[collectionId]).catch(err => {
+      db.saveCollection(collectionId, updated[collectionId]).catch(err => {
         setError(
           err instanceof Error
             ? err
@@ -145,7 +223,7 @@ export const CollectionsProvider = ({
         },
       }
 
-      saveCollection(collectionId, updated[collectionId]).catch(err => {
+      db.saveCollection(collectionId, updated[collectionId]).catch(err => {
         setError(
           err instanceof Error
             ? err
@@ -160,7 +238,7 @@ export const CollectionsProvider = ({
   const updateCollectionOrder = (newOrder: CollectionId[]) => {
     setCollectionOrder(newOrder)
 
-    saveCollectionOrder(newOrder).catch(err => {
+    db.saveCollectionOrder(newOrder).catch(err => {
       setError(
         err instanceof Error
           ? err
@@ -179,7 +257,7 @@ export const CollectionsProvider = ({
         },
       }
 
-      saveCollection(collectionId, updated[collectionId]).catch(err => {
+      db.saveCollection(collectionId, updated[collectionId]).catch(err => {
         setError(
           err instanceof Error ? err : new Error("Failed to update item order"),
         )
@@ -211,7 +289,7 @@ export const CollectionsProvider = ({
         [collectionId]: updatedCollection,
       }
 
-      saveCollection(collectionId, updatedCollection).catch(err => {
+      db.saveCollection(collectionId, updatedCollection).catch(err => {
         setError(
           err instanceof Error
             ? err
@@ -229,6 +307,8 @@ export const CollectionsProvider = ({
         collections,
         collectionOrder,
         addCollection,
+        deleteCollection,
+        updateCollection,
         addItem,
         deleteItem,
         updateItem,

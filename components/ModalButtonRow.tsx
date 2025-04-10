@@ -1,7 +1,9 @@
-import { Pressable, Text, View } from "react-native"
+import { Pressable, View } from "react-native"
 
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
+
+import AppText from "./AppText"
 
 type ModalButtonRowProps = {
   onApply: () => void
@@ -32,7 +34,7 @@ export default function ModalButtonRow({
           !applyDisabled && onApply()
         }}
       >
-        <Text>{applyLabel}</Text>
+        <AppText>{applyLabel}</AppText>
       </Pressable>
 
       <Pressable
@@ -44,7 +46,7 @@ export default function ModalButtonRow({
         ]}
         onPress={onDiscard}
       >
-        <Text>{discardLabel}</Text>
+        <AppText>{discardLabel}</AppText>
       </Pressable>
     </View>
   )

@@ -1,7 +1,9 @@
 import React from "react"
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { StyleSheet, TouchableOpacity, View } from "react-native"
 
 import { Ionicons } from "@expo/vector-icons"
+
+import AppText from "./AppText"
 
 type HeaderButtonProps = {
   iconName?: keyof typeof Ionicons.glyphMap
@@ -20,7 +22,9 @@ export const HeaderButton: React.FC<HeaderButtonProps> = ({
     <TouchableOpacity onPress={onPress} style={styles.container} hitSlop={8}>
       <View style={styles.inner}>
         {iconName && <Ionicons name={iconName} size={26} color="#007AFF" />}
-        {resolvedLabel && <Text style={styles.text}>{resolvedLabel}</Text>}
+        {resolvedLabel && (
+          <AppText style={styles.text}>{resolvedLabel}</AppText>
+        )}
       </View>
     </TouchableOpacity>
   )

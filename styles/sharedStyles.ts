@@ -1,27 +1,22 @@
 // styles/shared.ts
-import { Dimensions, StyleSheet } from "react-native"
-
-const screenWidth = Dimensions.get("window").width
+import { StyleSheet } from "react-native"
 
 export const sharedStyles = StyleSheet.create({
   title: {
     fontSize: 24,
-    fontWeight: "bold",
   },
   addCard: {
     backgroundColor: "#e0f7fa",
   },
   addText: {
     fontSize: 32,
-    fontWeight: "bold",
     color: "#007aff",
   },
   card: {
-    width: screenWidth * 0.9,
-    padding: 20,
+    width: "100%",
+    padding: 16,
     backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 15,
+    borderRadius: 16,
     elevation: 3, // Android shadow
     shadowColor: "#000", // iOS shadow
     shadowOffset: { width: 1, height: 1 },
@@ -32,7 +27,6 @@ export const sharedStyles = StyleSheet.create({
   },
   cardText: {
     fontSize: 18,
-    fontWeight: "500",
   },
   activeCard: {
     backgroundColor: "#d0f0ff",
@@ -43,11 +37,9 @@ export const sharedStyles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
   },
   inputCard: {
-    width: screenWidth * 0.9,
-    padding: 20,
+    padding: 16,
     backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 20,
+    borderRadius: 16,
     fontSize: 18,
     elevation: 3,
     shadowColor: "#000",
@@ -55,20 +47,14 @@ export const sharedStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  scrollContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
   errorText: {
     color: "red",
     fontSize: 18,
-    fontWeight: "500",
     textAlign: "center",
     padding: 20,
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
     marginBottom: 4,
     color: "#333",
   },

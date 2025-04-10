@@ -1,8 +1,9 @@
 import { ReactNode } from "react"
-import { Text, View, ViewStyle } from "react-native"
+import { View, ViewStyle } from "react-native"
 
 import { modalStyles } from "@/styles/modalStyles"
 
+import AppText from "./AppText"
 import ModalOverlay from "./ModalOverlay"
 
 type Props = {
@@ -27,24 +28,28 @@ export default function CompactModalLayout({
             alignSelf: "center",
             flexShrink: 1,
             maxWidth: "90%",
+            paddingHorizontal: 16,
           },
           contentStyle,
         ]}
       >
         <View
           style={{
-            padding: 16,
+            paddingVertical: 16,
           }}
         >
-          {title && <Text style={modalStyles.title}>{title}</Text>}
+          {title && (
+            <AppText weight="bold" style={modalStyles.title}>
+              {title}
+            </AppText>
+          )}
           {children}
         </View>
 
         {footer && (
           <View
             style={{
-              paddingTop: 8,
-              paddingHorizontal: 16,
+              paddingVertical: 16,
               borderTopWidth: 1,
               borderColor: "#eee",
             }}

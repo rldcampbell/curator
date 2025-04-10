@@ -1,11 +1,12 @@
 import React, { useState } from "react"
-import { Animated, SafeAreaView, StyleSheet, Text } from "react-native"
+import { Animated, SafeAreaView, StyleSheet } from "react-native"
 import DraggableFlatList, { RenderItem } from "react-native-draggable-flatlist"
 
 import * as Haptics from "expo-haptics"
 
 import { Feather } from "@expo/vector-icons"
 
+import AppText from "@/components/AppText"
 import SwaggableRow from "@/components/SwaggableRow"
 
 export default function TestScreen() {
@@ -40,7 +41,7 @@ export default function TestScreen() {
             padding: 16,
           }}
         >
-          <Text>{item}</Text>
+          <AppText>{item}</AppText>
         </Animated.View>
       )}
     />
@@ -48,7 +49,9 @@ export default function TestScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>🧪 Swipe to Reveal Actions</Text>
+      <AppText weight="semiBold" style={styles.title}>
+        🧪 Swipe to Reveal Actions
+      </AppText>
       <DraggableFlatList
         data={items}
         onDragEnd={({ data }) => setItems(data)}
@@ -66,7 +69,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "600",
     padding: 16,
   },
 })

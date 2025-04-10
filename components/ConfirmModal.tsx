@@ -1,6 +1,7 @@
 import React from "react"
-import { Modal, Text } from "react-native"
+import { Modal } from "react-native"
 
+import AppText from "./AppText"
 import CompactModalLayout from "./CompactModalLayout"
 import ModalButtonRow from "./ModalButtonRow"
 
@@ -41,7 +42,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           />
         }
       >
-        {message && <Text style={{ fontSize: 16 }}>{message}</Text>}
+        {message && <AppText style={{ fontSize: 16 }}>{message}</AppText>}
       </CompactModalLayout>
     </Modal>
   )
