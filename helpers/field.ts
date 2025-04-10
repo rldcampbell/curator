@@ -1,6 +1,6 @@
-import { FieldAndValue, FieldType } from "@/app/types"
+import { FieldType, RawFieldAndValue } from "@/app/types"
 
-export function formatFieldValue(field: FieldAndValue): string {
+export function formatFieldValue(field: RawFieldAndValue): string {
   switch (field.type) {
     case FieldType.Text:
       return field.value // string

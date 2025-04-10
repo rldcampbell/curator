@@ -3,7 +3,7 @@ import { Modal, Pressable, TextInput, View } from "react-native"
 
 import DateTimePicker from "@react-native-community/datetimepicker"
 
-import { Field, FieldId, FieldType, FieldValue, Item } from "@/app/types"
+import { FieldId, FieldType, FieldValue, RawField, RawItem } from "@/app/types"
 import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -15,10 +15,10 @@ import ScrollableModalLayout from "./ScrollableModalLayout"
 type ItemFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
-  initialValues?: Item
+  initialValues?: RawItem
   fieldOrder: FieldId[]
-  fields: Record<FieldId, Field>
-  onSubmit: (item: Item) => void
+  fields: Record<FieldId, RawField>
+  onSubmit: (item: RawItem) => void
   onDiscard: () => void
 }
 
@@ -31,7 +31,7 @@ export default function ItemFormModal({
   onSubmit,
   onDiscard,
 }: ItemFormModalProps) {
-  const [inputValues, setInputValues] = useState<Item>({})
+  const [inputValues, setInputValues] = useState<RawItem>({})
   const [activePickerField, setActivePickerField] = useState<FieldId | null>(
     null,
   )

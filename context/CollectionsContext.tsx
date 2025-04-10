@@ -5,8 +5,8 @@ import {
   CollectionId,
   CollectionsData,
   FieldId,
-  Item,
   ItemId,
+  RawItem,
 } from "@/app/types"
 import { genCollectionId, genItemId } from "@/helpers"
 import * as db from "@/services/database"
@@ -21,11 +21,11 @@ type CollectionsContextValue = {
   updateCollection: (collectionId: CollectionId, data: CollectionInput) => void
   updateCollectionOrder: (order: CollectionId[]) => void
   deleteItem: (collectionId: CollectionId, itemId: ItemId) => void
-  addItem: (collectionId: CollectionId, item: Item) => ItemId
+  addItem: (collectionId: CollectionId, item: RawItem) => ItemId
   updateItem: (
     collectionId: CollectionId,
     itemId: ItemId,
-    updatedItem: Item,
+    updatedItem: RawItem,
   ) => void
   updateItemOrder: (collectionId: CollectionId, itemOrder: ItemId[]) => void
   isLoading: boolean
@@ -142,7 +142,7 @@ export const CollectionsProvider = ({
         id => !(id in updated.fields),
       ) as FieldId[]
 
-      const cleanedItems: Record<ItemId, Item> = {}
+      const cleanedItems: Record<ItemId, RawItem> = {}
       for (const [itemId, item] of Object.entries(current.items)) {
         const cleanedItem = { ...item }
         for (const removedId of removedFieldIds) {
@@ -174,7 +174,7 @@ export const CollectionsProvider = ({
     })
   }
 
-  const addItem = (collectionId: CollectionId, item: Item) => {
+  const addItem = (collectionId: CollectionId, item: RawItem) => {
     const itemId = genItemId()
 
     setCollections(prev => {
@@ -208,7 +208,7 @@ export const CollectionsProvider = ({
   const updateItem = (
     collectionId: CollectionId,
     itemId: ItemId,
-    updatedItem: Item,
+    updatedItem: RawItem,
   ) => {
     setCollections(prev => {
       const collection = prev[collectionId]

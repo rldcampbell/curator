@@ -10,7 +10,7 @@ import { useLocalSearchParams } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId, Item, ItemId } from "@/app/types"
+import { CollectionId, ItemId, RawItem } from "@/app/types"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { HeaderButton } from "@/components/HeaderButton"
@@ -60,7 +60,7 @@ export default function CollectionDetailScreen() {
     )
   }
 
-  const handleItemSubmit = (item: Item) => {
+  const handleItemSubmit = (item: RawItem) => {
     if (editingItemId) {
       updateItem(editingItemId, item)
     } else {

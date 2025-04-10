@@ -3,6 +3,9 @@ import * as SQLite from "expo-sqlite"
 
 import data from "@/app/data.json"
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
+import { timestampNow } from "@/helpers/date"
+
+import { migrateDatabase } from "./migrations/runMigrations"
 
 const isDev = __DEV__
 const log = (...args: any[]) => {
@@ -17,25 +20,14 @@ let db: SQLite.SQLiteDatabase | null = null
 export const initDatabase = async (): Promise<void> => {
   db = await SQLite.openDatabaseAsync("curator.db")
 
-  await db.execAsync(`
-    PRAGMA journal_mode = WAL;
-    CREATE TABLE IF NOT EXISTS collections (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      field_order TEXT NOT NULL,
-      fields TEXT NOT NULL,
-      item_order TEXT NOT NULL,
-      items TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS images (
-      id TEXT PRIMARY KEY,
-      item_id TEXT NOT NULL,
-      field_id TEXT NOT NULL,
-      data BLOB NOT NULL,
-      created_at INTEGER NOT NULL,
-      FOREIGN KEY (item_id) REFERENCES collections (id)
-    );
-  `)
+  await db.execAsync(`PRAGMA journal_mode = WAL;`)
+
+  await migrateDatabase(db)
+
+  const versionRow = await db.getFirstAsync<{ value: string }>(
+    "SELECT value FROM meta WHERE key = 'db_version'",
+  )
+  log("DB schema version:", versionRow?.value)
 
   const existingOrder = await db.getFirstAsync(
     `SELECT id FROM collections WHERE id = ?`,
@@ -67,17 +59,28 @@ const upsertCollection = async (
   collection: Collection,
 ): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
-  const { name, fieldOrder, fields, itemOrder, items } = collection
+
+  const {
+    name,
+    fieldOrder,
+    fields,
+    itemOrder,
+    items,
+    _meta: { createdAt, updatedAt },
+  } = collection
 
   await db.runAsync(
-    `INSERT OR REPLACE INTO collections (id, name, field_order, fields, item_order, items)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO collections (
+      id, name, field_order, fields, item_order, items, createdAt, updatedAt
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     name,
     stringify(fieldOrder),
     stringify(fields),
     stringify(itemOrder),
     stringify(items),
+    createdAt,
+    updatedAt ?? null,
   )
 }
 
@@ -93,6 +96,8 @@ export const loadCollections = async (): Promise<CollectionsData> => {
     fields: string
     item_order: string
     items: string
+    createdAt: number
+    updatedAt: number
   }
 
   const collections: Record<CollectionId, Collection> = {}
@@ -108,6 +113,10 @@ export const loadCollections = async (): Promise<CollectionsData> => {
         fields: parse(row.fields),
         itemOrder: parse(row.item_order),
         items: parse(row.items),
+        _meta: {
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+        },
       }
     }
   }
@@ -178,9 +187,45 @@ const seedDatabaseFromJSON = async (): Promise<void> => {
   const { collectionOrder, collections } = data as unknown as CollectionsData
   log("Seeding collections from data.json:", collectionOrder.length)
 
+  const now = timestampNow()
+
   for (const id of collectionOrder) {
     const collection = collections[id]
-    await upsertCollection(id, collection)
+
+    // Patch missing createdAt/updatedAt
+    const withMeta: Collection = {
+      ...collection,
+      _meta: {
+        createdAt: collection._meta.createdAt ?? now,
+        updatedAt: collection._meta.updatedAt ?? now,
+      },
+      fields: Object.fromEntries(
+        Object.entries(collection.fields).map(([fid, field]) => [
+          fid,
+          {
+            ...field,
+            _meta: {
+              createdAt: field._meta.createdAt ?? now,
+              updatedAt: field._meta.updatedAt ?? now,
+            },
+          },
+        ]),
+      ),
+      items: Object.fromEntries(
+        Object.entries(collection.items).map(([iid, item]) => [
+          iid,
+          {
+            ...item,
+            _meta: {
+              createdAt: item._meta.createdAt ?? now,
+              updatedAt: item._meta.updatedAt ?? now,
+            },
+          },
+        ]),
+      ),
+    }
+
+    await upsertCollection(id, withMeta)
   }
 
   await saveCollectionOrder(collectionOrder)

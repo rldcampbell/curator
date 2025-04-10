@@ -6,6 +6,9 @@ export type ItemId = `i-${RawId}`
 
 export type DateArray = [y: number, m: number, d: number]
 
+/** Epoch ms */
+export type Timestamp = number
+
 export const FieldType = {
   Text: "text",
   Number: "number",
@@ -22,17 +25,24 @@ export type FieldValueMap = {
 
 export type FieldValue = FieldValueMap[FieldType]
 
-type BaseField = {
+export type Meta = {
+  createdAt: Timestamp
+  updatedAt: Timestamp
+}
+
+export type WithMeta<T, MetaType = Meta> = T & { _meta: MetaType }
+
+type RawBaseField = {
   name: string
 }
 
-type TextFieldAndValue = BaseField & {
+type RawTextFieldAndValue = RawBaseField & {
   type: typeof FieldType.Text
   value: FieldValueMap[typeof FieldType.Text]
   charLim?: number
 }
 
-type NumberFieldAndValue = BaseField & {
+type RawNumberFieldAndValue = RawBaseField & {
   type: typeof FieldType.Number
   value: FieldValueMap[typeof FieldType.Number]
   min?: number
@@ -40,30 +50,45 @@ type NumberFieldAndValue = BaseField & {
   // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
 }
 
-type DateFieldAndValue = BaseField & {
+type RawDateFieldAndValue = RawBaseField & {
   type: typeof FieldType.Date
   value: FieldValueMap[typeof FieldType.Date]
   min?: DateArray
   max?: DateArray
 }
 
-export type FieldAndValue =
-  | TextFieldAndValue
-  | NumberFieldAndValue
-  | DateFieldAndValue
+export type RawFieldAndValue =
+  | RawTextFieldAndValue
+  | RawNumberFieldAndValue
+  | RawDateFieldAndValue
 
 type OmitFromUnion<T, K extends keyof any> = T extends any ? Omit<T, K> : never
 
-export type Field = OmitFromUnion<FieldAndValue, "value">
+export type RawField = OmitFromUnion<RawFieldAndValue, "value">
+export type Field = WithMeta<RawField>
 
-export type Item = Record<FieldId, FieldValue>
+export type RawItem = Record<FieldId, FieldValue>
+export type Item = WithMeta<RawItem>
 
-export type Collection = {
+export type RawCollection = {
+  name: string
+  fieldOrder: FieldId[]
+  fields: Record<FieldId, RawField>
+  itemOrder: ItemId[]
+  items: Record<ItemId, RawItem>
+}
+
+export type Collection = WithMeta<{
   name: string
   fieldOrder: FieldId[]
   fields: Record<FieldId, Field>
   itemOrder: ItemId[]
   items: Record<ItemId, Item>
+}>
+
+export type RawCollectionsData = {
+  collectionOrder: CollectionId[]
+  collections: Record<CollectionId, RawCollection>
 }
 
 export type CollectionsData = {
