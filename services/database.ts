@@ -1,9 +1,7 @@
 import { deleteAsync, documentDirectory } from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 
-import data from "@/app/data.json"
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
-import { timestampNow } from "@/helpers/date"
 
 import { migrateDatabase } from "./migrations/runMigrations"
 
@@ -21,7 +19,6 @@ export const initDatabase = async (): Promise<void> => {
   db = await SQLite.openDatabaseAsync("curator.db")
 
   await db.execAsync(`PRAGMA journal_mode = WAL;`)
-
   await migrateDatabase(db)
 
   const versionRow = await db.getFirstAsync<{ value: string }>(
@@ -35,7 +32,7 @@ export const initDatabase = async (): Promise<void> => {
   )
 
   if (!existingOrder) {
-    log("Fresh DB detected — running seedDatabaseFromJSON")
+    log("Fresh DB detected — inserting __order__ row")
     await db.runAsync(
       `INSERT INTO collections (id, name, field_order, fields, item_order, items)
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -46,9 +43,8 @@ export const initDatabase = async (): Promise<void> => {
       "[]",
       "[]",
     )
-    await seedDatabaseFromJSON()
   } else {
-    log("DB already initialized — skipping seed")
+    log("DB already initialized — skipping __order__ insert")
   }
 
   log("Database initialized")
@@ -180,55 +176,4 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
 export const resetDatabase = async (): Promise<void> => {
   await deleteAsync(`${documentDirectory}SQLite/curator.db`)
   await initDatabase()
-}
-
-// Dev-only: seeds the DB with collections/items from data.json
-const seedDatabaseFromJSON = async (): Promise<void> => {
-  const { collectionOrder, collections } = data as unknown as CollectionsData
-  log("Seeding collections from data.json:", collectionOrder.length)
-
-  const now = timestampNow()
-
-  for (const id of collectionOrder) {
-    const collection = collections[id]
-
-    // Patch missing createdAt/updatedAt
-    const withMeta: Collection = {
-      ...collection,
-      _meta: {
-        createdAt: collection._meta.createdAt ?? now,
-        updatedAt: collection._meta.updatedAt ?? now,
-      },
-      fields: Object.fromEntries(
-        Object.entries(collection.fields).map(([fid, field]) => [
-          fid,
-          {
-            ...field,
-            _meta: {
-              createdAt: field._meta.createdAt ?? now,
-              updatedAt: field._meta.updatedAt ?? now,
-            },
-          },
-        ]),
-      ),
-      items: Object.fromEntries(
-        Object.entries(collection.items).map(([iid, item]) => [
-          iid,
-          {
-            ...item,
-            _meta: {
-              createdAt: item._meta.createdAt ?? now,
-              updatedAt: item._meta.updatedAt ?? now,
-            },
-          },
-        ]),
-      ),
-    }
-
-    await upsertCollection(id, withMeta)
-  }
-
-  await saveCollectionOrder(collectionOrder)
-
-  log("Database seeded with initial data")
 }

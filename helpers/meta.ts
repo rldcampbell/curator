@@ -1,6 +1,13 @@
 import isEqual from "lodash/isEqual"
 
-import { Collection, RawCollection, Timestamp, WithMeta } from "@/app/types"
+import {
+  Collection,
+  FieldId,
+  RawCollection,
+  RawField,
+  Timestamp,
+  WithMeta,
+} from "@/app/types"
 import { timestampNow } from "@/helpers/date"
 
 export const withMeta = <T>(
@@ -32,11 +39,31 @@ export const stripMeta = <T>(entity: WithMeta<T>): T => {
   return rest as T
 }
 
-export const patchCollectionWithMeta = (
+const assertFieldTypesUnchanged = (
+  existingFields: Record<FieldId, RawField>,
+  updatedFields: Record<FieldId, RawField>,
+) => {
+  for (const fieldId of Object.keys(existingFields)) {
+    const original = existingFields[fieldId as FieldId]
+    const replacement = updatedFields[fieldId as FieldId]
+    if (replacement && replacement.type !== original.type) {
+      throw new Error(
+        `Field type change not allowed: ${fieldId} (${original.type} → ${replacement.type})`,
+      )
+    }
+  }
+}
+
+export const patchCollection = (
   existing: Collection,
   incoming: Partial<RawCollection>,
+  options?: { strictFieldTypes?: boolean; timestamp?: Timestamp },
 ): Collection => {
-  const now = timestampNow()
+  if (options?.strictFieldTypes && incoming.fields) {
+    assertFieldTypesUnchanged(existing.fields, incoming.fields)
+  }
+
+  const timestamp = options?.timestamp ?? timestampNow()
 
   // Merge top-level props
   const name = incoming.name ?? existing.name
@@ -45,21 +72,21 @@ export const patchCollectionWithMeta = (
 
   // Merge fields
   const mergedFields = incoming.fields
-    ? mergeWithMeta(existing.fields, incoming.fields, now)
+    ? mergeWithMeta(existing.fields, incoming.fields, timestamp)
     : existing.fields
 
   // Merge items
   const mergedItems = incoming.items
-    ? mergeWithMeta(existing.items, incoming.items, now)
+    ? mergeWithMeta(existing.items, incoming.items, timestamp)
     : existing.items
 
   // Detect if anything changed
   const changed =
     name !== existing.name ||
-    !isEqual(fieldOrder, existing.fieldOrder) ||
-    !isEqual(itemOrder, existing.itemOrder) ||
-    !isEqual(mergedFields, existing.fields) ||
-    !isEqual(mergedItems, existing.items)
+    (incoming.fieldOrder && !isEqual(fieldOrder, existing.fieldOrder)) ||
+    (incoming.itemOrder && !isEqual(itemOrder, existing.itemOrder)) ||
+    (incoming.fields && !isEqual(mergedFields, existing.fields)) ||
+    (incoming.items && !isEqual(mergedItems, existing.items))
 
   return {
     name,
@@ -69,7 +96,7 @@ export const patchCollectionWithMeta = (
     items: mergedItems,
     _meta: {
       ...existing._meta,
-      updatedAt: changed ? now : existing._meta.updatedAt,
+      updatedAt: changed ? timestamp : existing._meta.updatedAt,
     },
   }
 }

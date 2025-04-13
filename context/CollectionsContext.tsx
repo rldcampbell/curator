@@ -1,21 +1,27 @@
 import { createContext, useContext, useEffect, useState } from "react"
 
+import data from "@/app/data.json"
 import {
-  Collection,
   CollectionId,
   CollectionsData,
-  FieldId,
   ItemId,
+  RawCollection,
   RawItem,
 } from "@/app/types"
 import { genCollectionId, genItemId } from "@/helpers"
+import { timestampNow } from "@/helpers/date"
+import { patchCollection } from "@/helpers/meta"
 import * as db from "@/services/database"
 
-export type CollectionInput = Pick<Collection, "name" | "fields" | "fieldOrder">
+export type CollectionInput = Pick<
+  RawCollection,
+  "name" | "fields" | "fieldOrder"
+>
 
 type CollectionsContextValue = {
   collections: CollectionsData["collections"]
   collectionOrder: CollectionId[]
+  seedCollectionsFromJSON: () => Promise<void>
   addCollection: (data: CollectionInput) => CollectionId
   deleteCollection: (collectionId: CollectionId) => void
   updateCollection: (collectionId: CollectionId, data: CollectionInput) => void
@@ -52,7 +58,14 @@ export const CollectionsProvider = ({
     const initializeData = async () => {
       try {
         await db.initDatabase()
-        const data = await db.loadCollections()
+        let data = await db.loadCollections()
+
+        if (Object.keys(data.collections).length === 0) {
+          console.log("[Context] Fresh DB detected — seeding from JSON")
+          await seedCollectionsFromJSON()
+          data = await db.loadCollections()
+        }
+
         setCollections(data.collections)
         setCollectionOrder(data.collectionOrder)
       } catch (err) {
@@ -69,18 +82,32 @@ export const CollectionsProvider = ({
 
   const addCollection = ({ name, fieldOrder, fields }: CollectionInput) => {
     const collectionId = genCollectionId()
-    const newCollection: Collection = {
-      name,
-      fieldOrder,
-      fields,
-      itemOrder: [],
-      items: {},
-    }
+    const timestamp = timestampNow()
+
+    const hydrated = patchCollection(
+      {
+        name: "",
+        fieldOrder: [],
+        itemOrder: [],
+        fields: {},
+        items: {},
+        _meta: {
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+      },
+      {
+        name,
+        fieldOrder,
+        fields,
+      },
+      { timestamp },
+    )
 
     setCollections(prev => {
-      const updated = { ...prev, [collectionId]: newCollection }
+      const updated = { ...prev, [collectionId]: hydrated }
 
-      db.saveCollection(collectionId, newCollection, true).catch(err => {
+      db.saveCollection(collectionId, hydrated, true).catch(err => {
         setError(
           err instanceof Error
             ? err
@@ -91,7 +118,19 @@ export const CollectionsProvider = ({
       return updated
     })
 
-    setCollectionOrder(prev => [...prev, collectionId])
+    setCollectionOrder(prev => {
+      const updatedOrder = [...prev, collectionId]
+
+      db.saveCollectionOrder(updatedOrder).catch(err => {
+        setError(
+          err instanceof Error
+            ? err
+            : new Error("Failed to save collection order"),
+        )
+      })
+
+      return updatedOrder
+    })
 
     return collectionId
   }
@@ -119,57 +158,41 @@ export const CollectionsProvider = ({
 
   const updateCollection = (
     collectionId: CollectionId,
-    updated: CollectionInput,
+    updated: Partial<RawCollection>,
   ) => {
     setCollections(prev => {
       const current = prev[collectionId]
       if (!current) return prev
 
-      // Disallow type changes for existing fields
-      for (const fieldId of Object.keys(current.fields)) {
-        const original = current.fields[fieldId as FieldId]
-        const replacement = updated.fields[fieldId as FieldId]
-        if (replacement && replacement.type !== original.type) {
-          console.warn(
-            `Field type change not allowed: ${fieldId} (${original.type} → ${replacement.type})`,
-          )
+      try {
+        const updatedCollection = patchCollection(current, updated, {
+          strictFieldTypes: true,
+        })
+
+        if (updatedCollection._meta.updatedAt === current._meta.updatedAt) {
+          // nothing changed
           return prev
         }
-      }
 
-      // Remove deleted field values from items
-      const removedFieldIds = Object.keys(current.fields).filter(
-        id => !(id in updated.fields),
-      ) as FieldId[]
+        db.saveCollection(collectionId, updatedCollection).catch(err => {
+          setError(
+            err instanceof Error
+              ? err
+              : new Error("Failed to persist updated collection"),
+          )
+        })
 
-      const cleanedItems: Record<ItemId, RawItem> = {}
-      for (const [itemId, item] of Object.entries(current.items)) {
-        const cleanedItem = { ...item }
-        for (const removedId of removedFieldIds) {
-          delete cleanedItem[removedId]
+        return {
+          ...prev,
+          [collectionId]: updatedCollection,
         }
-        cleanedItems[itemId as ItemId] = cleanedItem
-      }
-
-      const updatedCollection: Collection = {
-        name: updated.name,
-        fieldOrder: updated.fieldOrder,
-        fields: updated.fields,
-        itemOrder: current.itemOrder,
-        items: cleanedItems,
-      }
-
-      db.saveCollection(collectionId, updatedCollection).catch(err => {
-        setError(
+      } catch (err) {
+        console.warn(
           err instanceof Error
-            ? err
-            : new Error("Failed to persist updated collection"),
+            ? err.message
+            : "Unknown error patching collection",
         )
-      })
-
-      return {
-        ...prev,
-        [collectionId]: updatedCollection,
+        return prev
       }
     })
   }
@@ -177,29 +200,18 @@ export const CollectionsProvider = ({
   const addItem = (collectionId: CollectionId, item: RawItem) => {
     const itemId = genItemId()
 
-    setCollections(prev => {
-      const collection = prev[collectionId]
-      const updated: Record<CollectionId, Collection> = {
-        ...prev,
-        [collectionId]: {
-          ...collection,
-          itemOrder: [...collection.itemOrder, itemId],
-          items: {
-            ...collection.items,
-            [itemId]: item,
-          },
-        },
-      }
+    // TODO (2025-04-13): This uses `updateCollection`, which saves the full collection.
+    // It's clean and consistent, but could be optimized to save only item changes.
 
-      db.saveCollection(collectionId, updated[collectionId]).catch(err => {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to save item to collection"),
-        )
-      })
+    const current = collections[collectionId]
+    if (!current) return itemId
 
-      return updated
+    updateCollection(collectionId, {
+      itemOrder: [...current.itemOrder, itemId],
+      items: {
+        ...current.items,
+        [itemId]: item,
+      },
     })
 
     return itemId
@@ -210,28 +222,13 @@ export const CollectionsProvider = ({
     itemId: ItemId,
     updatedItem: RawItem,
   ) => {
-    setCollections(prev => {
-      const collection = prev[collectionId]
-      const updated: Record<CollectionId, Collection> = {
-        ...prev,
-        [collectionId]: {
-          ...collection,
-          items: {
-            ...collection.items,
-            [itemId]: updatedItem,
-          },
-        },
-      }
+    // TODO (2025-04-13): This uses `updateCollection`, which saves the full collection.
+    // It's clean and consistent, but could be optimized to save only item changes.
 
-      db.saveCollection(collectionId, updated[collectionId]).catch(err => {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to update item in collection"),
-        )
-      })
-
-      return updated
+    updateCollection(collectionId, {
+      items: {
+        [itemId]: updatedItem,
+      },
     })
   }
 
@@ -248,57 +245,52 @@ export const CollectionsProvider = ({
   }
 
   const updateItemOrder = (collectionId: CollectionId, newOrder: ItemId[]) => {
-    setCollections(prev => {
-      const updated: Record<CollectionId, Collection> = {
-        ...prev,
-        [collectionId]: {
-          ...prev[collectionId],
-          itemOrder: newOrder,
-        },
-      }
+    // TODO (2025-04-13): This uses `updateCollection`, which saves the full collection.
+    // It's clean and consistent, but could be optimized to only update item order.
 
-      db.saveCollection(collectionId, updated[collectionId]).catch(err => {
-        setError(
-          err instanceof Error ? err : new Error("Failed to update item order"),
-        )
-      })
-
-      return updated
+    updateCollection(collectionId, {
+      itemOrder: newOrder,
     })
   }
 
   const deleteItem = (collectionId: CollectionId, itemId: ItemId) => {
-    setCollections(prev => {
-      const collection = prev[collectionId]
+    // TODO (2025-04-13): This uses `updateCollection`, which saves the full collection.
+    // It's clean and consistent, but could be optimized to save only item changes.
 
-      if (!collection) return prev
+    const current = collections[collectionId]
+    if (!current) return
 
-      const updatedItems = { ...collection.items }
-      delete updatedItems[itemId]
+    const updatedItems = { ...current.items }
+    delete updatedItems[itemId]
 
-      const updatedItemOrder = collection.itemOrder.filter(id => id !== itemId)
+    const updatedItemOrder = current.itemOrder.filter(id => id !== itemId)
 
-      const updatedCollection: Collection = {
-        ...collection,
-        items: updatedItems,
-        itemOrder: updatedItemOrder,
-      }
-
-      const updated = {
-        ...prev,
-        [collectionId]: updatedCollection,
-      }
-
-      db.saveCollection(collectionId, updatedCollection).catch(err => {
-        setError(
-          err instanceof Error
-            ? err
-            : new Error("Failed to delete item from collection"),
-        )
-      })
-
-      return updated
+    updateCollection(collectionId, {
+      itemOrder: updatedItemOrder,
+      items: updatedItems,
     })
+  }
+
+  /** DEV ONLY! */
+  const seedCollectionsFromJSON = async () => {
+    const { collectionOrder, collections } = data as unknown as CollectionsData
+    const newCollectionOrder = [] as CollectionId[]
+
+    for (const cId of collectionOrder) {
+      const { name, fieldOrder, fields, itemOrder, items } = collections[cId]
+
+      // Add collection and get the new ID
+      const newId = addCollection({ name, fieldOrder, fields })
+      newCollectionOrder.push(newId)
+
+      // Add items in order
+      for (const iId of itemOrder) {
+        const item = items[iId]
+        addItem(newId, item)
+      }
+    }
+
+    setCollectionOrder(newCollectionOrder)
   }
 
   return (
@@ -306,6 +298,7 @@ export const CollectionsProvider = ({
       value={{
         collections,
         collectionOrder,
+        seedCollectionsFromJSON,
         addCollection,
         deleteCollection,
         updateCollection,
