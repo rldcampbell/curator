@@ -1,8 +1,21 @@
-import { deleteAsync, documentDirectory } from "expo-file-system"
+// TODO (2025-04-13):
+// Items are currently stored inside the `collections` table as JSON.
+// In future, we should normalize this by moving items to a separate `items` table,
+// with each item having its own row. This would:
+// - Improve scalability for large item sets
+// - Allow more granular queries / updates
+// - Prepare for future online sync & conflict resolution
+// This will require updating:
+// - saveCollection/loadCollections logic to use `items` table
+// - migrations to support the new schema
+import * as FileSystem from "expo-file-system"
 import * as SQLite from "expo-sqlite"
+import * as Updates from "expo-updates"
 
-import data from "@/app/data.json"
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
+import { timestampNow } from "@/helpers/date"
+
+import { migrateDatabase } from "./migrations/runMigrations"
 
 const isDev = __DEV__
 const log = (...args: any[]) => {
@@ -14,28 +27,22 @@ const parse = JSON.parse
 
 let db: SQLite.SQLiteDatabase | null = null
 
-export const initDatabase = async (): Promise<void> => {
+export const initDatabase = async (): Promise<{ isFreshDb: boolean }> => {
+  const path = `${FileSystem.documentDirectory}SQLite/curator.db`
+
+  const info = await FileSystem.getInfoAsync(path)
+  const isFreshDb = !info.exists
+  console.log("[DB] SQLite file exists on init?", !isFreshDb, "at:", path)
+
   db = await SQLite.openDatabaseAsync("curator.db")
 
-  await db.execAsync(`
-    PRAGMA journal_mode = WAL;
-    CREATE TABLE IF NOT EXISTS collections (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      field_order TEXT NOT NULL,
-      fields TEXT NOT NULL,
-      item_order TEXT NOT NULL,
-      items TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS images (
-      id TEXT PRIMARY KEY,
-      item_id TEXT NOT NULL,
-      field_id TEXT NOT NULL,
-      data BLOB NOT NULL,
-      created_at INTEGER NOT NULL,
-      FOREIGN KEY (item_id) REFERENCES collections (id)
-    );
-  `)
+  await db.execAsync(`PRAGMA journal_mode = WAL;`)
+  await migrateDatabase(db)
+
+  const versionRow = await db.getFirstAsync<{ value: string }>(
+    "SELECT value FROM meta WHERE key = 'db_version'",
+  )
+  log("DB schema version:", versionRow?.value)
 
   const existingOrder = await db.getFirstAsync(
     `SELECT id FROM collections WHERE id = ?`,
@@ -43,41 +50,58 @@ export const initDatabase = async (): Promise<void> => {
   )
 
   if (!existingOrder) {
-    log("Fresh DB detected — running seedDatabaseFromJSON")
+    log("Fresh DB detected — inserting __order__ row")
     await db.runAsync(
-      `INSERT INTO collections (id, name, field_order, fields, item_order, items)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO collections (
+        id, name, field_order, fields, item_order, items, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       "__order__",
       "Collection Order",
       "[]",
       "{}",
       "[]",
       "[]",
+      timestampNow(),
+      timestampNow(),
     )
-    await seedDatabaseFromJSON()
   } else {
-    log("DB already initialized — skipping seed")
+    log("DB already initialized — skipping __order__ insert")
   }
 
   log("Database initialized")
+
+  return { isFreshDb }
 }
 
 const upsertCollection = async (
   id: CollectionId,
   collection: Collection,
 ): Promise<void> => {
+  console.log("[DB] Upsert collection:", id)
+
   if (!db) throw new Error("Database not initialized")
-  const { name, fieldOrder, fields, itemOrder, items } = collection
+
+  const {
+    name,
+    fieldOrder,
+    fields,
+    itemOrder,
+    items,
+    _meta: { createdAt, updatedAt },
+  } = collection
 
   await db.runAsync(
-    `INSERT OR REPLACE INTO collections (id, name, field_order, fields, item_order, items)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO collections (
+      id, name, field_order, fields, item_order, items, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     name,
     stringify(fieldOrder),
     stringify(fields),
     stringify(itemOrder),
     stringify(items),
+    createdAt,
+    updatedAt ?? null,
   )
 }
 
@@ -93,6 +117,8 @@ export const loadCollections = async (): Promise<CollectionsData> => {
     fields: string
     item_order: string
     items: string
+    created_at: number
+    updated_at: number
   }
 
   const collections: Record<CollectionId, Collection> = {}
@@ -108,6 +134,10 @@ export const loadCollections = async (): Promise<CollectionsData> => {
         fields: parse(row.fields),
         itemOrder: parse(row.item_order),
         items: parse(row.items),
+        _meta: {
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        },
       }
     }
   }
@@ -121,6 +151,8 @@ export const saveCollection = async (
   collection: Collection,
   isNew: boolean = false,
 ): Promise<void> => {
+  console.log("[DB] Saving collection:", id)
+
   await upsertCollection(id, collection)
 
   if (isNew) {
@@ -146,6 +178,8 @@ export const saveCollectionOrder = async (
 ): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
 
+  console.log(`[DB] persisting collectionOrder: ${order}`)
+
   await db.runAsync(
     `UPDATE collections SET items = ? WHERE id = ?`,
     stringify(order),
@@ -169,21 +203,14 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
 }
 
 export const resetDatabase = async (): Promise<void> => {
-  await deleteAsync(`${documentDirectory}SQLite/curator.db`)
-  await initDatabase()
-}
+  const dbPath = `${FileSystem.documentDirectory}SQLite/curator.db`
+  console.log("[RESET] Deleting SQLite database at:", dbPath)
 
-// Dev-only: seeds the DB with collections/items from data.json
-const seedDatabaseFromJSON = async (): Promise<void> => {
-  const { collectionOrder, collections } = data as unknown as CollectionsData
-  log("Seeding collections from data.json:", collectionOrder.length)
+  await FileSystem.deleteAsync(dbPath, { idempotent: true })
+  console.log("[RESET] Database file deleted")
 
-  for (const id of collectionOrder) {
-    const collection = collections[id]
-    await upsertCollection(id, collection)
-  }
-
-  await saveCollectionOrder(collectionOrder)
-
-  log("Database seeded with initial data")
+  console.log(
+    "[RESET] Reloading app to re-initialize DB and trigger seeding...",
+  )
+  await Updates.reloadAsync()
 }

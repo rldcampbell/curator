@@ -9,7 +9,7 @@ import {
 
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 
-import { CollectionId, FieldAndValue, ItemId } from "@/app/types"
+import { CollectionId, ItemId, RawFieldAndValue } from "@/app/types"
 import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
@@ -85,7 +85,7 @@ export default function ItemDetailScreen() {
             const displayValue = formatFieldValue({
               ...field,
               value,
-            } as FieldAndValue)
+            } as RawFieldAndValue)
 
             return (
               <View key={fieldId} style={styles.fieldRow}>

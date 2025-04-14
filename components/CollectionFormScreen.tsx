@@ -6,7 +6,7 @@ import { router } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId, Field, FieldId } from "@/app/types"
+import { CollectionId, FieldId, RawField } from "@/app/types"
 import AddButton from "@/components/AddButton"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
@@ -33,7 +33,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
   const [fieldOrder, setFieldOrder] = useState<FieldId[]>(
     existing?.fieldOrder ?? [],
   )
-  const [fields, setFields] = useState<Record<FieldId, Field>>(
+  const [fields, setFields] = useState<Record<FieldId, RawField>>(
     existing?.fields ?? {},
   )
 
@@ -66,7 +66,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
     setModalVisible(true)
   }
 
-  const handleSubmitField = (field: Field) => {
+  const handleSubmitField = (field: RawField) => {
     if (modalMode === "create") {
       const id = genFieldId()
       setFieldOrder(prev => [...prev, id])
@@ -83,11 +83,11 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
     if (mode === "create") {
       addCollection({ name: collectionName, fieldOrder, fields })
     } else if (collectionId) {
-      updateCollection(collectionId, {
+      updateCollection(collectionId, () => ({
         name: collectionName,
         fieldOrder,
         fields,
-      })
+      }))
     }
     router.back()
   }

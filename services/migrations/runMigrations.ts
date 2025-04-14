@@ -1,29 +1,28 @@
-import * as FileSystem from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 
-const MIGRATIONS_DIR = FileSystem.documentDirectory + "migrations/"
+// Import compiled migration files as strings
+import up_001 from "./compiled/up_001_create_base_schema"
+import up_002 from "./compiled/up_002_seed_missing_createdAt"
 
-// Reads and executes a .sql file one statement at a time
-async function runSqlFile(
-  db: SQLite.SQLiteDatabase,
-  path: string,
-): Promise<void> {
-  const sql = await FileSystem.readAsStringAsync(path)
-  const statements = sql
-    .split(";")
-    .map(s => s.trim())
-    .filter(Boolean)
-
-  for (const stmt of statements) {
-    await db.execAsync(stmt + ";")
-  }
+type Migration = {
+  version: number
+  name: string
+  sql: string
 }
+
+const MIGRATIONS: Migration[] = [
+  { version: 1, name: "create_base_schema", sql: up_001 },
+  { version: 2, name: "seed_missing_createdAt", sql: up_002 },
+]
 
 async function getDatabaseVersion(db: SQLite.SQLiteDatabase): Promise<number> {
   try {
+    console.log("[DB] Checking for meta key...")
     const result = await db.getFirstAsync<{ value: string }>(
       "SELECT value FROM meta WHERE key = 'db_version'",
     )
+    console.log("[DB] Found db_version meta row:", result)
+
     return result ? parseInt(result.value, 10) : 0
   } catch (_err) {
     // Meta table doesn't exist yet
@@ -42,23 +41,37 @@ async function setDatabaseVersion(
   )
 }
 
-// Runs all pending migrations in alphabetical order
 export async function migrateDatabase(
   db: SQLite.SQLiteDatabase,
 ): Promise<void> {
   const currentVersion = await getDatabaseVersion(db)
 
-  const allFiles = await FileSystem.readDirectoryAsync(MIGRATIONS_DIR)
-  const upFiles = allFiles.filter(f => f.startsWith("up_")).sort()
+  for (const migration of MIGRATIONS) {
+    if (migration.version > currentVersion) {
+      console.log(
+        `[DB] Running migration: up_${String(migration.version).padStart(
+          3,
+          "0",
+        )}_${migration.name}`,
+      )
 
-  for (const file of upFiles) {
-    const match = file.match(/^up_(\d+)_/)
-    if (!match) continue
-    const version = parseInt(match[1])
-    if (version > currentVersion) {
-      console.log(`[DB] Running migration: ${file}`)
-      await runSqlFile(db, MIGRATIONS_DIR + file)
-      await setDatabaseVersion(db, version)
+      const statements = migration.sql
+        .split(";")
+        .map(s => s.trim())
+        .filter(Boolean)
+
+      for (const stmt of statements) {
+        try {
+          console.log(`[DB] Executing statement:\n${stmt}`)
+          await db.execAsync(stmt)
+        } catch (err) {
+          console.error("[DB] Failed to execute statement:", stmt)
+          console.error(err)
+          throw err
+        }
+      }
+
+      await setDatabaseVersion(db, migration.version)
     }
   }
 }

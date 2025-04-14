@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { DevSettings, View } from "react-native"
+import { View } from "react-native"
 
 import AddButton from "@/components/AddButton"
 import AppText from "@/components/AppText"
@@ -22,10 +22,7 @@ export default function DevScreen() {
         <ConfirmModal
           visible={true}
           onCancel={() => setModalVisible(false)}
-          onConfirm={async () => {
-            await resetDatabase()
-            DevSettings.reload()
-          }}
+          onConfirm={resetDatabase}
           title="Reset database?"
           message="Are you sure you want to delete all data and reset the database?"
         />
