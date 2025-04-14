@@ -226,8 +226,9 @@ export const CollectionsProvider = ({
     // TODO (2025-04-13): This uses `updateCollection`, which saves the full collection.
     // It's clean and consistent, but could be optimized to save only item changes.
 
-    updateCollection(collectionId, () => ({
+    updateCollection(collectionId, prev => ({
       items: {
+        ...prev.items,
         [itemId]: updatedItem,
       },
     }))
