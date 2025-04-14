@@ -1,5 +1,4 @@
 import { useLayoutEffect, useState } from "react"
-import { Animated } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -9,7 +8,7 @@ import { router, useNavigation } from "expo-router"
 import { Feather } from "@expo/vector-icons"
 
 import { CollectionId } from "@/app/types"
-import AppText from "@/components/AppText"
+import CollectionListItem from "@/components/CollectionListItem"
 import ConfirmModal from "@/components/ConfirmModal"
 import FullPageLayout from "@/components/FullPageLayout"
 import { HeaderButton } from "@/components/HeaderButton"
@@ -89,19 +88,12 @@ export default function CollectionsScreen() {
                 })
               }
               buttons={buttons}
-              renderContent={() => (
-                <Animated.View
-                  style={{
-                    backgroundColor: isActive ? "#f0f0f0" : "#fff",
-                    padding: 16,
-                    borderBottomWidth: 1,
-                    borderBottomColor: "#ddd",
-                  }}
-                >
-                  <AppText weight="semiBold" style={{ fontSize: 18 }}>
-                    {collection.name}
-                  </AppText>
-                </Animated.View>
+              renderContent={id => (
+                <CollectionListItem
+                  collection={collection}
+                  collectionId={id}
+                  isActive={isActive}
+                />
               )}
             />
           )
