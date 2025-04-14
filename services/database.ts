@@ -1,7 +1,18 @@
+// TODO (2025-04-13):
+// Items are currently stored inside the `collections` table as JSON.
+// In future, we should normalize this by moving items to a separate `items` table,
+// with each item having its own row. This would:
+// - Improve scalability for large item sets
+// - Allow more granular queries / updates
+// - Prepare for future online sync & conflict resolution
+// This will require updating:
+// - saveCollection/loadCollections logic to use `items` table
+// - migrations to support the new schema
 import { deleteAsync, documentDirectory } from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
+import { timestampNow } from "@/helpers/date"
 
 import { migrateDatabase } from "./migrations/runMigrations"
 
@@ -34,14 +45,17 @@ export const initDatabase = async (): Promise<void> => {
   if (!existingOrder) {
     log("Fresh DB detected — inserting __order__ row")
     await db.runAsync(
-      `INSERT INTO collections (id, name, field_order, fields, item_order, items)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO collections (
+        id, name, field_order, fields, item_order, items, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       "__order__",
       "Collection Order",
       "[]",
       "{}",
       "[]",
       "[]",
+      timestampNow(),
+      timestampNow(),
     )
   } else {
     log("DB already initialized — skipping __order__ insert")
@@ -67,7 +81,7 @@ const upsertCollection = async (
 
   await db.runAsync(
     `INSERT OR REPLACE INTO collections (
-      id, name, field_order, fields, item_order, items, createdAt, updatedAt
+      id, name, field_order, fields, item_order, items, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     name,
@@ -92,8 +106,8 @@ export const loadCollections = async (): Promise<CollectionsData> => {
     fields: string
     item_order: string
     items: string
-    createdAt: number
-    updatedAt: number
+    created_at: number
+    updated_at: number
   }
 
   const collections: Record<CollectionId, Collection> = {}
@@ -110,8 +124,8 @@ export const loadCollections = async (): Promise<CollectionsData> => {
         itemOrder: parse(row.item_order),
         items: parse(row.items),
         _meta: {
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
         },
       }
     }
@@ -151,6 +165,8 @@ export const saveCollectionOrder = async (
 ): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
 
+  console.log(`[DB] persisting collectionOrder: ${order}`)
+
   await db.runAsync(
     `UPDATE collections SET items = ? WHERE id = ?`,
     stringify(order),
@@ -174,6 +190,13 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
 }
 
 export const resetDatabase = async (): Promise<void> => {
-  await deleteAsync(`${documentDirectory}SQLite/curator.db`)
+  console.log("[RESET] Deleting existing SQLite database...")
+  await deleteAsync(`${documentDirectory}SQLite/curator.db`, {
+    idempotent: true,
+  })
+  console.log("[RESET] Database file deleted")
+
+  console.log("[RESET] Re-initializing database...")
   await initDatabase()
+  console.log("[RESET] Database reset and initialized successfully")
 }

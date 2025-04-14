@@ -83,11 +83,11 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
     if (mode === "create") {
       addCollection({ name: collectionName, fieldOrder, fields })
     } else if (collectionId) {
-      updateCollection(collectionId, {
+      updateCollection(collectionId, () => ({
         name: collectionName,
         fieldOrder,
         fields,
-      })
+      }))
     }
     router.back()
   }

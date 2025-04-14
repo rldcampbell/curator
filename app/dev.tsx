@@ -27,6 +27,7 @@ export default function DevScreen() {
           onConfirm={async () => {
             await resetDatabase()
             await seedCollectionsFromJSON()
+            setModalVisible(false)
           }}
           title="Reset database?"
           message="Are you sure you want to delete all data and reset the database?"
