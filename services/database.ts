@@ -8,9 +8,9 @@
 // This will require updating:
 // - saveCollection/loadCollections logic to use `items` table
 // - migrations to support the new schema
-import { deleteAsync, documentDirectory } from "expo-file-system"
 import * as FileSystem from "expo-file-system"
 import * as SQLite from "expo-sqlite"
+import * as Updates from "expo-updates"
 
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
 import { timestampNow } from "@/helpers/date"
@@ -27,11 +27,12 @@ const parse = JSON.parse
 
 let db: SQLite.SQLiteDatabase | null = null
 
-export const initDatabase = async (): Promise<void> => {
+export const initDatabase = async (): Promise<{ isFreshDb: boolean }> => {
   const path = `${FileSystem.documentDirectory}SQLite/curator.db`
 
   const info = await FileSystem.getInfoAsync(path)
-  console.log("[DB] SQLite file exists on init?", info.exists, "at:", path)
+  const isFreshDb = !info.exists
+  console.log("[DB] SQLite file exists on init?", !isFreshDb, "at:", path)
 
   db = await SQLite.openDatabaseAsync("curator.db")
 
@@ -68,12 +69,16 @@ export const initDatabase = async (): Promise<void> => {
   }
 
   log("Database initialized")
+
+  return { isFreshDb }
 }
 
 const upsertCollection = async (
   id: CollectionId,
   collection: Collection,
 ): Promise<void> => {
+  console.log("[DB] Upsert collection:", id)
+
   if (!db) throw new Error("Database not initialized")
 
   const {
@@ -146,6 +151,8 @@ export const saveCollection = async (
   collection: Collection,
   isNew: boolean = false,
 ): Promise<void> => {
+  console.log("[DB] Saving collection:", id)
+
   await upsertCollection(id, collection)
 
   if (isNew) {
@@ -196,13 +203,14 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
 }
 
 export const resetDatabase = async (): Promise<void> => {
-  console.log("[RESET] Deleting existing SQLite database...")
-  await deleteAsync(`${documentDirectory}SQLite/curator.db`, {
-    idempotent: true,
-  })
+  const dbPath = `${FileSystem.documentDirectory}SQLite/curator.db`
+  console.log("[RESET] Deleting SQLite database at:", dbPath)
+
+  await FileSystem.deleteAsync(dbPath, { idempotent: true })
   console.log("[RESET] Database file deleted")
 
-  console.log("[RESET] Re-initializing database...")
-  await initDatabase()
-  console.log("[RESET] Database reset and initialized successfully")
+  console.log(
+    "[RESET] Reloading app to re-initialize DB and trigger seeding...",
+  )
+  await Updates.reloadAsync()
 }

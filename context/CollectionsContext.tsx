@@ -23,7 +23,6 @@ type UpdateCollectionFn = (prev: RawCollection) => Partial<RawCollection>
 type CollectionsContextValue = {
   collections: CollectionsData["collections"]
   collectionOrder: CollectionId[]
-  seedCollectionsFromJSON: () => Promise<void>
   addCollection: (data: CollectionInput) => CollectionId
   deleteCollection: (collectionId: CollectionId) => void
   updateCollection: (
@@ -56,19 +55,25 @@ export const CollectionsProvider = ({
     collections: {},
     collectionOrder: [],
   })
-  // const [collections, setCollections] = useState<
-  //   CollectionsData["collections"]
-  // >({})
-  // const [collectionOrder, setCollectionOrder] = useState<CollectionId[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     const initializeData = async () => {
       try {
-        await db.initDatabase()
+        const { isFreshDb } = await db.initDatabase()
+
+        if (isFreshDb) {
+          console.log("[INIT] Fresh DB detected — seeding from JSON")
+          await seedCollectionsFromJSON()
+        }
+
         const data = await db.loadCollections()
-        console.log("[INIT] Loaded collections:", Object.keys(data.collections))
+
+        console.log(
+          "[INIT] Loaded collections:",
+          Object.keys(data.collections).length,
+        )
         console.log("[INIT] Loaded collectionOrder:", data.collectionOrder)
 
         const dupes = data.collectionOrder.filter(
@@ -305,7 +310,6 @@ export const CollectionsProvider = ({
       value={{
         collections: collectionsData.collections,
         collectionOrder: collectionsData.collectionOrder,
-        seedCollectionsFromJSON,
         addCollection,
         deleteCollection,
         updateCollection,
