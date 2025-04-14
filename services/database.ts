@@ -9,6 +9,7 @@
 // - saveCollection/loadCollections logic to use `items` table
 // - migrations to support the new schema
 import { deleteAsync, documentDirectory } from "expo-file-system"
+import * as FileSystem from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
@@ -27,6 +28,11 @@ const parse = JSON.parse
 let db: SQLite.SQLiteDatabase | null = null
 
 export const initDatabase = async (): Promise<void> => {
+  const path = `${FileSystem.documentDirectory}SQLite/curator.db`
+
+  const info = await FileSystem.getInfoAsync(path)
+  console.log("[DB] SQLite file exists on init?", info.exists, "at:", path)
+
   db = await SQLite.openDatabaseAsync("curator.db")
 
   await db.execAsync(`PRAGMA journal_mode = WAL;`)

@@ -17,9 +17,12 @@ const MIGRATIONS: Migration[] = [
 
 async function getDatabaseVersion(db: SQLite.SQLiteDatabase): Promise<number> {
   try {
+    console.log("[DB] Checking for meta key...")
     const result = await db.getFirstAsync<{ value: string }>(
       "SELECT value FROM meta WHERE key = 'db_version'",
     )
+    console.log("[DB] Found db_version meta row:", result)
+
     return result ? parseInt(result.value, 10) : 0
   } catch (_err) {
     // Meta table doesn't exist yet
@@ -58,7 +61,14 @@ export async function migrateDatabase(
         .filter(Boolean)
 
       for (const stmt of statements) {
-        await db.execAsync(stmt + ";")
+        try {
+          console.log(`[DB] Executing statement:\n${stmt}`)
+          await db.execAsync(stmt)
+        } catch (err) {
+          console.error("[DB] Failed to execute statement:", stmt)
+          console.error(err)
+          throw err
+        }
       }
 
       await setDatabaseVersion(db, migration.version)
