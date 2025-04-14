@@ -1,15 +1,21 @@
 export type HexColor = `#${string}`
 
-const COLLECTION_COLORS: HexColor[] = [
-  "#E27D60", // muted red / coral
-  "#85DCB0", // mint green
-  "#E8A87C", // soft orange / peach
-  "#C38D9E", // dusty rose / mauve
-  "#41B3A3", // teal / turquoise
-  "#8DA7BE", // steel blue / soft denim
-  "#F6C667", // warm yellow / sunflower
-  "#999AC6", // lavender / muted purple
-]
+const COLLECTION_COLORS = [
+  "#FF6B6B", // bright coral red
+  "#FFB84D", // golden orange
+  "#FFD93D", // sunny yellow
+  "#6BCB77", // vibrant mint green
+  "#4D96FF", // bright blue
+  "#A66CFF", // lively lavender
+  "#F473B9", // warm pink
+  "#00C2A8", // turquoise green
+  "#FFA36C", // peachy orange
+  "#9D4EDD", // rich violet
+  "#43AA8B", // forest teal
+  "#FFC6FF", // soft candy pink
+] as const satisfies HexColor[]
+
+type CollectionColor = (typeof COLLECTION_COLORS)[number]
 
 const hashStringToNumber = (str: string): number => {
   let hash = 0
@@ -20,7 +26,7 @@ const hashStringToNumber = (str: string): number => {
   return Math.abs(hash)
 }
 
-const getCollectionColor = (idOrName: string): HexColor => {
+const getCollectionColor = (idOrName: string): CollectionColor => {
   const hash = hashStringToNumber(idOrName)
   return COLLECTION_COLORS[hash % COLLECTION_COLORS.length]
 }
