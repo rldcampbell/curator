@@ -38,7 +38,7 @@ export default function MetaBar({ itemCount, updatedAt }: Props) {
         {itemCount} {itemCount === 1 ? "item" : "items"}
       </AppText>
       <AppText style={styles.metaText}>
-        Last updated {updatedAtString || "unknown"}
+        Updated {updatedAtString || "unknown"}
       </AppText>
     </View>
   )
@@ -48,9 +48,7 @@ const styles = StyleSheet.create({
   metaBar: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
-    backgroundColor: "#fff",
+    backgroundColor: "#fafafa",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
