@@ -13,6 +13,7 @@ export const FieldType = {
   Text: "text",
   Number: "number",
   Date: "date",
+  Image: "image",
 } as const
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType]
@@ -21,6 +22,7 @@ export type FieldValueMap = {
   [FieldType.Text]: string
   [FieldType.Number]: number
   [FieldType.Date]: DateArray
+  [FieldType.Image]: string[]
 }
 
 export type FieldValue = FieldValueMap[FieldType]
@@ -57,10 +59,17 @@ type RawDateFieldAndValue = RawBaseField & {
   max?: DateArray
 }
 
+type RawImageFieldAndValue = RawBaseField & {
+  type: typeof FieldType.Image
+  value: FieldValueMap[typeof FieldType.Image]
+  max?: number // future: UI might restrict how many images can be selected
+}
+
 export type RawFieldAndValue =
   | RawTextFieldAndValue
   | RawNumberFieldAndValue
   | RawDateFieldAndValue
+  | RawImageFieldAndValue
 
 type OmitFromUnion<T, K extends keyof any> = T extends any ? Omit<T, K> : never
 
@@ -85,11 +94,6 @@ export type Collection = WithMeta<{
   itemOrder: ItemId[]
   items: Record<ItemId, Item>
 }>
-
-export type RawCollectionsData = {
-  collectionOrder: CollectionId[]
-  collections: Record<CollectionId, RawCollection>
-}
 
 export type CollectionsData = {
   collectionOrder: CollectionId[]
