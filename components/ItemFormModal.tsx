@@ -160,7 +160,11 @@ export default function ItemFormModal({
                     <AppText style={{ color: "#666", marginBottom: 8 }}>
                       📷 No image selected
                     </AppText>
-                    <AppText style={{ color: "#007AFF" }}>Pick Image</AppText>
+                    <Pressable
+                      onPress={() => console.log("Pick image for", fieldId)}
+                    >
+                      <AppText style={{ color: "#007AFF" }}>Pick Image</AppText>
+                    </Pressable>
                   </View>
                 </View>
               )
