@@ -110,6 +110,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
 
   return (
     <FullPageLayout
+      padding={16}
       header={
         <TextInput
           ref={inputRef}
