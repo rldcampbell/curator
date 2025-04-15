@@ -40,13 +40,13 @@ type RawBaseField = {
 
 type RawTextFieldAndValue = RawBaseField & {
   type: typeof FieldType.Text
-  value: FieldValueMap[typeof FieldType.Text]
+  value?: FieldValueMap[typeof FieldType.Text]
   charLim?: number
 }
 
 type RawNumberFieldAndValue = RawBaseField & {
   type: typeof FieldType.Number
-  value: FieldValueMap[typeof FieldType.Number]
+  value?: FieldValueMap[typeof FieldType.Number]
   min?: number
   max?: number
   // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
@@ -54,14 +54,14 @@ type RawNumberFieldAndValue = RawBaseField & {
 
 type RawDateFieldAndValue = RawBaseField & {
   type: typeof FieldType.Date
-  value: FieldValueMap[typeof FieldType.Date]
+  value?: FieldValueMap[typeof FieldType.Date]
   min?: DateArray
   max?: DateArray
 }
 
 type RawImageFieldAndValue = RawBaseField & {
   type: typeof FieldType.Image
-  value: FieldValueMap[typeof FieldType.Image]
+  value?: FieldValueMap[typeof FieldType.Image]
   max?: number // future: UI might restrict how many images can be selected
 }
 
