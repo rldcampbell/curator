@@ -15,6 +15,7 @@ import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
+import MetaBar from "@/components/MetaBar"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollection } from "@/hooks/useCollection"
 import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
@@ -33,6 +34,7 @@ export default function CollectionDetailScreen() {
     items,
     name,
     updateItemOrder,
+    _meta,
   } = useCollection(collectionId)
 
   const [itemModalVisible, setItemModalVisible] = useState(false)
@@ -77,6 +79,10 @@ export default function CollectionDetailScreen() {
 
   return (
     <View style={collectionDetailStyles.container}>
+      {/* Sticky Meta Bar */}
+      <MetaBar updatedAt={_meta.updatedAt} itemCount={itemOrder.length} />
+
+      {/* Item List */}
       <DraggableFlatList
         data={itemOrder}
         keyExtractor={item => item}
