@@ -1,4 +1,5 @@
 import * as FileSystem from "expo-file-system"
+import * as ImageManipulator from "expo-image-manipulator"
 import * as ImagePicker from "expo-image-picker"
 
 import { genId } from "@/helpers"
@@ -38,11 +39,28 @@ export const pickAndStoreImage = async (): Promise<string | null> => {
 
   const ext = getFileExtension(originalUri)
   const fileId = genId({ prefix: "img-" })
-  const filename = `${fileId}.${ext}`
+
+  // Force the destination extension to match the actual manipulated format (JPEG or PNG only)
+  const [outputFormat, formatExt] =
+    ext === "png"
+      ? [ImageManipulator.SaveFormat.PNG, "png"]
+      : [ImageManipulator.SaveFormat.JPEG, "jpg"]
+
+  const filename = `${fileId}.${formatExt}`
   const destination = `${IMAGES_DIR}${filename}`
 
+  const manipulated = await ImageManipulator.manipulateAsync(
+    originalUri,
+    [{ resize: { width: 1024 } }],
+    {
+      compress: 0.8,
+      format: outputFormat,
+      base64: false,
+    },
+  )
+
   await FileSystem.copyAsync({
-    from: originalUri,
+    from: manipulated.uri,
     to: destination,
   })
 

@@ -1,5 +1,7 @@
 import { Pressable, TextInput, View } from "react-native"
 
+import { deleteAsync } from "expo-file-system"
+
 import DateTimePicker from "@react-native-community/datetimepicker"
 
 import {
@@ -10,6 +12,7 @@ import {
   RawFieldAndValue,
 } from "@/app/types"
 import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
+import { pickAndStoreImage } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -104,9 +107,32 @@ export default function FieldInput({
             ]}
           >
             <AppText style={{ color: "#666", marginBottom: 8 }}>
-              📷 No image selected
+              {fieldWithValue.value?.length
+                ? `✅ ${fieldWithValue.value.length} image selected`
+                : "📷 No image selected"}
             </AppText>
-            <Pressable onPress={() => console.log("Pick image for", fieldId)}>
+
+            <Pressable
+              onPress={async () => {
+                const newUri = await pickAndStoreImage()
+                if (!newUri) return
+
+                // Delete the previously selected image if it exists
+                const previousUri = fieldWithValue.value?.[0]
+                if (previousUri) {
+                  try {
+                    await deleteAsync(previousUri, {
+                      idempotent: true,
+                    })
+                  } catch (err) {
+                    console.warn("Failed to delete previous image", err)
+                  }
+                }
+
+                // Update with new image
+                update(fieldId, [newUri])
+              }}
+            >
               <AppText style={{ color: "#007AFF" }}>Pick Image</AppText>
             </Pressable>
           </View>
