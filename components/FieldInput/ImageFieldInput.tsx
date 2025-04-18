@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Image, Pressable, View } from "react-native"
+
+import * as FileSystem from "expo-file-system"
 
 import { Feather } from "@expo/vector-icons"
 
@@ -19,6 +21,20 @@ export default function ImageFieldInput({
 }: FieldInputProps<typeof FieldType.Image>) {
   const [previewUri, setPreviewUri] = useState<string | undefined>()
   const [aspectRatio, setAspectRatio] = useState(1)
+
+  // Remember the original image URI on mount (if any)
+  const initialUriRef = useRef<string | undefined>()
+
+  useEffect(() => {
+    if (
+      !initialUriRef.current &&
+      value &&
+      typeof value !== "function" &&
+      value.length > 0
+    ) {
+      initialUriRef.current = value[0]
+    }
+  }, [value])
 
   useEffect(() => {
     // If a new image has been picked, keep using previewUri
@@ -53,13 +69,23 @@ export default function ImageFieldInput({
 
     update(fieldId, async () => {
       const storedUri = await storeImage(picked.uri)
+      const oldUri = initialUriRef.current
+      if (oldUri && oldUri !== storedUri) {
+        await FileSystem.deleteAsync(oldUri, { idempotent: true })
+      }
       return [storedUri]
     })
   }
 
   const handleRemoveImage = async () => {
     setPreviewUri(undefined)
-    update(fieldId, [])
+    update(fieldId, async () => {
+      const oldUri = initialUriRef.current
+      if (oldUri) {
+        await FileSystem.deleteAsync(oldUri, { idempotent: true })
+      }
+      return []
+    })
   }
 
   return (
