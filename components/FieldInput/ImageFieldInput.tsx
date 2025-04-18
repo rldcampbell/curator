@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Image, Pressable, View } from "react-native"
+import { Pressable, View } from "react-native"
 
 import * as FileSystem from "expo-file-system"
 
@@ -10,6 +10,7 @@ import { pickImageAsset, storeImage } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
+import ImagePreview from "../ImagePreview"
 import FieldWrapper from "./FieldWrapper"
 import { FieldInputProps } from "./types"
 
@@ -20,7 +21,6 @@ export default function ImageFieldInput({
   update,
 }: FieldInputProps<typeof FieldType.Image>) {
   const [previewUri, setPreviewUri] = useState<string | undefined>()
-  const [aspectRatio, setAspectRatio] = useState(1)
 
   // Remember the original image URI on mount (if any)
   const initialUriRef = useRef<string | undefined>()
@@ -45,21 +45,6 @@ export default function ImageFieldInput({
       setPreviewUri(value[0])
     }
   }, [value, previewUri])
-
-  useEffect(() => {
-    if (previewUri) {
-      Image.getSize(
-        previewUri,
-        (width, height) => {
-          setAspectRatio(width / height)
-        },
-        error => {
-          console.warn("Could not get image size", error)
-          setAspectRatio(1)
-        },
-      )
-    }
-  }, [previewUri])
 
   const handlePickImage = async () => {
     const picked = await pickImageAsset()
@@ -107,16 +92,7 @@ export default function ImageFieldInput({
       >
         {previewUri ? (
           <>
-            <Image
-              source={{ uri: previewUri }}
-              style={{
-                width: "100%",
-                aspectRatio,
-                borderRadius: 12,
-                marginBottom: 12,
-              }}
-              resizeMode="cover"
-            />
+            <ImagePreview uri={previewUri} style={{ marginBottom: 12 }} />
             <View style={{ flexDirection: "row", gap: 24 }}>
               <Pressable onPress={handlePickImage}>
                 <Feather name="refresh-ccw" size={24} color="#007AFF" />
