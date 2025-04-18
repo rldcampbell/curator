@@ -69,9 +69,12 @@ export default function ImageFieldInput({
 
     update(fieldId, async () => {
       const storedUri = await storeImage(picked.uri)
+      console.log("[ImageFieldInput] Stored image at:", storedUri)
+
       const oldUri = initialUriRef.current
       if (oldUri && oldUri !== storedUri) {
         await FileSystem.deleteAsync(oldUri, { idempotent: true })
+        console.log("[ImageFieldInput] Deleted old image at:", oldUri)
       }
       return [storedUri]
     })
@@ -83,6 +86,7 @@ export default function ImageFieldInput({
       const oldUri = initialUriRef.current
       if (oldUri) {
         await FileSystem.deleteAsync(oldUri, { idempotent: true })
+        console.log("[ImageFieldInput] Deleted image at:", oldUri)
       }
       return []
     })
