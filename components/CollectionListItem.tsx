@@ -13,7 +13,6 @@ type Props = {
 }
 
 const CollectionListItem = ({ collection, collectionId, isActive }: Props) => {
-  console.log("id for getting color scheme:", collectionId)
   const { accent, background } = getCollectionColorScheme(collectionId)
 
   const animatedStyle = useAnimatedStyle(() => {
