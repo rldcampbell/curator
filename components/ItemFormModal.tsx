@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react"
-import { Modal, Pressable, TextInput, View } from "react-native"
+import { Modal } from "react-native"
 
-import DateTimePicker from "@react-native-community/datetimepicker"
+import { FieldId, FieldValue, RawField, RawItem } from "@/app/types"
 
-import { FieldId, FieldType, FieldValue, RawField, RawItem } from "@/app/types"
-import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
-
-import AppText from "./AppText"
+import FieldInput from "./FieldInput"
 import ModalButtonRow from "./ModalButtonRow"
 import ScrollableModalLayout from "./ScrollableModalLayout"
 
@@ -31,10 +26,10 @@ export default function ItemFormModal({
   onSubmit,
   onDiscard,
 }: ItemFormModalProps) {
-  const [inputValues, setInputValues] = useState<RawItem>({})
-  const [activePickerField, setActivePickerField] = useState<FieldId | null>(
-    null,
-  )
+  // Allow values to be either actual field values or thunks (functions that return values)
+  const [inputValues, setInputValues] = useState<
+    Record<FieldId, FieldValue | (() => FieldValue | Promise<FieldValue>)>
+  >({})
 
   useEffect(() => {
     if (visible && mode === "edit" && initialValues) {
@@ -44,8 +39,25 @@ export default function ItemFormModal({
     }
   }, [visible, mode, initialValues])
 
-  const updateField = (id: FieldId, value: FieldValue) => {
+  // Store either a direct value or a thunk (function to be resolved later)
+  const updateField = (
+    id: FieldId,
+    value: FieldValue | (() => FieldValue | Promise<FieldValue>),
+  ) => {
     setInputValues(prev => ({ ...prev, [id]: value }))
+  }
+
+  // Resolve all values, including any thunks, before submitting
+  const handleSubmit = async () => {
+    const resolved: RawItem = {}
+    for (const [id, val] of Object.entries(inputValues)) {
+      if (typeof val === "function") {
+        resolved[id as FieldId] = await val()
+      } else {
+        resolved[id as FieldId] = val
+      }
+    }
+    onSubmit(resolved)
   }
 
   return (
@@ -54,81 +66,21 @@ export default function ItemFormModal({
         title={mode === "create" ? "New Item" : "Edit Item"}
         footer={
           <ModalButtonRow
-            onApply={() => onSubmit(inputValues)}
+            onApply={handleSubmit}
             applyLabel={mode === "create" ? "Create" : "Update"}
             onDiscard={onDiscard}
           />
         }
       >
-        {fieldOrder.map(fieldId => {
-          const field = fields[fieldId]
-          const value = inputValues[fieldId] ?? ""
-
-          switch (field.type) {
-            case FieldType.Text:
-              return (
-                <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-                  <AppText style={sharedStyles.label}>{field.name}</AppText>
-                  <TextInput
-                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
-                    placeholder={field.name}
-                    value={value as string}
-                    onChangeText={text => updateField(fieldId, text)}
-                  />
-                </View>
-              )
-            case FieldType.Number:
-              return (
-                <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-                  <AppText style={sharedStyles.label}>{field.name}</AppText>
-                  <TextInput
-                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
-                    placeholder={field.name}
-                    value={value?.toString() ?? ""}
-                    keyboardType="numeric"
-                    onChangeText={text =>
-                      updateField(fieldId, parseFloat(text))
-                    }
-                  />
-                </View>
-              )
-            case FieldType.Date:
-              return (
-                <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-                  <AppText style={sharedStyles.label}>{field.name}</AppText>
-                  <Pressable
-                    onPress={() => setActivePickerField(fieldId)}
-                    style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
-                  >
-                    <AppText>
-                      {Array.isArray(value)
-                        ? formatDate(dateArrayToUTCDate(value))
-                        : "Select date"}
-                    </AppText>
-                  </Pressable>
-                  {activePickerField === fieldId && (
-                    <DateTimePicker
-                      value={
-                        Array.isArray(value)
-                          ? dateArrayToUTCDate(value)
-                          : new Date()
-                      }
-                      mode="date"
-                      display="default"
-                      onChange={(_, selectedDate) => {
-                        setActivePickerField(null)
-                        if (selectedDate) {
-                          updateField(fieldId, dateToDateArray(selectedDate))
-                        }
-                      }}
-                    />
-                  )}
-                </View>
-              )
-            default:
-              return null
-          }
-        })}
+        {fieldOrder.map(fieldId => (
+          <FieldInput
+            key={fieldId}
+            fieldId={fieldId}
+            field={fields[fieldId]}
+            value={inputValues[fieldId] as FieldValue}
+            update={updateField}
+          />
+        ))}
       </ScrollableModalLayout>
     </Modal>
   )

@@ -13,6 +13,7 @@ type Props = {
   footer?: ReactNode
   children: ReactNode
   contentContainerStyle?: ViewStyle
+  padding?: number // TODO: temp measure - come up with better solution
 }
 
 export default function FullPageLayout({
@@ -20,42 +21,45 @@ export default function FullPageLayout({
   footer,
   children,
   contentContainerStyle,
+  padding = 0,
 }: Props) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.root}
+      style={[styles.root, { paddingHorizontal: padding }]}
     >
-      <SafeAreaView style={styles.root}>
-        {header && <View style={styles.header}>{header}</View>}
+      <SafeAreaView style={[styles.root, { paddingHorizontal: padding }]}>
+        {header && (
+          <View style={[styles.header, { paddingVertical: padding }]}>
+            {header}
+          </View>
+        )}
 
-        <View style={[styles.content, contentContainerStyle]}>{children}</View>
+        <View style={[{ paddingVertical: padding }, contentContainerStyle]}>
+          {children}
+        </View>
 
-        {footer && <View style={styles.footer}>{footer}</View>}
+        {footer && (
+          <View style={[styles.footer, { paddingVertical: padding }]}>
+            {footer}
+          </View>
+        )}
       </SafeAreaView>
     </KeyboardAvoidingView>
   )
 }
 
-const PAGE_PADDING = 16
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingHorizontal: PAGE_PADDING,
   },
   header: {
-    paddingVertical: PAGE_PADDING,
     borderBottomWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",
   },
-  content: {
-    paddingVertical: PAGE_PADDING,
-  },
   footer: {
-    paddingVertical: PAGE_PADDING,
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",

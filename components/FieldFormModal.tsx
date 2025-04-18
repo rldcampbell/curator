@@ -40,6 +40,7 @@ export default function FieldFormModal({
     { label: "Text", value: FieldType.Text },
     { label: "Number", value: FieldType.Number },
     { label: "Date", value: FieldType.Date },
+    { label: "Image", value: FieldType.Image },
   ])
 
   const inputRef = useRef<TextInput>(null)
