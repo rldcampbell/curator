@@ -15,7 +15,10 @@ export type FieldInputProps = {
   fieldId: FieldId
   field: RawField
   value: FieldValue | undefined
-  update: (fieldId: FieldId, value: FieldValue) => void
+  update: (
+    fieldId: FieldId,
+    value: FieldValue | (() => FieldValue | Promise<FieldValue>),
+  ) => void
 }
 
 export default function FieldInput({

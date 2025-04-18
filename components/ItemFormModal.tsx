@@ -26,10 +26,10 @@ export default function ItemFormModal({
   onSubmit,
   onDiscard,
 }: ItemFormModalProps) {
-  const [inputValues, setInputValues] = useState<RawItem>({})
-  const [activePickerField, setActivePickerField] = useState<FieldId | null>(
-    null,
-  )
+  // Allow values to be either actual field values or thunks (functions that return values)
+  const [inputValues, setInputValues] = useState<
+    Record<FieldId, FieldValue | (() => FieldValue | Promise<FieldValue>)>
+  >({})
 
   useEffect(() => {
     if (visible && mode === "edit" && initialValues) {
@@ -39,8 +39,25 @@ export default function ItemFormModal({
     }
   }, [visible, mode, initialValues])
 
-  const updateField = (id: FieldId, value: FieldValue) => {
+  // Store either a direct value or a thunk (function to be resolved later)
+  const updateField = (
+    id: FieldId,
+    value: FieldValue | (() => FieldValue | Promise<FieldValue>),
+  ) => {
     setInputValues(prev => ({ ...prev, [id]: value }))
+  }
+
+  // Resolve all values, including any thunks, before submitting
+  const handleSubmit = async () => {
+    const resolved: RawItem = {}
+    for (const [id, val] of Object.entries(inputValues)) {
+      if (typeof val === "function") {
+        resolved[id as FieldId] = await val()
+      } else {
+        resolved[id as FieldId] = val
+      }
+    }
+    onSubmit(resolved)
   }
 
   return (
@@ -49,7 +66,7 @@ export default function ItemFormModal({
         title={mode === "create" ? "New Item" : "Edit Item"}
         footer={
           <ModalButtonRow
-            onApply={() => onSubmit(inputValues)}
+            onApply={handleSubmit}
             applyLabel={mode === "create" ? "Create" : "Update"}
             onDiscard={onDiscard}
           />
@@ -60,10 +77,8 @@ export default function ItemFormModal({
             key={fieldId}
             fieldId={fieldId}
             field={fields[fieldId]}
-            value={inputValues[fieldId]}
+            value={inputValues[fieldId] as FieldValue}
             update={updateField}
-            activePickerField={activePickerField}
-            setActivePickerField={setActivePickerField}
           />
         ))}
       </ScrollableModalLayout>

@@ -15,32 +15,33 @@ const ensureImagesDirExists = async () => {
   }
 }
 
-export const pickAndStoreImage = async (): Promise<string | null> => {
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-  if (status !== "granted") {
-    console.warn("Permission to access media library denied")
-    return null
+export const pickImageAsset =
+  async (): Promise<ImagePicker.ImagePickerAsset | null> => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== "granted") {
+      console.warn("Permission to access media library denied")
+      return null
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsMultipleSelection: false,
+      quality: 0.8,
+    })
+
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      return null
+    }
+
+    return result.assets[0]
   }
 
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: "images",
-    allowsMultipleSelection: false,
-    quality: 0.8,
-  })
-
-  if (result.canceled || !result.assets || result.assets.length === 0) {
-    return null
-  }
-
-  const picked = result.assets[0]
-  const originalUri = picked.uri
-
+export const storeImage = async (originalUri: string): Promise<string> => {
   await ensureImagesDirExists()
 
   const ext = getFileExtension(originalUri)
   const fileId = genId({ prefix: "img-" })
 
-  // Force the destination extension to match the actual manipulated format (JPEG or PNG only)
   const [outputFormat, formatExt] =
     ext === "png"
       ? [ImageManipulator.SaveFormat.PNG, "png"]

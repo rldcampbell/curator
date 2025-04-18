@@ -4,5 +4,10 @@ export type FieldInputProps<T extends FieldType> = {
   fieldId: FieldId
   field: Extract<RawField, { type: T }>
   value?: FieldValueMap[T]
-  update: (id: FieldId, value: FieldValueMap[T]) => void
+  update: (
+    id: FieldId,
+    value:
+      | FieldValueMap[T]
+      | (() => FieldValueMap[T] | Promise<FieldValueMap[T]>),
+  ) => void
 }

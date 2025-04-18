@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react"
 import { Image, Pressable, View } from "react-native"
 
-import * as FileSystem from "expo-file-system"
-
 import { Feather } from "@expo/vector-icons"
 
 import { FieldType } from "@/app/types"
-import { pickAndStoreImage } from "@/helpers/image"
+import { pickImageAsset, storeImage } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -19,45 +17,48 @@ export default function ImageFieldInput({
   value,
   update,
 }: FieldInputProps<typeof FieldType.Image>) {
-  const uri = value?.[0]
+  const [previewUri, setPreviewUri] = useState<string | undefined>()
   const [aspectRatio, setAspectRatio] = useState(1)
 
   useEffect(() => {
-    if (!uri) return
-    Image.getSize(
-      uri,
-      (width, height) => {
-        setAspectRatio(width / height)
-      },
-      error => {
-        console.warn("Could not get image size", error)
-        setAspectRatio(1)
-      },
-    )
-  }, [uri])
+    // If a new image has been picked, keep using previewUri
+    if (previewUri) return
+
+    // Fallback to existing value if available
+    if (value && typeof value !== "function" && value.length > 0) {
+      setPreviewUri(value[0])
+    }
+  }, [value, previewUri])
+
+  useEffect(() => {
+    if (previewUri) {
+      Image.getSize(
+        previewUri,
+        (width, height) => {
+          setAspectRatio(width / height)
+        },
+        error => {
+          console.warn("Could not get image size", error)
+          setAspectRatio(1)
+        },
+      )
+    }
+  }, [previewUri])
 
   const handlePickImage = async () => {
-    const newUri = await pickAndStoreImage()
-    if (!newUri) return
+    const picked = await pickImageAsset()
+    if (!picked) return
 
-    if (uri) {
-      try {
-        await FileSystem.deleteAsync(uri, { idempotent: true })
-      } catch (err) {
-        console.warn("Failed to delete previous image", err)
-      }
-    }
+    setPreviewUri(picked.uri)
 
-    update(fieldId, [newUri])
+    update(fieldId, async () => {
+      const storedUri = await storeImage(picked.uri)
+      return [storedUri]
+    })
   }
 
   const handleRemoveImage = async () => {
-    if (!uri) return
-    try {
-      await FileSystem.deleteAsync(uri, { idempotent: true })
-    } catch (err) {
-      console.warn("Failed to delete image", err)
-    }
+    setPreviewUri(undefined)
     update(fieldId, [])
   }
 
@@ -74,10 +75,10 @@ export default function ImageFieldInput({
           },
         ]}
       >
-        {uri ? (
+        {previewUri ? (
           <>
             <Image
-              source={{ uri }}
+              source={{ uri: previewUri }}
               style={{
                 width: "100%",
                 aspectRatio,
