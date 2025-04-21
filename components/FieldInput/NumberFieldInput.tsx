@@ -1,18 +1,18 @@
 import { TextInput } from "react-native"
 
 import { FieldType } from "@/app/types"
+import { InputProps } from "@/fieldRegistry/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import FieldWrapper from "./FieldWrapper"
-import { FieldInputProps } from "./types"
 
 export default function NumberFieldInput({
   fieldId,
   field,
   value,
   update,
-}: FieldInputProps<typeof FieldType.Number>) {
+}: InputProps<typeof FieldType.Number>) {
   return (
     <FieldWrapper label={field.name}>
       <TextInput

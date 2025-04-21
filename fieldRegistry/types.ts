@@ -1,5 +1,4 @@
-import { FieldType, FieldValueMap } from "@/app/types"
-import { FieldInputProps } from "@/components/FieldInput/types"
+import { FieldId, FieldType, FieldValueMap, RawField } from "@/app/types"
 
 /**
  * FieldDefinition<T>
@@ -23,10 +22,24 @@ export type FieldDefinition<T extends FieldType> = {
   label: string
   defaultValue: FieldValueMap[T]
   display: React.FC<{ value?: FieldValueMap[T] }>
-  input: React.FC<FieldInputProps<T>>
+  input: (props: InputProps<T>) => React.ReactElement
   validate: (value: unknown) => value is FieldValueMap[T]
   convertTo: <U extends FieldType>(
     value: FieldValueMap[T] | undefined,
     target: U,
   ) => FieldValueMap[U] | undefined
+}
+
+export type UpdateFn<T extends FieldType = FieldType> = (
+  fieldId: FieldId,
+  value:
+    | FieldValueMap[T]
+    | (() => FieldValueMap[T] | Promise<FieldValueMap[T]>),
+) => void
+
+export type InputProps<T extends FieldType> = {
+  fieldId: FieldId
+  value?: FieldValueMap[T]
+  field: Extract<RawField, { type: T }>
+  update: UpdateFn<T>
 }

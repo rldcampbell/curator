@@ -6,20 +6,20 @@ import * as FileSystem from "expo-file-system"
 import { Feather } from "@expo/vector-icons"
 
 import { FieldType } from "@/app/types"
+import { InputProps } from "@/fieldRegistry/types"
 import { pickImageAsset, storeImage } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import ImagePreview from "../ImagePreview"
 import FieldWrapper from "./FieldWrapper"
-import { FieldInputProps } from "./types"
 
 export default function ImageFieldInput({
   fieldId,
   field,
   value,
   update,
-}: FieldInputProps<typeof FieldType.Image>) {
+}: InputProps<typeof FieldType.Image>) {
   const [previewUri, setPreviewUri] = useState<string | undefined>()
 
   // Remember the original image URI on mount (if any)

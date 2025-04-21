@@ -9,20 +9,13 @@ import {
 
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 
-import {
-  CollectionId,
-  FieldType,
-  ItemId,
-  RawFieldAndValue,
-  WithMeta,
-} from "@/app/types"
+import { CollectionId, ItemId, RawFieldAndValue, WithMeta } from "@/app/types"
 import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
-import ImagePreview from "@/components/ImagePreview"
 import ItemFormModal from "@/components/ItemFormModal"
 import { safeAccess } from "@/helpers"
-import { formatFieldValue } from "@/helpers/field"
 import { useCollection } from "@/hooks/useCollection"
+import { fieldService } from "@/services/fieldService"
 
 export default function ItemDetailScreen() {
   const { cId, iId } = useLocalSearchParams()
@@ -84,8 +77,8 @@ export default function ItemDetailScreen() {
         <ScrollView contentContainerStyle={styles.container}>
           {fieldOrder.map(fieldId => {
             const value = item[fieldId]
-            const field = fields[fieldId]
             if (value === undefined) return null
+            const field = fields[fieldId]
 
             const fieldWithValue = {
               ...field,
@@ -93,31 +86,12 @@ export default function ItemDetailScreen() {
             } as WithMeta<RawFieldAndValue>
             const label = fieldWithValue.name
 
-            if (fieldWithValue.type === FieldType.Image) {
-              if (!fieldWithValue.value || fieldWithValue.value.length === 0) {
-                return null // don't display this field at all
-              }
-
-              return (
-                <View key={fieldId} style={{ gap: 8 }}>
-                  <AppText weight="bold" style={styles.label}>
-                    {label}
-                  </AppText>
-                  <ImagePreview uri={fieldWithValue.value[0]} />
-                </View>
-              )
-            }
-
-            const displayValue = formatFieldValue(fieldWithValue)
-
             return (
               <View key={fieldId} style={styles.fieldRow}>
                 <AppText weight="bold" style={styles.label}>
                   {label}
                 </AppText>
-                <View style={styles.valueContainer}>
-                  <AppText style={styles.value}>{displayValue}</AppText>
-                </View>
+                {fieldService.display(fieldWithValue)}
               </View>
             )
           })}

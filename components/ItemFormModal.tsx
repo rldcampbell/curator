@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react"
-import { Modal } from "react-native"
+import { Modal, View } from "react-native"
 
-import { FieldId, FieldValue, RawField, RawItem } from "@/app/types"
+import {
+  FieldId,
+  FieldValue,
+  RawField,
+  RawFieldAndValue,
+  RawItem,
+} from "@/app/types"
+import { fieldService } from "@/services/fieldService"
 
-import FieldInput from "./FieldInput"
 import ModalButtonRow from "./ModalButtonRow"
 import ScrollableModalLayout from "./ScrollableModalLayout"
 
@@ -72,15 +78,16 @@ export default function ItemFormModal({
           />
         }
       >
-        {fieldOrder.map(fieldId => (
-          <FieldInput
-            key={fieldId}
-            fieldId={fieldId}
-            field={fields[fieldId]}
-            value={inputValues[fieldId] as FieldValue}
-            update={updateField}
-          />
-        ))}
+        {fieldOrder.map(fieldId => {
+          const field = fields[fieldId]
+          const value = inputValues[fieldId]
+          const fieldWithValue = { ...field, value } as RawFieldAndValue
+          return (
+            <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+              {fieldService.input(fieldWithValue, fieldId, updateField)}
+            </View>
+          )
+        })}
       </ScrollableModalLayout>
     </Modal>
   )
