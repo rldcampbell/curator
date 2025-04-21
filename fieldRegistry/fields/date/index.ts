@@ -1,7 +1,7 @@
 import { DateArray } from "@/app/types"
 import DateFieldInput from "@/components/FieldInput/DateFieldInput"
 
-import { FieldDefinition } from "../types"
+import { FieldDefinition } from "../../types"
 
 const def: FieldDefinition<"date"> = {
   label: "Date",

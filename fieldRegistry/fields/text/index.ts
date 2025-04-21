@@ -1,8 +1,7 @@
 import { FieldType } from "@/app/types"
 import TextFieldInput from "@/components/FieldInput/TextFieldInput"
-
-import { FieldDefinition } from "../types"
-import { TextDisplay } from "./display"
+import { TextDisplay } from "@/fieldRegistry/display/TextDisplay"
+import { FieldDefinition } from "@/fieldRegistry/types"
 
 const validate = (value: unknown): value is string => typeof value === "string"
 
@@ -17,6 +16,7 @@ const convertTo = (value: string | undefined, target: FieldType): any => {
       return isNaN(num) ? undefined : num
     }
     case FieldType.Date: {
+      // TODO: make sure have appropriate date array helpers - and use them!
       const date = new Date(value)
       return isNaN(date.getTime())
         ? undefined

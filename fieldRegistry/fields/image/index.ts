@@ -1,6 +1,6 @@
 import ImageFieldInput from "@/components/FieldInput/ImageFieldInput"
 
-import { FieldDefinition } from "../types"
+import { FieldDefinition } from "../../types"
 
 const def: FieldDefinition<"image"> = {
   label: "Image",

@@ -10,10 +10,10 @@
  */
 import { FieldType } from "@/app/types"
 
-import date from "./date"
-import image from "./image"
-import number from "./number"
-import { text } from "./text"
+import date from "./fields/date"
+import image from "./fields/image"
+import { number } from "./fields/number"
+import { text } from "./fields/text"
 import { FieldDefinition } from "./types"
 
 export const fieldRegistry = {
