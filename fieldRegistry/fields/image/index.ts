@@ -1,15 +1,20 @@
+import { FieldType } from "@/app/types"
 import ImageFieldInput from "@/components/FieldInput/ImageFieldInput"
+import { ImageDisplay } from "@/fieldRegistry/display/ImageDisplay"
+import { FieldDefinition } from "@/fieldRegistry/types"
 
-import { FieldDefinition } from "../../types"
+const validate = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every(v => typeof v === "string")
 
-const def: FieldDefinition<"image"> = {
-  label: "Image",
-  defaultValue: [],
-  display: ({}) => null,
-  input: ImageFieldInput,
-  validate: (value: unknown): value is string[] =>
-    Array.isArray(value) && value.every(v => typeof v === "string"),
-  convertTo: () => undefined,
+const convertTo = (_value: string[] | undefined, _target: FieldType): any => {
+  return undefined
 }
 
-export default def
+export const image: FieldDefinition<"image"> = {
+  label: "Image",
+  defaultValue: [],
+  display: ImageDisplay,
+  input: ImageFieldInput,
+  validate,
+  convertTo,
+}

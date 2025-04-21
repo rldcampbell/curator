@@ -10,8 +10,8 @@
  */
 import { FieldType } from "@/app/types"
 
-import date from "./fields/date"
-import image from "./fields/image"
+import { date } from "./fields/date"
+import { image } from "./fields/image"
 import { number } from "./fields/number"
 import { text } from "./fields/text"
 import { FieldDefinition } from "./types"

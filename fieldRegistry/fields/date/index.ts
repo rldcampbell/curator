@@ -1,18 +1,35 @@
-import { DateArray } from "@/app/types"
+import { DateArray, FieldType } from "@/app/types"
 import DateFieldInput from "@/components/FieldInput/DateFieldInput"
+import { DateDisplay } from "@/fieldRegistry/display/DateDisplay"
+import { FieldDefinition } from "@/fieldRegistry/types"
+import { dateArrayToUTCDate, formatDate } from "@/helpers"
 
-import { FieldDefinition } from "../../types"
+const validate = (value: unknown): value is DateArray =>
+  Array.isArray(value) &&
+  value.length === 3 &&
+  value.every(v => typeof v === "number")
 
-const def: FieldDefinition<"date"> = {
-  label: "Date",
-  defaultValue: [2000, 1, 1],
-  display: ({}) => null,
-  input: DateFieldInput,
-  validate: (value: unknown): value is DateArray =>
-    Array.isArray(value) &&
-    value.length === 3 &&
-    value.every(v => typeof v === "number"),
-  convertTo: () => undefined,
+const convertTo = (value: DateArray | undefined, target: FieldType): any => {
+  if (!value) return undefined
+  const date = dateArrayToUTCDate(value)
+
+  switch (target) {
+    case FieldType.Date:
+      return value
+    case FieldType.Text:
+      return formatDate(date)
+    case FieldType.Number:
+      return date.getTime()
+    case FieldType.Image:
+      return undefined
+  }
 }
 
-export default def
+export const date: FieldDefinition<"date"> = {
+  label: "Date",
+  defaultValue: [2024, 1, 1],
+  display: DateDisplay,
+  input: DateFieldInput,
+  validate,
+  convertTo,
+}
