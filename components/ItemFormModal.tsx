@@ -92,11 +92,12 @@ export default function ItemFormModal({
         {fieldOrder.map(fieldId => {
           const field = fields[fieldId]
           const value = inputValues[fieldId]
+
           return (
             <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
               {fieldService.input({
                 field,
-                value: isResolved(value) ? value : undefined,
+                initialValue: isResolved(value) ? value : undefined,
                 onChange: value => updateField(fieldId, value),
               })}
             </View>

@@ -2,11 +2,10 @@ import {
   FieldType,
   FieldValue,
   FieldValueMap,
-  RawField,
   RawFieldAndValue,
 } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
-import { FieldInputChangeHandler } from "@/fieldRegistry/types"
+import { InputProps } from "@/fieldRegistry/types"
 
 export const fieldService = {
   display<T extends FieldType>({
@@ -19,11 +18,7 @@ export const fieldService = {
     return fieldRegistry[type].display({ value })
   },
 
-  input<T extends FieldType>(props: {
-    value?: FieldValueMap[T]
-    field: Extract<RawField, { type: T }>
-    onChange: FieldInputChangeHandler<T>
-  }) {
+  input<T extends FieldType>(props: InputProps<T>) {
     return fieldRegistry[props.field.type].input(props)
   },
 
