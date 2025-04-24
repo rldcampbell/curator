@@ -1,37 +1,30 @@
 import {
-  FieldId,
   FieldType,
   FieldValue,
   FieldValueMap,
+  RawField,
   RawFieldAndValue,
 } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
-import { FieldDefinition, UpdateFn } from "@/fieldRegistry/types"
+import { FieldInputChangeHandler } from "@/fieldRegistry/types"
 
 export const fieldService = {
-  display(fieldWithValue: RawFieldAndValue) {
-    // Safe cast: field.type ensures the correct display function is selected from the registry,
-    // and field satisfies the expected structure for that type (guaranteed by the discriminated union).
-    const { type } = fieldWithValue
-    type T = typeof type
-    const entry = fieldRegistry[type] as FieldDefinition<T>
-
-    return entry.display(fieldWithValue)
+  display<T extends FieldType>({
+    type,
+    value,
+  }: {
+    type: T
+    value?: FieldValueMap[T]
+  }) {
+    return fieldRegistry[type].display({ value })
   },
 
-  input(fieldWithValue: RawFieldAndValue, fieldId: FieldId, update: UpdateFn) {
-    // Safe cast: fieldWithValue.type ensures the correct input component is selected from the registry,
-    // and the field object matches the expected input props for that type.
-    return (
-      fieldRegistry[fieldWithValue.type] as FieldDefinition<
-        typeof fieldWithValue.type
-      >
-    ).input({
-      fieldId,
-      value: fieldWithValue.value,
-      field: fieldWithValue,
-      update,
-    })
+  input<T extends FieldType>(props: {
+    value?: FieldValueMap[T]
+    field: Extract<RawField, { type: T }>
+    onChange: FieldInputChangeHandler<T>
+  }) {
+    return fieldRegistry[props.field.type].input(props)
   },
 
   defaultValue(type: FieldType): FieldValue {

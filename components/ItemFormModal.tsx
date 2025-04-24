@@ -5,8 +5,9 @@ import {
   FieldId,
   FieldValue,
   RawField,
-  RawFieldAndValue,
   RawItem,
+  Resolvable,
+  Resolved,
 } from "@/app/types"
 import { fieldService } from "@/services/fieldService"
 
@@ -23,6 +24,24 @@ type ItemFormModalProps = {
   onDiscard: () => void
 }
 
+const resolve = async <T,>(input: Resolvable<T>): Promise<T> => {
+  const result = typeof input === "function" ? input() : input
+
+  return await result
+}
+
+const resolveObjectValues = async <K extends string, V>(
+  obj: Record<K, Resolvable<V>>,
+): Promise<Record<K, V>> => {
+  const entries = await Promise.all(
+    Object.entries(obj).map(
+      async ([key, val]) => [key, await resolve(val)] as [K, V],
+    ),
+  )
+
+  return Object.fromEntries(entries) as Record<K, V>
+}
+
 export default function ItemFormModal({
   mode,
   visible,
@@ -34,35 +53,27 @@ export default function ItemFormModal({
 }: ItemFormModalProps) {
   // Allow values to be either actual field values or thunks (functions that return values)
   const [inputValues, setInputValues] = useState<
-    Record<FieldId, FieldValue | (() => FieldValue | Promise<FieldValue>)>
-  >({})
+    Record<FieldId, Resolvable<FieldValue>>
+  >(initialValues ?? {})
 
   useEffect(() => {
-    if (visible && mode === "edit" && initialValues) {
-      setInputValues(initialValues)
-    } else if (visible && mode === "create") {
-      setInputValues({})
+    if (visible) {
+      setInputValues(initialValues ?? {})
     }
-  }, [visible, mode, initialValues])
+  }, [visible, initialValues])
 
   // Store either a direct value or a thunk (function to be resolved later)
   const updateField = (
     id: FieldId,
-    value: FieldValue | (() => FieldValue | Promise<FieldValue>),
+    value: Resolvable<FieldValue | undefined>,
   ) => {
     setInputValues(prev => ({ ...prev, [id]: value }))
   }
 
   // Resolve all values, including any thunks, before submitting
   const handleSubmit = async () => {
-    const resolved: RawItem = {}
-    for (const [id, val] of Object.entries(inputValues)) {
-      if (typeof val === "function") {
-        resolved[id as FieldId] = await val()
-      } else {
-        resolved[id as FieldId] = val
-      }
-    }
+    const resolved = await resolveObjectValues(inputValues)
+
     onSubmit(resolved)
   }
 
@@ -81,14 +92,21 @@ export default function ItemFormModal({
         {fieldOrder.map(fieldId => {
           const field = fields[fieldId]
           const value = inputValues[fieldId]
-          const fieldWithValue = { ...field, value } as RawFieldAndValue
           return (
             <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-              {fieldService.input(fieldWithValue, fieldId, updateField)}
+              {fieldService.input({
+                field,
+                value: isResolved(value) ? value : undefined,
+                onChange: value => updateField(fieldId, value),
+              })}
             </View>
           )
         })}
       </ScrollableModalLayout>
     </Modal>
   )
+}
+
+export function isResolved<T>(val: Resolvable<T>): val is Resolved<T> {
+  return typeof val !== "function" && !(val instanceof Promise)
 }

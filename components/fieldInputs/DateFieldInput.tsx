@@ -13,12 +13,12 @@ import AppText from "../AppText"
 import FieldWrapper from "./FieldWrapper"
 
 export default function DateFieldInput({
-  fieldId,
   field,
-  value,
-  update,
+  initialValue,
+  onChange,
 }: InputProps<typeof FieldType.Date>) {
   const [showPicker, setShowPicker] = useState(false)
+  const [value, setValue] = useState(initialValue)
 
   return (
     <FieldWrapper label={field.name}>
@@ -41,7 +41,9 @@ export default function DateFieldInput({
           onChange={(_, selectedDate) => {
             setShowPicker(false)
             if (selectedDate) {
-              update(fieldId, dateToDateArray(selectedDate))
+              const dateArray = dateToDateArray(selectedDate)
+              setValue(dateArray)
+              onChange(dateArray)
             }
           }}
         />

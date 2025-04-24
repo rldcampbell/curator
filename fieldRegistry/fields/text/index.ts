@@ -1,5 +1,5 @@
 import { FieldType } from "@/app/types"
-import TextFieldInput from "@/components/FieldInput/TextFieldInput"
+import TextFieldInput from "@/components/fieldInputs/TextFieldInput"
 import { TextDisplay } from "@/fieldRegistry/display/TextDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
 

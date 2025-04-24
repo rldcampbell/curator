@@ -1,5 +1,5 @@
 import { FieldType } from "@/app/types"
-import ImageFieldInput from "@/components/FieldInput/ImageFieldInput"
+import ImageFieldInput from "@/components/fieldInputs/ImageFieldInput"
 import { ImageDisplay } from "@/fieldRegistry/display/ImageDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
 

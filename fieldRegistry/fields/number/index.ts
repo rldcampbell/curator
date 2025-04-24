@@ -1,5 +1,5 @@
 import { FieldType } from "@/app/types"
-import NumberFieldInput from "@/components/FieldInput/NumberFieldInput"
+import NumberFieldInput from "@/components/fieldInputs/NumberFieldInput"
 import { NumberDisplay } from "@/fieldRegistry/display/NumberDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
 import { dateToDateArray } from "@/helpers"

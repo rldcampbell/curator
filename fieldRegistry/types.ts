@@ -1,4 +1,4 @@
-import { FieldId, FieldType, FieldValueMap, RawField } from "@/app/types"
+import { FieldType, FieldValueMap, RawField, Resolvable } from "@/app/types"
 
 /**
  * FieldDefinition<T>
@@ -30,16 +30,12 @@ export type FieldDefinition<T extends FieldType> = {
   ) => FieldValueMap[U] | undefined
 }
 
-export type UpdateFn<T extends FieldType = FieldType> = (
-  fieldId: FieldId,
-  value:
-    | FieldValueMap[T]
-    | (() => FieldValueMap[T] | Promise<FieldValueMap[T]>),
+export type FieldInputChangeHandler<T extends FieldType> = (
+  value: Resolvable<FieldValueMap[T] | undefined>,
 ) => void
 
 export type InputProps<T extends FieldType> = {
-  fieldId: FieldId
-  value?: FieldValueMap[T]
+  initialValue?: FieldValueMap[T]
   field: Extract<RawField, { type: T }>
-  update: UpdateFn<T>
+  onChange: FieldInputChangeHandler<T>
 }

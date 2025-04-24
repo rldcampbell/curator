@@ -1,5 +1,5 @@
 import { DateArray, FieldType } from "@/app/types"
-import DateFieldInput from "@/components/FieldInput/DateFieldInput"
+import DateFieldInput from "@/components/fieldInputs/DateFieldInput"
 import { DateDisplay } from "@/fieldRegistry/display/DateDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
 import { dateArrayToUTCDate, formatDate } from "@/helpers"

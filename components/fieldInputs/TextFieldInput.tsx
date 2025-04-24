@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { TextInput } from "react-native"
 
 import { FieldType } from "@/app/types"
@@ -8,18 +9,22 @@ import { sharedStyles } from "@/styles/sharedStyles"
 import FieldWrapper from "./FieldWrapper"
 
 export default function TextFieldInput({
-  fieldId,
   field,
-  value,
-  update,
+  initialValue,
+  onChange,
 }: InputProps<typeof FieldType.Text>) {
+  const [value, setValue] = useState(initialValue ?? "")
+
   return (
     <FieldWrapper label={field.name}>
       <TextInput
         style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
         placeholder={field.name}
         value={value}
-        onChangeText={text => update(fieldId, text)}
+        onChangeText={text => {
+          setValue(text)
+          onChange(text)
+        }}
       />
     </FieldWrapper>
   )

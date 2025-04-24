@@ -99,3 +99,9 @@ export type CollectionsData = {
   collectionOrder: CollectionId[]
   collections: Record<CollectionId, Collection>
 }
+
+export type Resolvable<T> = [T] extends [Function]
+  ? never
+  : T | Promise<T> | (() => T | Promise<T>)
+
+export type Resolved<T> = Exclude<Resolvable<T>, Function | Promise<any>>
