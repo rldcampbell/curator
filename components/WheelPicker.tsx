@@ -5,8 +5,8 @@ import * as Haptics from "expo-haptics"
 
 import AppText from "@/components/AppText"
 
-const ITEM_HEIGHT = 48
-const VISIBLE_ITEMS = 5
+const ITEM_HEIGHT = 30
+const VISIBLE_ITEMS = 4
 
 export type WheelPickerProps = {
   value: number | undefined
@@ -53,6 +53,7 @@ export const WheelPicker = ({
   const [measuredWidth, setMeasuredWidth] = useState<number | undefined>(
     undefined,
   )
+  const [currentIndex, setCurrentIndex] = useState<number>(0)
 
   const data = [
     ...(showUndefined ? [undefined] : []),
@@ -67,15 +68,27 @@ export const WheelPicker = ({
         index: initialIndex,
         animated: false,
       })
+      setCurrentIndex(initialIndex)
     }
   }, [initialIndex])
+
+  const onScroll = useCallback(
+    (event: any) => {
+      const offsetY = event.nativeEvent.contentOffset.y
+      const index = Math.round(offsetY / ITEM_HEIGHT)
+      if (index !== currentIndex) {
+        setCurrentIndex(index)
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      }
+    },
+    [currentIndex],
+  )
 
   const onMomentumScrollEnd = useCallback(
     (event: any) => {
       const offsetY = event.nativeEvent.contentOffset.y
       const index = Math.round(offsetY / ITEM_HEIGHT)
       const selectedValue = data[index]
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
       onChange(selectedValue)
     },
     [data, onChange],
@@ -85,7 +98,9 @@ export const WheelPicker = ({
     const isSelected = value === item
 
     return (
-      <View style={[styles.itemContainer]}>
+      <View
+        style={[styles.itemContainer, { width: "100%" }]} // Make active region full width
+      >
         <AppText
           weight={isSelected ? "semiBold" : "medium"}
           style={[styles.itemText, isSelected && styles.selectedItemText]}
@@ -97,9 +112,9 @@ export const WheelPicker = ({
   }
 
   return (
-    <View style={[styles.container, { width: (measuredWidth ?? 40) + 16 }]}>
-      {" "}
-      {/* small padding */}
+    <View
+      style={[styles.container, { width: (measuredWidth ?? 40) + 16 }]} // small padding
+    >
       <MeasureTextWidth
         text={generateWideSample(max)}
         onMeasure={setMeasuredWidth}
@@ -113,7 +128,13 @@ export const WheelPicker = ({
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
-        decelerationRate="fast"
+        snapToAlignment="center"
+        decelerationRate={0.998}
+        bounces={false}
+        directionalLockEnabled={true}
+        scrollEnabled={true}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         getItemLayout={(_, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
@@ -123,6 +144,7 @@ export const WheelPicker = ({
         contentContainerStyle={{
           paddingVertical: (ITEM_HEIGHT * (VISIBLE_ITEMS - 1)) / 2,
         }}
+        style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS, overflow: "hidden" }}
       />
       <AppText style={styles.label} weight="medium">
         {label}
