@@ -14,6 +14,7 @@ import FullPageLayout from "@/components/FullPageLayout"
 import { HeaderButton } from "@/components/HeaderButton"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
+import { collectionService } from "@/services/collectionService"
 
 export default function CollectionsScreen() {
   const {
@@ -69,6 +70,16 @@ export default function CollectionsScreen() {
                   params: { cId: item },
                 })
               },
+            },
+            {
+              icon: <Feather name="download" size={20} color="black" />,
+              onPress: () => {
+                const collection = collections[item]
+                if (collection) {
+                  collectionService.exportToCsvFile(collection)
+                }
+              },
+              backgroundColor: "#3498db", // blue
             },
             {
               icon: <Feather name="trash-2" size={20} color="black" />,
