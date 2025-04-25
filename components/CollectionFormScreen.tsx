@@ -17,7 +17,7 @@ import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
 import { changeSummary } from "@/helpers/collection"
-import { COLLECTION_COLORS, HexColor } from "@/helpers/color"
+import { COLLECTION_COLORS, HexColor, getPaleColor } from "@/helpers/color"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 type Props = {
@@ -156,25 +156,26 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
           {COLLECTION_COLORS.map(colorOption => {
             const isSelected = color === colorOption
+            const pale = getPaleColor(colorOption)
 
             return (
               <Pressable
                 key={colorOption}
                 onPress={() => {
                   if (isSelected) {
-                    setColor(undefined) // Clear if already selected
+                    setColor(undefined) // Deselect on second tap
                   } else {
                     setColor(colorOption)
                   }
                 }}
                 style={({ pressed }) => ({
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: colorOption,
-                  borderWidth: isSelected ? 3 : 1,
-                  borderColor: isSelected ? "#333" : "#ccc",
-                  opacity: pressed ? 0.7 : 1,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: isSelected ? colorOption : pale,
+                  borderWidth: 2,
+                  borderColor: colorOption,
+                  opacity: pressed ? 0.8 : 1,
                   marginRight: 8,
                   marginBottom: 8,
                 })}

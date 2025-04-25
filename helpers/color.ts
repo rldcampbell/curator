@@ -33,7 +33,7 @@ const getCollectionColor = (idOrName: string): CollectionColor => {
   return COLLECTION_COLORS[hash % COLLECTION_COLORS.length]
 }
 
-const getPaleColor = (hex: HexColor, alpha = 0.08): string => {
+export const getPaleColor = (hex: HexColor, alpha = 0.08): string => {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
@@ -42,7 +42,7 @@ const getPaleColor = (hex: HexColor, alpha = 0.08): string => {
 
 export const getCollectionColorScheme = (
   collectionId: CollectionId,
-  collection?: RawCollection,
+  collection?: Pick<RawCollection, "color">,
 ): {
   accent: HexColor
   background: string
