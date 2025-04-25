@@ -1,6 +1,8 @@
+import { CollectionId, RawCollection } from "@/app/types"
+
 export type HexColor = `#${string}`
 
-const COLLECTION_COLORS = [
+export const COLLECTION_COLORS = [
   "#FF6B6B", // bright coral red
   "#FFB84D", // golden orange
   "#FFD93D", // sunny yellow
@@ -31,7 +33,7 @@ const getCollectionColor = (idOrName: string): CollectionColor => {
   return COLLECTION_COLORS[hash % COLLECTION_COLORS.length]
 }
 
-const getPaleColor = (hex: HexColor, alpha = 0.08): string => {
+export const getPaleColor = (hex: HexColor, alpha = 0.08): string => {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
@@ -39,12 +41,13 @@ const getPaleColor = (hex: HexColor, alpha = 0.08): string => {
 }
 
 export const getCollectionColorScheme = (
-  idOrName: string,
+  collectionId: CollectionId,
+  collection?: Pick<RawCollection, "color">,
 ): {
   accent: HexColor
   background: string
 } => {
-  const accent = getCollectionColor(idOrName)
+  const accent = collection?.color ?? getCollectionColor(collectionId)
   const background = getPaleColor(accent)
   return { accent, background }
 }

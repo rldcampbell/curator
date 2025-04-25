@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { TextInput, View } from "react-native"
+import { Pressable, TextInput, View } from "react-native"
 import DraggableFlatList from "react-native-draggable-flatlist"
 
 import { router } from "expo-router"
@@ -17,6 +17,7 @@ import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
 import { changeSummary } from "@/helpers/collection"
+import { COLLECTION_COLORS, HexColor, getPaleColor } from "@/helpers/color"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 type Props = {
@@ -36,6 +37,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
   const [fields, setFields] = useState<Record<FieldId, RawField>>(
     existing?.fields ?? {},
   )
+  const [color, setColor] = useState<HexColor | undefined>(existing?.color)
 
   const [modalVisible, setModalVisible] = useState(false)
   const [modalMode, setModalMode] = useState<"create" | "edit">("create")
@@ -81,12 +83,18 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
 
   const handleSubmitCollection = () => {
     if (mode === "create") {
-      addCollection({ name: collectionName, fieldOrder, fields })
+      addCollection({
+        name: collectionName,
+        fieldOrder,
+        fields,
+        color,
+      })
     } else if (collectionId) {
       updateCollection(collectionId, () => ({
         name: collectionName,
         fieldOrder,
         fields,
+        color,
       }))
     }
     router.back()
@@ -106,6 +114,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         name: collectionName,
         fields,
         fieldOrder,
+        color,
       }).any)
 
   return (
@@ -139,6 +148,42 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         />
       }
     >
+      <View style={{ marginBottom: 16 }}>
+        <AppText weight="medium" style={{ marginBottom: 8 }}>
+          Choose a Color
+        </AppText>
+
+        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          {COLLECTION_COLORS.map(colorOption => {
+            const isSelected = color === colorOption
+            const pale = getPaleColor(colorOption)
+
+            return (
+              <Pressable
+                key={colorOption}
+                onPress={() => {
+                  if (isSelected) {
+                    setColor(undefined) // Deselect on second tap
+                  } else {
+                    setColor(colorOption)
+                  }
+                }}
+                style={({ pressed }) => ({
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: isSelected ? colorOption : pale,
+                  borderWidth: 2,
+                  borderColor: colorOption,
+                  opacity: pressed ? 0.8 : 1,
+                  marginRight: 8,
+                  marginBottom: 8,
+                })}
+              />
+            )
+          })}
+        </View>
+      </View>
       <DraggableFlatList
         ListFooterComponent={
           <View style={{ marginTop: 8, alignItems: "center" }}>

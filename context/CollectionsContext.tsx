@@ -15,7 +15,7 @@ import * as db from "@/services/database"
 
 export type CollectionInput = Pick<
   RawCollection,
-  "name" | "fields" | "fieldOrder"
+  "name" | "fields" | "fieldOrder" | "color"
 >
 
 type UpdateCollectionFn = (prev: RawCollection) => Partial<RawCollection>
@@ -96,7 +96,12 @@ export const CollectionsProvider = ({
     initializeData()
   }, [])
 
-  const addCollection = ({ name, fieldOrder, fields }: CollectionInput) => {
+  const addCollection = ({
+    name,
+    fieldOrder,
+    fields,
+    color,
+  }: CollectionInput) => {
     const collectionId = genCollectionId()
     console.log("[addCollection] Creating collection:", collectionId)
 
@@ -118,6 +123,7 @@ export const CollectionsProvider = ({
         name,
         fieldOrder,
         fields,
+        color,
       },
       { timestamp },
     )

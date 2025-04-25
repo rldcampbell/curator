@@ -13,6 +13,7 @@ import * as SQLite from "expo-sqlite"
 import * as Updates from "expo-updates"
 
 import { Collection, CollectionId, CollectionsData } from "@/app/types"
+import { HexColor } from "@/helpers/color"
 import { timestampNow } from "@/helpers/date"
 
 import { migrateDatabase } from "./migrations/runMigrations"
@@ -92,14 +93,16 @@ const upsertCollection = async (
 
   await db.runAsync(
     `INSERT OR REPLACE INTO collections (
-      id, name, field_order, fields, item_order, items, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  id, name, field_order, fields, item_order, items, color, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+`,
     id,
     name,
     stringify(fieldOrder),
     stringify(fields),
     stringify(itemOrder),
     stringify(items),
+    collection.color ?? null,
     createdAt,
     updatedAt ?? null,
   )
@@ -117,6 +120,7 @@ export const loadCollections = async (): Promise<CollectionsData> => {
     fields: string
     item_order: string
     items: string
+    color: string | null
     created_at: number
     updated_at: number
   }
@@ -134,6 +138,7 @@ export const loadCollections = async (): Promise<CollectionsData> => {
         fields: parse(row.fields),
         itemOrder: parse(row.item_order),
         items: parse(row.items),
+        color: (row.color as HexColor | null) ?? undefined,
         _meta: {
           createdAt: row.created_at,
           updatedAt: row.updated_at,
