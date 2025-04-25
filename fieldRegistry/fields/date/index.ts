@@ -1,29 +1,12 @@
-import { DateArray, FieldType } from "@/app/types"
+import { DateArray } from "@/app/types"
 import DateFieldInput from "@/components/fieldInputs/DateFieldInput"
 import { DateDisplay } from "@/fieldRegistry/display/DateDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
-import { dateArrayToUTCDate, formatDate } from "@/helpers"
 
 const validate = (value: unknown): value is DateArray =>
   Array.isArray(value) &&
   value.length === 3 &&
   value.every(v => typeof v === "number")
-
-const convertTo = (value: DateArray | undefined, target: FieldType): any => {
-  if (!value) return undefined
-  const date = dateArrayToUTCDate(value)
-
-  switch (target) {
-    case FieldType.Date:
-      return value
-    case FieldType.Text:
-      return formatDate(date)
-    case FieldType.Number:
-      return date.getTime()
-    case FieldType.Image:
-      return undefined
-  }
-}
 
 export const date: FieldDefinition<"date"> = {
   label: "Date",
@@ -31,5 +14,19 @@ export const date: FieldDefinition<"date"> = {
   display: DateDisplay,
   input: DateFieldInput,
   validate,
-  convertTo,
+  fromText: text => {
+    if (!text) return undefined
+
+    const match = text.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (!match) return undefined
+
+    const [, y, m, d] = match.map(Number)
+    return [y, m, d] as [number, number, number]
+  },
+  toText: value =>
+    value === undefined
+      ? undefined
+      : new Date(Date.UTC(value[0], value[1] - 1, value[2]))
+          .toISOString()
+          .slice(0, 10), // "YYYY-MM-DD"
 }

@@ -9,6 +9,7 @@ import {
 import DropDownPicker from "react-native-dropdown-picker"
 
 import { FieldType } from "@/app/types"
+import { fieldRegistry } from "@/fieldRegistry"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -36,12 +37,12 @@ export default function FieldFormModal({
   const [open, setOpen] = useState(false)
   const [fieldName, setFieldName] = useState("")
   const [fieldType, setFieldType] = useState<FieldType>(FieldType.Text)
-  const [items, setItems] = useState([
-    { label: "Text", value: FieldType.Text },
-    { label: "Number", value: FieldType.Number },
-    { label: "Date", value: FieldType.Date },
-    { label: "Image", value: FieldType.Image },
-  ])
+  const [items, setItems] = useState(
+    Object.entries(fieldRegistry).map(([type, { label }]) => ({
+      label,
+      value: type as FieldType,
+    })),
+  )
 
   const inputRef = useRef<TextInput>(null)
 

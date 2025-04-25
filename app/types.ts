@@ -10,19 +10,21 @@ export type DateArray = [y: number, m: number, d: number]
 export type Timestamp = number
 
 export const FieldType = {
-  Text: "text",
-  Number: "number",
+  Boolean: "boolean",
   Date: "date",
   Image: "image",
+  Number: "number",
+  Text: "text",
 } as const
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 
 export type FieldValueMap = {
-  [FieldType.Text]: string
-  [FieldType.Number]: number
+  [FieldType.Boolean]: boolean
   [FieldType.Date]: DateArray
   [FieldType.Image]: string[]
+  [FieldType.Number]: number
+  [FieldType.Text]: string
 }
 
 export type FieldValue = FieldValueMap[FieldType]
@@ -38,18 +40,9 @@ type RawBaseField = {
   name: string
 }
 
-type RawTextFieldAndValue = RawBaseField & {
-  type: typeof FieldType.Text
-  value?: FieldValueMap[typeof FieldType.Text]
-  charLim?: number
-}
-
-type RawNumberFieldAndValue = RawBaseField & {
-  type: typeof FieldType.Number
-  value?: FieldValueMap[typeof FieldType.Number]
-  min?: number
-  max?: number
-  // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
+type RawBooleanFieldAndValue = RawBaseField & {
+  type: typeof FieldType.Boolean
+  value?: FieldValueMap[typeof FieldType.Boolean]
 }
 
 type RawDateFieldAndValue = RawBaseField & {
@@ -65,7 +58,22 @@ type RawImageFieldAndValue = RawBaseField & {
   max?: number // future: UI might restrict how many images can be selected
 }
 
+type RawNumberFieldAndValue = RawBaseField & {
+  type: typeof FieldType.Number
+  value?: FieldValueMap[typeof FieldType.Number]
+  min?: number
+  max?: number
+  // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
+}
+
+type RawTextFieldAndValue = RawBaseField & {
+  type: typeof FieldType.Text
+  value?: FieldValueMap[typeof FieldType.Text]
+  charLim?: number
+}
+
 export type RawFieldAndValue =
+  | RawBooleanFieldAndValue
   | RawTextFieldAndValue
   | RawNumberFieldAndValue
   | RawDateFieldAndValue

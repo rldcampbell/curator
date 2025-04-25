@@ -16,6 +16,7 @@
  */
 import { FieldType } from "@/app/types"
 
+import { boolean } from "./fields/boolean"
 import { date } from "./fields/date"
 import { image } from "./fields/image"
 import { number } from "./fields/number"
@@ -25,8 +26,9 @@ import { FieldDefinition } from "./types"
 export const fieldRegistry: {
   [K in FieldType]: FieldDefinition<K>
 } = {
-  text,
-  number,
+  boolean,
   date,
   image,
+  number,
+  text,
 }
