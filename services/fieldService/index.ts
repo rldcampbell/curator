@@ -1,9 +1,4 @@
-import {
-  FieldType,
-  FieldValue,
-  FieldValueMap,
-  RawFieldAndValue,
-} from "@/app/types"
+import { FieldType, FieldValue, FieldValueMap } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
 import { InputProps } from "@/fieldRegistry/types"
 
@@ -31,15 +26,17 @@ export const fieldService = {
     return validator ? validator(value) : true
   },
 
-  convertTo<T extends FieldType>(
-    fieldWithValue: RawFieldAndValue,
-    to: T,
+  fromText<T extends FieldType>(
+    type: T,
+    value: string | undefined,
   ): FieldValueMap[T] | undefined {
-    // Safe cast: field.type selects the correct convertTo function,
-    // and value matches the expected type for that function.
-    return fieldRegistry[fieldWithValue.type].convertTo(
-      fieldWithValue.value as any,
-      to,
-    )
+    return fieldRegistry[type].fromText(value)
+  },
+
+  toText<T extends FieldType>(
+    type: T,
+    value: FieldValueMap[T] | undefined,
+  ): string | undefined {
+    return fieldRegistry[type].toText(value)
   },
 }
