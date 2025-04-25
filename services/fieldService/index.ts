@@ -39,4 +39,12 @@ export const fieldService = {
   ): string | undefined {
     return fieldRegistry[type].toText(value)
   },
+
+  convert<From extends FieldType, To extends FieldType>(
+    from: From,
+    to: To,
+    value: FieldValueMap[From] | undefined,
+  ): FieldValueMap[To] | undefined {
+    return fieldService.fromText(to, fieldService.toText(from, value))
+  },
 }
