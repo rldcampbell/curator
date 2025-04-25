@@ -69,6 +69,10 @@ export const patchCollection = (
   const name = incoming.name ?? existing.name
   const fieldOrder = incoming.fieldOrder ?? existing.fieldOrder
   const itemOrder = incoming.itemOrder ?? existing.itemOrder
+  const color = "color" in incoming ? incoming.color : existing.color // to be able to clear!
+  // TODO: a lot of this logic might need a real clean-up as it has been
+  // difficult adding the ability to choose a colour for a collection
+  // when it feels like it should be pretty straight-forward
 
   // Merge fields
   const mergedFields = incoming.fields
@@ -86,7 +90,8 @@ export const patchCollection = (
     (incoming.fieldOrder && !isEqual(fieldOrder, existing.fieldOrder)) ||
     (incoming.itemOrder && !isEqual(itemOrder, existing.itemOrder)) ||
     (incoming.fields && !isEqual(mergedFields, existing.fields)) ||
-    (incoming.items && !isEqual(mergedItems, existing.items))
+    (incoming.items && !isEqual(mergedItems, existing.items)) ||
+    color !== existing.color
 
   return {
     name,
@@ -94,6 +99,7 @@ export const patchCollection = (
     itemOrder,
     fields: mergedFields,
     items: mergedItems,
+    color,
     _meta: {
       ...existing._meta,
       updatedAt: changed ? timestamp : existing._meta.updatedAt,

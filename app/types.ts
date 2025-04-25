@@ -1,3 +1,5 @@
+import { HexColor } from "@/helpers/color"
+
 export type RawId = `${string}-${string}-${string}-${string}` // future: https://github.com/microsoft/TypeScript/issues/41160
 
 export type CollectionId = `c-${RawId}`
@@ -93,6 +95,7 @@ export type RawCollection = {
   fields: Record<FieldId, RawField>
   itemOrder: ItemId[]
   items: Record<ItemId, RawItem>
+  color?: HexColor
 }
 
 export type Collection = WithMeta<{
@@ -101,6 +104,7 @@ export type Collection = WithMeta<{
   fields: Record<FieldId, Field>
   itemOrder: ItemId[]
   items: Record<ItemId, Item>
+  color?: HexColor
 }>
 
 export type CollectionsData = {

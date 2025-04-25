@@ -9,6 +9,7 @@ export function changeSummary(
     name: original.name !== edited.name,
     fields: false,
     fieldOrder: false,
+    color: original.color !== edited.color,
     any: false,
   }
 
@@ -39,7 +40,7 @@ export function changeSummary(
     result.fieldOrder = true
   }
 
-  result.any = result.name || result.fields || result.fieldOrder
+  result.any = result.name || result.fields || result.fieldOrder || result.color
 
   return result
 }
