@@ -51,13 +51,8 @@ export function isoDurationToDateTimeArray(
   if (sAndMs !== undefined) {
     const [sPart, msPart] = sAndMs.split(".")
 
-    if (sPart) {
-      s = parseInt(sPart, 10)
-    }
-
-    if (msPart) {
-      ms = parseInt(msPart.padEnd(3, "0"), 10)
-    }
+    if (sPart) s = parseInt(sPart, 10)
+    if (msPart) ms = parseInt(msPart.padEnd(3, "0"), 10)
   }
 
   return [y, m, d, h, min, s, ms]
