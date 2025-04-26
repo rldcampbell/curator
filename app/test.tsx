@@ -4,15 +4,20 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native"
 
 import * as SQLite from "expo-sqlite"
 
+import AppText from "@/components/AppText"
+import MultiWheelPicker from "@/components/MultiWheelPicker"
+
+// adjust path if needed
+
 const TestScreen = () => {
   const [rows, setRows] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [testTime, setTestTime] = useState<(number | undefined)[]>([0, 0, 0])
 
   useEffect(() => {
     fetchTable()
@@ -33,19 +38,41 @@ const TestScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.testPickerContainer}>
+        <AppText style={styles.testTitle}>
+          ⏰ Test Picker (Hours, Minutes, Seconds)
+        </AppText>
+        <MultiWheelPicker
+          pickers={[
+            { min: 0, max: 999, label: "hrs" },
+            { min: 0, max: 59, label: "min" },
+            { min: 0, max: 59, label: "sec" },
+          ]}
+          value={testTime}
+          onChange={setTestTime}
+          gap={12}
+        />
+        <AppText style={styles.testValue}>
+          Selected: {testTime.join(" : ")}
+        </AppText>
+      </View>
+
       <View style={styles.header}>
-        <Text style={styles.title}>📦 collections Table</Text>
+        <AppText style={styles.title}>📦 collections Table</AppText>
         <Button title="Refresh" onPress={fetchTable} />
       </View>
+
       <ScrollView contentContainerStyle={styles.scroll}>
-        {error && <Text style={styles.error}>Error: {error}</Text>}
+        {error && <AppText style={styles.error}>Error: {error}</AppText>}
         {rows.map((row, index) => (
           <View key={index} style={styles.row}>
-            <Text style={styles.json}>{JSON.stringify(row, null, 2)}</Text>
+            <AppText style={styles.json}>
+              {JSON.stringify(row, null, 2)}
+            </AppText>
           </View>
         ))}
         {rows.length === 0 && !error && (
-          <Text style={styles.noRows}>No collections found</Text>
+          <AppText style={styles.noRows}>No collections found</AppText>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -92,5 +119,21 @@ const styles = StyleSheet.create({
   noRows: {
     fontStyle: "italic",
     color: "#888",
+  },
+  testPickerContainer: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ccc",
+  },
+  testTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  testValue: {
+    marginTop: 12,
+    fontSize: 16,
+    fontFamily: "Courier",
+    textAlign: "center",
   },
 })
