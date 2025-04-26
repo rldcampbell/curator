@@ -29,7 +29,7 @@ export function isoDurationToDateTimeArray(
   text: string,
 ): DateTimeArray | undefined {
   const regex =
-    /^P(?:([\d]+)Y)?(?:([\d]+)M)?(?:([\d]+)D)?(?:T(?:([\d]+)H)?(?:([\d]+)M)?(?:([\d]*(?:\.\d+)?)S)?)?$/
+    /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d*(?:\.\d+)?)S)?)?$/
 
   const match = text.match(regex)
 
