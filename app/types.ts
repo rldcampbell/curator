@@ -18,13 +18,24 @@ export type DateTimeArray = [
   ms?: number,
 ]
 
+type DateTimeParts = [
+  year: boolean,
+  month: boolean,
+  day: boolean,
+  hour: boolean,
+  minute: boolean,
+  second: boolean,
+  ms: boolean,
+]
+
 /** Epoch ms */
 export type Timestamp = number
 
 export const FieldType = {
   Boolean: "boolean",
-  Date: "date",
+  Date: "date", // to deprecate
   DateTime: "datetime",
+  Duration: "duration",
   Image: "image",
   Number: "number",
   Text: "text",
@@ -36,6 +47,7 @@ export type FieldValueMap = {
   [FieldType.Boolean]: boolean
   [FieldType.Date]: DateArray
   [FieldType.DateTime]: DateTimeArray
+  [FieldType.Duration]: DateTimeArray
   [FieldType.Image]: string[]
   [FieldType.Number]: number
   [FieldType.Text]: string
@@ -69,16 +81,13 @@ type RawDateFieldAndValue = RawBaseField & {
 type RawDateTimeFieldAndValue = RawBaseField & {
   type: typeof FieldType.DateTime
   value?: FieldValueMap[typeof FieldType.DateTime]
-  mode: "datetime" | "duration"
-  parts: [
-    year: boolean,
-    month: boolean,
-    day: boolean,
-    hour: boolean,
-    minute: boolean,
-    second: boolean,
-    ms: boolean,
-  ]
+  parts: DateTimeParts
+}
+
+type RawDurationFieldAndValue = RawBaseField & {
+  type: typeof FieldType.Duration
+  value?: FieldValueMap[typeof FieldType.Duration]
+  parts: DateTimeParts
 }
 
 type RawImageFieldAndValue = RawBaseField & {
@@ -105,6 +114,7 @@ export type RawFieldAndValue =
   | RawBooleanFieldAndValue
   | RawDateFieldAndValue
   | RawDateTimeFieldAndValue
+  | RawDurationFieldAndValue
   | RawImageFieldAndValue
   | RawNumberFieldAndValue
   | RawTextFieldAndValue
