@@ -247,15 +247,17 @@ describe("Duration Roundtrip Tests", () => {
   it("round-trips text ➔ array ➔ text correctly", () => {
     for (const [text] of roundtripCases) {
       const parsed = isoDurationToDateTimeArray(text)
-      const serialized = dateTimeArrayToIsoDuration(parsed)
+      const serialized = parsed ? dateTimeArrayToIsoDuration(parsed) : undefined
       expect(serialized).toBe(text)
     }
   })
 
   it("round-trips array ➔ text ➔ array correctly", () => {
     for (const [, array] of roundtripCases) {
-      const serialized = dateTimeArrayToIsoDuration(array)
-      const parsed = isoDurationToDateTimeArray(serialized)
+      const serialized = array ? dateTimeArrayToIsoDuration(array) : undefined
+      const parsed = serialized
+        ? isoDurationToDateTimeArray(serialized)
+        : undefined
       expect(parsed).toEqual(array)
     }
   })
