@@ -8,12 +8,23 @@ export type ItemId = `i-${RawId}`
 
 export type DateArray = [y: number, m: number, d: number]
 
+export type DateTimeArray = [
+  year?: number,
+  month?: number,
+  day?: number,
+  hour?: number,
+  minute?: number,
+  second?: number,
+  ms?: number,
+]
+
 /** Epoch ms */
 export type Timestamp = number
 
 export const FieldType = {
   Boolean: "boolean",
   Date: "date",
+  DateTime: "datetime",
   Image: "image",
   Number: "number",
   Text: "text",
@@ -24,6 +35,7 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 export type FieldValueMap = {
   [FieldType.Boolean]: boolean
   [FieldType.Date]: DateArray
+  [FieldType.DateTime]: DateTimeArray
   [FieldType.Image]: string[]
   [FieldType.Number]: number
   [FieldType.Text]: string
@@ -54,6 +66,21 @@ type RawDateFieldAndValue = RawBaseField & {
   max?: DateArray
 }
 
+type RawDateTimeFieldAndValue = RawBaseField & {
+  type: typeof FieldType.DateTime
+  value?: FieldValueMap[typeof FieldType.DateTime]
+  mode: "datetime" | "duration"
+  parts: [
+    year: boolean,
+    month: boolean,
+    day: boolean,
+    hour: boolean,
+    minute: boolean,
+    second: boolean,
+    ms: boolean,
+  ]
+}
+
 type RawImageFieldAndValue = RawBaseField & {
   type: typeof FieldType.Image
   value?: FieldValueMap[typeof FieldType.Image]
@@ -76,10 +103,11 @@ type RawTextFieldAndValue = RawBaseField & {
 
 export type RawFieldAndValue =
   | RawBooleanFieldAndValue
-  | RawTextFieldAndValue
-  | RawNumberFieldAndValue
   | RawDateFieldAndValue
+  | RawDateTimeFieldAndValue
   | RawImageFieldAndValue
+  | RawNumberFieldAndValue
+  | RawTextFieldAndValue
 
 type OmitFromUnion<T, K extends keyof any> = T extends any ? Omit<T, K> : never
 
