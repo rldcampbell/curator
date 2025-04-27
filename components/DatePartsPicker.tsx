@@ -55,16 +55,18 @@ export default function DatePartsPicker({
 
   const handleMaxChange = (value: (prevState: PartIndex) => PartIndex) => {
     const newMax = value(maxPart)
-    const adjustedMax = Math.min(newMax, minPart) as PartIndex
-    setMaxPart(adjustedMax)
-    updateParts(adjustedMax, minPart)
+    const adjustedMin = Math.max(newMax, minPart) as PartIndex
+    setMaxPart(newMax)
+    setMinPart(adjustedMin)
+    updateParts(newMax, adjustedMin)
   }
 
   const handleMinChange = (value: (prevState: PartIndex) => PartIndex) => {
     const newMin = value(minPart)
-    const adjustedMin = Math.max(newMin, maxPart) as PartIndex
-    setMinPart(adjustedMin)
-    updateParts(maxPart, adjustedMin)
+    const adjustedMax = Math.min(newMin, maxPart) as PartIndex
+    setMinPart(newMin)
+    setMaxPart(adjustedMax)
+    updateParts(adjustedMax, newMin)
   }
 
   const dropdownItems = KEYS.map((key, i) => ({ label: LABELS[i], value: key }))
