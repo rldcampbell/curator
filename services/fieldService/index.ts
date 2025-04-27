@@ -1,6 +1,6 @@
 import { FieldType, FieldValue, FieldValueMap } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
-import { InputProps } from "@/fieldRegistry/types"
+import { ConfigInputProps, InputProps } from "@/fieldRegistry/types"
 
 export const fieldService = {
   display<T extends FieldType>({
@@ -15,6 +15,13 @@ export const fieldService = {
 
   input<T extends FieldType>(props: InputProps<T>) {
     return fieldRegistry[props.field.type].input(props)
+  },
+
+  configInput<T extends FieldType>({
+    type,
+    ...props
+  }: { type: T } & ConfigInputProps<T>) {
+    return fieldRegistry[type].configInput?.(props) ?? null
   },
 
   defaultValue(type: FieldType): FieldValue {

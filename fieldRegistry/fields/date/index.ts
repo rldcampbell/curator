@@ -11,6 +11,7 @@ const validate = (value: unknown): value is DateArray =>
 export const date: FieldDefinition<"date"> = {
   label: "Date",
   defaultValue: [2024, 1, 1],
+  defaultConfig: {},
   display: DateDisplay,
   input: DateFieldInput,
   validate,

@@ -1,4 +1,4 @@
-import { DateTimeArray } from "@/app/types"
+import { DateTimeArray, DateTimeParts } from "@/app/types"
 
 export const timestampNow = () => Date.now()
 
@@ -57,3 +57,62 @@ export function isoDurationToDateTimeArray(
 
   return [y, m, d, h, min, s, ms]
 }
+
+export const safeDateTimeArrayToUTCDate = (
+  arr: DateTimeArray,
+  fallback?: DateTimeArray,
+): Date => {
+  const [
+    year = fallback?.[0] ?? 2000,
+    month = fallback?.[1] ?? 1,
+    day = fallback?.[2] ?? 1,
+    hour = fallback?.[3] ?? 0,
+    minute = fallback?.[4] ?? 0,
+    second = fallback?.[5] ?? 0,
+    ms = fallback?.[6] ?? 0,
+  ] = arr
+  return new Date(Date.UTC(year, month - 1, day, hour, minute, second, ms))
+}
+
+export const formatDateTimeArray = (
+  value: DateTimeArray,
+  parts: DateTimeParts = [true, true, true, true, true, true, true],
+): string => {
+  const [year, month, day, hour, minute, second, ms] = value.map((v, i) =>
+    parts[i] ? v : undefined,
+  )
+  const resultArray: string[] = []
+
+  if (year !== undefined) resultArray.push(year.toString())
+  if (month !== undefined)
+    resultArray.push(MONTHS[month - 1] ?? month.toString())
+  if (day !== undefined) resultArray.push(day.toString())
+
+  const timeArray: string[] = []
+  if (hour !== undefined) timeArray.push(hour.toString().padStart(2, "0"))
+  if (minute !== undefined) timeArray.push(minute.toString().padStart(2, "0"))
+  if (second !== undefined) timeArray.push(second.toString().padStart(2, "0"))
+
+  let timeString = timeArray.join(":")
+  if (ms !== undefined) {
+    timeString += `.${ms.toString().padStart(3, "0")}`
+  }
+  resultArray.push(timeString)
+
+  return resultArray.join(" ")
+}
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+]

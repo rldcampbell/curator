@@ -23,6 +23,9 @@ export const modalStyles = StyleSheet.create({
   addButton: {
     backgroundColor: "#e0f7fa",
   },
+  clearButton: {
+    backgroundColor: "#fff8e1",
+  },
   closeButton: {
     backgroundColor: "#eee",
   },

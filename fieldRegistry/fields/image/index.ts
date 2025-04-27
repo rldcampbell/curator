@@ -8,6 +8,7 @@ const validate = (value: unknown): value is string[] =>
 export const image: FieldDefinition<"image"> = {
   label: "Image",
   defaultValue: [],
+  defaultConfig: {},
   display: ImageDisplay,
   input: ImageFieldInput,
   validate,

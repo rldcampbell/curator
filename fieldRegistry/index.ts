@@ -18,6 +18,8 @@ import { FieldType } from "@/app/types"
 
 import { boolean } from "./fields/boolean"
 import { date } from "./fields/date"
+import { datetime } from "./fields/datetime"
+import { duration } from "./fields/duration"
 import { image } from "./fields/image"
 import { number } from "./fields/number"
 import { text } from "./fields/text"
@@ -28,6 +30,8 @@ export const fieldRegistry: {
 } = {
   boolean,
   date,
+  datetime,
+  duration,
   image,
   number,
   text,

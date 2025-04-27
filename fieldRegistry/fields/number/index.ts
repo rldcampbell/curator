@@ -8,6 +8,7 @@ const validate = (value: unknown): value is number =>
 export const number: FieldDefinition<"number"> = {
   label: "Number",
   defaultValue: 0,
+  defaultConfig: {},
   display: NumberDisplay,
   input: NumberFieldInput,
   validate,
