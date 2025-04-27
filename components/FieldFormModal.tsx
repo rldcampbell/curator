@@ -8,9 +8,8 @@ import {
 } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
-import { FieldType } from "@/app/types"
+import { FieldType, RawField } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
-import { ConfigInputProps } from "@/fieldRegistry/types"
 import { fieldService } from "@/services/fieldService"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -22,10 +21,10 @@ import ModalButtonRow from "./ModalButtonRow"
 type FieldFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
-  initialValues?: { name: string; type: FieldType }
+  initialValues?: RawField
   typeUpdateDisabled?: boolean
   onClose: () => void
-  onSubmit: (field: { name: string; type: FieldType; config: {} }) => void
+  onSubmit: (field: RawField) => void
 }
 
 export default function FieldFormModal({
@@ -37,11 +36,13 @@ export default function FieldFormModal({
   onSubmit,
 }: FieldFormModalProps) {
   const [open, setOpen] = useState(false)
-  const [fieldName, setFieldName] = useState("")
-  const [fieldType, setFieldType] = useState<FieldType>(FieldType.Text)
-  const [fieldConfig, setFieldConfig] = useState(
-    fieldRegistry[fieldType].defaultConfig,
-  )
+
+  const [field, setField] = useState<RawField>({
+    name: "",
+    type: FieldType.Text,
+    config: fieldRegistry[FieldType.Text].defaultConfig,
+  })
+
   const [items, setItems] = useState(
     Object.entries(fieldRegistry).map(([type, { label }]) => ({
       label,
@@ -51,15 +52,17 @@ export default function FieldFormModal({
 
   const inputRef = useRef<TextInput>(null)
 
-  // Populate or reset values on modal open
+  // Populate or reset field on modal open
   useEffect(() => {
     if (visible) {
       if (mode === "edit" && initialValues) {
-        setFieldName(initialValues.name)
-        setFieldType(initialValues.type)
+        setField(initialValues)
       } else {
-        setFieldName("")
-        setFieldType(FieldType.Text)
+        setField({
+          name: "",
+          type: FieldType.Text,
+          config: fieldRegistry[FieldType.Text].defaultConfig,
+        })
       }
 
       // Autofocus
@@ -68,8 +71,8 @@ export default function FieldFormModal({
   }, [visible, mode, initialValues])
 
   const handleSubmit = () => {
-    if (!fieldName.trim()) return
-    onSubmit({ name: fieldName.trim(), type: fieldType, config: fieldConfig })
+    if (!field.name.trim()) return
+    onSubmit(field)
     onClose()
   }
 
@@ -99,8 +102,8 @@ export default function FieldFormModal({
               style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
               placeholder="e.g. Title"
               placeholderTextColor="#999"
-              value={fieldName}
-              onChangeText={setFieldName}
+              value={field.name}
+              onChangeText={name => setField(f => ({ ...f, name }))}
               maxLength={50}
             />
           </View>
@@ -115,13 +118,19 @@ export default function FieldFormModal({
             <DropDownPicker
               disabled={typeUpdateDisabled}
               open={open}
-              value={fieldType}
+              value={field.type}
               items={items}
               setOpen={setOpen}
               setValue={value => {
-                const resolved = value(fieldType) as FieldType
-                setFieldType(resolved)
-                setFieldConfig(fieldRegistry[resolved].defaultConfig)
+                const resolved = value(field.type) as FieldType
+                setField(
+                  f =>
+                    ({
+                      ...f,
+                      type: resolved,
+                      config: fieldRegistry[resolved].defaultConfig,
+                    }) as RawField,
+                )
               }}
               setItems={setItems}
               style={{
@@ -135,13 +144,20 @@ export default function FieldFormModal({
               }}
             />
           </View>
-          {fieldRegistry[fieldType].configInput && (
+
+          {fieldRegistry[field.type].configInput && (
             <View style={{ width: "100%", marginBottom: 24 }}>
               {fieldService.configInput({
-                type: fieldType,
-                config: fieldConfig,
-                onConfigChange:
-                  setFieldConfig as ConfigInputProps<FieldType>["onConfigChange"],
+                type: field.type,
+                config: field.config,
+                onConfigChange: config =>
+                  setField(
+                    f =>
+                      ({
+                        ...f,
+                        config,
+                      }) as RawField,
+                  ),
               })}
             </View>
           )}

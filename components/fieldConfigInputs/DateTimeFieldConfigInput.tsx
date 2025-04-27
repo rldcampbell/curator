@@ -1,4 +1,3 @@
-import { DateTimeParts } from "@/app/types"
 import DatePartsPicker from "@/components/DatePartsPicker"
 import { ConfigInputProps } from "@/fieldRegistry/types"
 
@@ -11,9 +10,7 @@ export default function DateTimeFieldConfigInput({
   return (
     <DatePartsPicker
       parts={parts}
-      onPartsChange={updated =>
-        onConfigChange({ parts: updated as DateTimeParts })
-      }
+      onPartsChange={parts => onConfigChange({ parts })}
     />
   )
 }

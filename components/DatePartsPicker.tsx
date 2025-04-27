@@ -3,6 +3,7 @@ import React from "react"
 import { View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
+import { DateTimeParts } from "@/app/types"
 import AppText from "@/components/AppText"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -21,8 +22,8 @@ const KEYS = [0, 1, 2, 3, 4, 5, 6] as const
 type PartIndex = (typeof KEYS)[number]
 
 export interface DatePartsPickerProps {
-  parts: boolean[]
-  onPartsChange: (parts: boolean[]) => void
+  parts: DateTimeParts
+  onPartsChange: (parts: DateTimeParts) => void
 }
 
 export default function DatePartsPicker({
@@ -49,7 +50,7 @@ export default function DatePartsPicker({
 
   const updateParts = (newMax: PartIndex, newMin: PartIndex) => {
     const updated = KEYS.map(index => index >= newMax && index <= newMin)
-    onPartsChange(updated)
+    onPartsChange(updated as DateTimeParts)
   }
 
   const handleMaxChange = (value: (prevState: PartIndex) => PartIndex) => {
