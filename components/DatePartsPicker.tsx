@@ -48,24 +48,23 @@ export default function DatePartsPicker({
   const [maxOpen, setMaxOpen] = React.useState(false)
   const [minOpen, setMinOpen] = React.useState(false)
 
-  const updateParts = (newMax: PartIndex, newMin: PartIndex) => {
-    const updated = KEYS.map(index => index >= newMax && index <= newMin)
-    onPartsChange(updated as DateTimeParts)
+  const updateParts = (max: PartIndex, min: PartIndex) => {
+    setMaxPart(max)
+    setMinPart(min)
+    onPartsChange(
+      KEYS.map(index => index >= max && index <= min) as DateTimeParts,
+    )
   }
 
   const handleMaxChange = (value: (prevState: PartIndex) => PartIndex) => {
     const newMax = value(maxPart)
     const adjustedMin = Math.max(newMax, minPart) as PartIndex
-    setMaxPart(newMax)
-    setMinPart(adjustedMin)
     updateParts(newMax, adjustedMin)
   }
 
   const handleMinChange = (value: (prevState: PartIndex) => PartIndex) => {
     const newMin = value(minPart)
     const adjustedMax = Math.min(newMin, maxPart) as PartIndex
-    setMinPart(newMin)
-    setMaxPart(adjustedMax)
     updateParts(adjustedMax, newMin)
   }
 
