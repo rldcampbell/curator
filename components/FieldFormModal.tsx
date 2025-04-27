@@ -43,14 +43,24 @@ export default function FieldFormModal({
     config: fieldRegistry[FieldType.Text].defaultConfig,
   })
 
-  const [items, setItems] = useState(
-    Object.entries(fieldRegistry).map(([type, { label }]) => ({
-      label,
-      value: type as FieldType,
-    })),
-  )
-
   const inputRef = useRef<TextInput>(null)
+
+  const items = Object.entries(fieldRegistry).map(([type, { label }]) => ({
+    label,
+    value: type as FieldType,
+  }))
+
+  const handleTypeChange = (value: (prevState: FieldType) => FieldType) => {
+    const resolved = value(field.type) as FieldType
+    setField(
+      f =>
+        ({
+          ...f,
+          type: resolved,
+          config: fieldRegistry[resolved].defaultConfig,
+        }) as RawField,
+    )
+  }
 
   // Populate or reset field on modal open
   useEffect(() => {
@@ -121,18 +131,7 @@ export default function FieldFormModal({
               value={field.type}
               items={items}
               setOpen={setOpen}
-              setValue={value => {
-                const resolved = value(field.type) as FieldType
-                setField(
-                  f =>
-                    ({
-                      ...f,
-                      type: resolved,
-                      config: fieldRegistry[resolved].defaultConfig,
-                    }) as RawField,
-                )
-              }}
-              setItems={setItems}
+              setValue={handleTypeChange}
               style={{
                 borderRadius: 12,
                 borderColor: "#ccc",
