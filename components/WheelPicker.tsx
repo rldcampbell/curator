@@ -82,6 +82,12 @@ export const WheelPicker = ({
       const index = Math.round(offsetY / ITEM_HEIGHT)
       const selectedValue = data[index]
       onChange(selectedValue)
+
+      // 👉 Force scroll to exact index
+      flatListRef.current?.scrollToIndex({
+        index,
+        animated: true,
+      })
     },
     [data, onChange],
   )
