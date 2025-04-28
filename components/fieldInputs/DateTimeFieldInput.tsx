@@ -5,9 +5,12 @@ import { DateTimeArray, FieldType } from "@/app/types"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
 import { formatDateTimeArray } from "@/helpers/date"
+import { modalStyles } from "@/styles/modalStyles"
+import { sharedStyles } from "@/styles/sharedStyles"
 
 import AppText from "../AppText"
 import MultiWheelPickerModal from "../MultiWheelPickerModal"
+import FieldWrapper from "./FieldWrapper"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const MIN = [0, 1, 1, 0, 0, 0, 0] as const
@@ -105,9 +108,20 @@ const DateTimeFieldInput = ({
 
   return (
     <View>
-      <Pressable onPress={() => setPickerVisible(true)}>
-        <AppText>{displayedValue}</AppText>
-      </Pressable>
+      <FieldWrapper label={field.name}>
+        <Pressable
+          style={[
+            sharedStyles.inputCard,
+            modalStyles.buttonInModal,
+            { justifyContent: "center" },
+          ]}
+          onPress={() => setPickerVisible(true)}
+        >
+          <AppText style={{ color: value ? "#000" : "#999" }}>
+            {displayedValue}
+          </AppText>
+        </Pressable>
+      </FieldWrapper>
 
       <MultiWheelPickerModal
         visible={pickerVisible}

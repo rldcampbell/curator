@@ -94,7 +94,7 @@ export const safeDateTimeArrayToUTCDate = (
 export const formatDateTimeArray = (
   value: DateTimeArray | undefined,
   parts: DateTimeParts = [true, true, true, true, true, true, true],
-  fallback = "Select a date/time",
+  fallback = "Select date/time",
 ): string => {
   if (!value) return fallback
 
