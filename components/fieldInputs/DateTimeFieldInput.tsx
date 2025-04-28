@@ -19,7 +19,7 @@ const getDaysInMonth = (
   month: number, // this month is 1 based!
 ) => new Date(year, month, 0).getDate() // month 0 based!
 
-const DurationFieldInput = ({
+const DateTimeFieldInput = ({
   field,
   initialValue,
   onChange,
@@ -97,9 +97,7 @@ const DurationFieldInput = ({
     setPickerVisible(false)
   }
 
-  const displayedValue = value
-    ? formatDateTimeArray(value)
-    : "Select a date/time"
+  const displayedValue = formatDateTimeArray(value)
 
   const initialPickerValues = fallback
     .map((v, i) => (parts[i] ? (value?.[i] ?? v) : undefined))
@@ -124,4 +122,4 @@ const DurationFieldInput = ({
   )
 }
 
-export default DurationFieldInput
+export default DateTimeFieldInput

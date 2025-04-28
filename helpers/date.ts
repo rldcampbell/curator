@@ -1,5 +1,22 @@
 import { DateTimeArray, DateTimeParts } from "@/app/types"
 
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+]
+
+const LABELS = ["y", "m", "d", "h", "m", "s", "ms"] as const
+
 export const timestampNow = () => Date.now()
 
 export const timestampToDate = (ts: number) => new Date(ts)
@@ -75,9 +92,12 @@ export const safeDateTimeArrayToUTCDate = (
 }
 
 export const formatDateTimeArray = (
-  value: DateTimeArray,
+  value: DateTimeArray | undefined,
   parts: DateTimeParts = [true, true, true, true, true, true, true],
+  fallback = "Select a date/time",
 ): string => {
+  if (!value) return fallback
+
   const [year, month, day, hour, minute, second, ms] = value.map((v, i) =>
     parts[i] ? v : undefined,
   )
@@ -102,17 +122,20 @@ export const formatDateTimeArray = (
   return resultArray.join(" ")
 }
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-]
+export function formatDurationArray(
+  value: DateTimeArray | undefined,
+  fallback: string = "Select duration",
+): string {
+  if (!value) return fallback
+
+  const parts: string[] = []
+
+  for (let i = 0; i < value.length; i++) {
+    const v = value[i]
+    if (v !== undefined && v !== 0) {
+      parts.push(`${v}${LABELS[i]}`)
+    }
+  }
+
+  return parts.length > 0 ? parts.join(" ") : "-"
+}

@@ -1,10 +1,13 @@
-import React from "react"
-import { View } from "react-native"
+import React, { useState } from "react"
+import { Pressable, View } from "react-native"
 
 import { DateTimeArray, FieldType } from "@/app/types"
-import MultiWheelPicker from "@/components/MultiWheelPicker"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
+import { formatDurationArray } from "@/helpers/date"
+
+import AppText from "../AppText"
+import MultiWheelPickerModal from "../MultiWheelPickerModal"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const NATURAL_MAX = [999, 11, 31, 23, 59, 59, 999] as const
@@ -14,13 +17,13 @@ const DurationFieldInput = ({
   initialValue,
   onChange,
 }: InputProps<typeof FieldType.Duration>) => {
-  // TODO!!! handle state internally -it's 'initialValue' for a reason...
+  const [value, setValue] = useState(initialValue)
+  const [pickerVisible, setPickerVisible] = useState(false)
   const { parts } = field.config
 
   const firstActiveIndex = parts.findIndex(p => p)
 
   const pickerConfigs: Omit<WheelPickerProps, "value" | "onChange">[] = []
-  const currentValues: (number | undefined)[] = []
 
   for (const [index, enabled] of parts.entries()) {
     if (enabled) {
@@ -33,14 +36,11 @@ const DurationFieldInput = ({
         label: LABELS[index],
         showUndefined: true,
       })
-
-      const value = initialValue?.[index]
-      currentValues.push(value !== undefined ? value % (max + 1) : undefined)
     }
   }
 
-  const handleChange = (newValues: (number | undefined)[]) => {
-    const fullArray: (number | undefined)[] = []
+  const handlePickerSubmit = (newValues: (number | undefined)[]) => {
+    const fullArray: DateTimeArray = []
     let cursor = 0
 
     for (let i = 0; i < parts.length; i++) {
@@ -52,15 +52,35 @@ const DurationFieldInput = ({
       }
     }
 
-    onChange(fullArray as DateTimeArray)
+    setValue(fullArray)
+    onChange(fullArray)
+    setPickerVisible(false)
   }
+
+  const handleClear = () => {
+    setValue(undefined)
+    onChange(undefined)
+    setPickerVisible(false)
+  }
+
+  const displayedValue = formatDurationArray(value)
+
+  const initialPickerValues = value ? value.filter((v, i) => parts[i]) : []
 
   return (
     <View>
-      <MultiWheelPicker
-        pickers={pickerConfigs}
-        value={currentValues}
-        onChange={handleChange}
+      <Pressable onPress={() => setPickerVisible(true)}>
+        <AppText>{displayedValue}</AppText>
+      </Pressable>
+
+      <MultiWheelPickerModal
+        visible={pickerVisible}
+        title={field.name}
+        initialValue={initialPickerValues}
+        pickerConfigs={pickerConfigs}
+        onSubmit={handlePickerSubmit}
+        onCancel={() => setPickerVisible(false)}
+        onClear={handleClear}
       />
     </View>
   )
