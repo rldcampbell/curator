@@ -137,6 +137,9 @@ export const WheelPicker = ({
         scrollEnabled={true}
         onScroll={onScroll}
         scrollEventThrottle={16}
+        initialNumToRender={100}
+        maxToRenderPerBatch={100}
+        windowSize={100}
         getItemLayout={(_, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
