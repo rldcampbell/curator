@@ -35,7 +35,7 @@ export default function ModalOverlay({
               flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.3)", // ✨ ADD THIS ✨
+              backgroundColor: "rgba(0, 0, 0, 0.3)",
             }}
           >
             {children}

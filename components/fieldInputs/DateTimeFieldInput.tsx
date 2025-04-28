@@ -10,7 +10,8 @@ import AppText from "../AppText"
 import MultiWheelPickerModal from "../MultiWheelPickerModal"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
-const MAX = [9999, 11, 31, 23, 59, 59, 999] as const
+const MIN = [0, 1, 1, 0, 0, 0, 0] as const
+const MAX = [9999, 12, 31, 23, 59, 59, 999] as const
 const LEAP_YEAR = 2000
 
 const getDaysInMonth = (
@@ -64,7 +65,7 @@ const DurationFieldInput = ({
       }
 
       pickerConfigs.push({
-        min: 0,
+        min: MIN[index],
         max,
         label: LABELS[index],
         showUndefined: false,
@@ -112,7 +113,7 @@ const DurationFieldInput = ({
 
       <MultiWheelPickerModal
         visible={pickerVisible}
-        title="Pick Duration"
+        title={field.name}
         initialValue={initialPickerValues}
         pickerConfigs={pickerConfigs}
         onSubmit={handlePickerSubmit}

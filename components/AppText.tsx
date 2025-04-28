@@ -33,7 +33,7 @@ const getFontFamily = ({
   italic?: boolean
 }): FontFamily => `${font}-${weightMap[weight]}${italic ? "Italic" : ""}`
 
-type AppTextProps = TextProps & {
+export type AppTextProps = TextProps & {
   children: ReactNode
   weight?: Weight
   italic?: boolean
