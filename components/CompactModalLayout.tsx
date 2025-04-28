@@ -11,6 +11,8 @@ type Props = {
   children: ReactNode
   footer?: ReactNode
   contentStyle?: ViewStyle
+  visible: boolean
+  onRequestClose: () => void
 }
 
 export default function CompactModalLayout({
@@ -18,15 +20,17 @@ export default function CompactModalLayout({
   children,
   footer,
   contentStyle,
+  visible,
+  onRequestClose,
 }: Props) {
   return (
-    <ModalOverlay>
+    <ModalOverlay visible={visible} onRequestClose={onRequestClose}>
       <View
         style={[
           modalStyles.content,
           {
             alignSelf: "center",
-            flexShrink: 1,
+            // flexShrink: 1,
             maxWidth: "90%",
             paddingHorizontal: 16,
           },

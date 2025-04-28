@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"
-import { View } from "react-native"
 
 import CompactModalLayout from "./CompactModalLayout"
 import ModalButtonRow from "./ModalButtonRow"
@@ -34,17 +33,11 @@ export default function MultiWheelPickerModal({
     }
   }, [visible, initialValue])
 
-  if (!visible) return null
-
   return (
     <CompactModalLayout
+      visible={visible}
+      onRequestClose={onCancel}
       title={title}
-      contentStyle={{
-        width: "100%",
-        maxWidth: 400,
-        alignSelf: "center",
-        paddingHorizontal: 0,
-      }}
       footer={
         <ModalButtonRow
           onApply={() => onSubmit(localValue)}
@@ -53,13 +46,11 @@ export default function MultiWheelPickerModal({
         />
       }
     >
-      <View style={{ paddingTop: 16, paddingBottom: 8 }}>
-        <MultiWheelPicker
-          pickers={pickerConfigs}
-          value={localValue}
-          onChange={setLocalValue}
-        />
-      </View>
+      <MultiWheelPicker
+        pickers={pickerConfigs}
+        value={localValue}
+        onChange={setLocalValue}
+      />
     </CompactModalLayout>
   )
 }

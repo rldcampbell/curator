@@ -1,5 +1,4 @@
 import React from "react"
-import { Modal } from "react-native"
 
 import AppText from "./AppText"
 import CompactModalLayout from "./CompactModalLayout"
@@ -25,26 +24,21 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onCancel,
 }) => {
   return (
-    <Modal
-      transparent
-      animationType="fade"
+    <CompactModalLayout
       visible={visible}
       onRequestClose={onCancel}
+      title={title}
+      footer={
+        <ModalButtonRow
+          onApply={onConfirm}
+          applyLabel={confirmText}
+          onDiscard={onCancel}
+          discardLabel={cancelText}
+        />
+      }
     >
-      <CompactModalLayout
-        title={title}
-        footer={
-          <ModalButtonRow
-            onApply={onConfirm}
-            applyLabel={confirmText}
-            onDiscard={onCancel}
-            discardLabel={cancelText}
-          />
-        }
-      >
-        {message && <AppText style={{ fontSize: 16 }}>{message}</AppText>}
-      </CompactModalLayout>
-    </Modal>
+      {message && <AppText style={{ fontSize: 16 }}>{message}</AppText>}
+    </CompactModalLayout>
   )
 }
 
