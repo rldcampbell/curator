@@ -177,11 +177,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   itemText: {
-    fontSize: 18,
+    fontSize: 20,
     color: "#999",
   },
   selectedItemText: {
-    fontSize: 22,
+    fontSize: 20,
     color: "#000",
   },
   label: {
