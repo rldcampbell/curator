@@ -8,12 +8,34 @@ export type ItemId = `i-${RawId}`
 
 export type DateArray = [y: number, m: number, d: number]
 
+export type DateTimeArray = [
+  year?: number,
+  month?: number,
+  day?: number,
+  hour?: number,
+  minute?: number,
+  second?: number,
+  ms?: number,
+]
+
+export type DateTimeParts = [
+  year: boolean,
+  month: boolean,
+  day: boolean,
+  hour: boolean,
+  minute: boolean,
+  second: boolean,
+  ms: boolean,
+]
+
 /** Epoch ms */
 export type Timestamp = number
 
 export const FieldType = {
   Boolean: "boolean",
-  Date: "date",
+  Date: "date", // to deprecate
+  DateTime: "datetime",
+  Duration: "duration",
   Image: "image",
   Number: "number",
   Text: "text",
@@ -24,6 +46,8 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 export type FieldValueMap = {
   [FieldType.Boolean]: boolean
   [FieldType.Date]: DateArray
+  [FieldType.DateTime]: DateTimeArray
+  [FieldType.Duration]: DateTimeArray
   [FieldType.Image]: string[]
   [FieldType.Number]: number
   [FieldType.Text]: string
@@ -45,6 +69,7 @@ type RawBaseField = {
 type RawBooleanFieldAndValue = RawBaseField & {
   type: typeof FieldType.Boolean
   value?: FieldValueMap[typeof FieldType.Boolean]
+  config: {}
 }
 
 type RawDateFieldAndValue = RawBaseField & {
@@ -52,36 +77,55 @@ type RawDateFieldAndValue = RawBaseField & {
   value?: FieldValueMap[typeof FieldType.Date]
   min?: DateArray
   max?: DateArray
+  config: {}
+}
+
+type RawDateTimeFieldAndValue = RawBaseField & {
+  type: typeof FieldType.DateTime
+  value?: FieldValueMap[typeof FieldType.DateTime]
+  config: {
+    parts: DateTimeParts
+  }
+}
+
+type RawDurationFieldAndValue = RawBaseField & {
+  type: typeof FieldType.Duration
+  value?: FieldValueMap[typeof FieldType.Duration]
+  config: {
+    parts: DateTimeParts
+  }
 }
 
 type RawImageFieldAndValue = RawBaseField & {
   type: typeof FieldType.Image
   value?: FieldValueMap[typeof FieldType.Image]
-  max?: number // future: UI might restrict how many images can be selected
+  config: {}
 }
 
 type RawNumberFieldAndValue = RawBaseField & {
   type: typeof FieldType.Number
   value?: FieldValueMap[typeof FieldType.Number]
-  min?: number
-  max?: number
-  // format?: NumberFormat // TODO: determine what this should look like - scientific, SF, DP etc. etc.
+  config: {}
 }
 
 type RawTextFieldAndValue = RawBaseField & {
   type: typeof FieldType.Text
   value?: FieldValueMap[typeof FieldType.Text]
-  charLim?: number
+  config: {}
 }
 
 export type RawFieldAndValue =
   | RawBooleanFieldAndValue
-  | RawTextFieldAndValue
-  | RawNumberFieldAndValue
   | RawDateFieldAndValue
+  | RawDateTimeFieldAndValue
+  | RawDurationFieldAndValue
   | RawImageFieldAndValue
+  | RawNumberFieldAndValue
+  | RawTextFieldAndValue
 
-type OmitFromUnion<T, K extends keyof any> = T extends any ? Omit<T, K> : never
+export type OmitFromUnion<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never
 
 export type RawField = OmitFromUnion<RawFieldAndValue, "value">
 export type Field = WithMeta<RawField>
@@ -117,3 +161,7 @@ export type Resolvable<T> = [T] extends [Function]
   : T | Promise<T> | (() => T | Promise<T>)
 
 export type Resolved<T> = Exclude<Resolvable<T>, Function | Promise<any>>
+
+export type RequiredTuple<T extends readonly unknown[]> = {
+  [K in keyof T]-?: T[K]
+}

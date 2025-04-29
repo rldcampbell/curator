@@ -1,20 +1,20 @@
 import { View } from "react-native"
 
-import { DateArray } from "@/app/types"
+import { DateTimeArray } from "@/app/types"
 import AppText from "@/components/AppText"
-import { dateArrayToUTCDate, formatDate } from "@/helpers"
+import { formatDateTimeArray } from "@/helpers/date"
 
 import { sharedFieldStyles } from "./styles"
 
-export const DateDisplay = ({ value }: { value?: DateArray }) => {
-  if (value === undefined) {
+export const DateTimeDisplay = ({ value }: { value?: DateTimeArray }) => {
+  if (!value || value.every(v => v === undefined)) {
     return null
   }
 
   return (
     <View style={sharedFieldStyles.valueContainer}>
       <AppText style={sharedFieldStyles.value}>
-        {formatDate(dateArrayToUTCDate(value))}
+        {formatDateTimeArray(value)}
       </AppText>
     </View>
   )

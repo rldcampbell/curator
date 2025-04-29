@@ -7,6 +7,7 @@ const validate = (value: unknown): value is string => typeof value === "string"
 export const text: FieldDefinition<"text"> = {
   label: "Text",
   defaultValue: "",
+  defaultConfig: {},
   display: TextDisplay,
   input: TextFieldInput,
   validate,

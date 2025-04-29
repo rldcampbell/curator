@@ -5,6 +5,7 @@ import { FieldDefinition } from "@/fieldRegistry/types"
 export const boolean: FieldDefinition<"boolean"> = {
   label: "Boolean",
   defaultValue: false,
+  defaultConfig: {},
   display: BooleanDisplay,
   input: BooleanFieldInput,
   validate: (v): v is boolean => typeof v === "boolean",

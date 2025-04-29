@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react"
+import React, { useCallback, useRef, useState } from "react"
 import { FlatList, StyleSheet, View } from "react-native"
 
 import * as Haptics from "expo-haptics"
 
-import AppText from "@/components/AppText"
+import AppText, { AppTextProps } from "@/components/AppText"
 
 const ITEM_HEIGHT = 30
 const VISIBLE_ITEMS = 4
@@ -25,15 +25,17 @@ const generateWideSample = (max: number) => {
 const MeasureTextWidth = ({
   text,
   onMeasure,
+  textProps,
 }: {
   text: string
   onMeasure: (width: number) => void
+  textProps: Pick<AppTextProps, "weight" | "style">
 }) => {
   return (
     <View style={{ position: "absolute", opacity: 0 }}>
       <AppText
-        weight="medium"
         onLayout={e => onMeasure(e.nativeEvent.layout.width)}
+        {...textProps}
       >
         {text}
       </AppText>
@@ -62,16 +64,6 @@ export const WheelPicker = ({
 
   const initialIndex = data.findIndex(item => item === value)
 
-  useEffect(() => {
-    if (flatListRef.current && initialIndex >= 0) {
-      flatListRef.current.scrollToIndex({
-        index: initialIndex,
-        animated: false,
-      })
-      setCurrentIndex(initialIndex)
-    }
-  }, [initialIndex])
-
   const onScroll = useCallback(
     (event: any) => {
       const offsetY = event.nativeEvent.contentOffset.y
@@ -90,6 +82,12 @@ export const WheelPicker = ({
       const index = Math.round(offsetY / ITEM_HEIGHT)
       const selectedValue = data[index]
       onChange(selectedValue)
+
+      // 👉 Force scroll to exact index
+      flatListRef.current?.scrollToIndex({
+        index,
+        animated: true,
+      })
     },
     [data, onChange],
   )
@@ -118,6 +116,10 @@ export const WheelPicker = ({
       <MeasureTextWidth
         text={generateWideSample(max)}
         onMeasure={setMeasuredWidth}
+        textProps={{
+          weight: "semiBold",
+          style: [styles.itemText, styles.selectedItemText],
+        }}
       />
       <FlatList
         ref={flatListRef}
@@ -135,11 +137,23 @@ export const WheelPicker = ({
         scrollEnabled={true}
         onScroll={onScroll}
         scrollEventThrottle={16}
+        initialNumToRender={100}
+        maxToRenderPerBatch={100}
+        windowSize={100}
         getItemLayout={(_, index) => ({
           length: ITEM_HEIGHT,
           offset: ITEM_HEIGHT * index,
           index,
         })}
+        onLayout={() => {
+          if (flatListRef.current && initialIndex >= 0) {
+            flatListRef.current.scrollToIndex({
+              index: initialIndex,
+              animated: false,
+            })
+            setCurrentIndex(initialIndex)
+          }
+        }}
         onMomentumScrollEnd={onMomentumScrollEnd}
         contentContainerStyle={{
           paddingVertical: (ITEM_HEIGHT * (VISIBLE_ITEMS - 1)) / 2,
@@ -163,11 +177,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   itemText: {
-    fontSize: 18,
+    fontSize: 20,
     color: "#999",
   },
   selectedItemText: {
-    fontSize: 22,
+    fontSize: 20,
     color: "#000",
   },
   label: {

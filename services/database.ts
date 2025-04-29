@@ -12,7 +12,16 @@ import * as FileSystem from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 import * as Updates from "expo-updates"
 
-import { Collection, CollectionId, CollectionsData } from "@/app/types"
+import {
+  Collection,
+  CollectionId,
+  CollectionsData,
+  Field,
+  FieldId,
+  FieldType,
+  RawField,
+} from "@/app/types"
+import { fieldRegistry } from "@/fieldRegistry"
 import { HexColor } from "@/helpers/color"
 import { timestampNow } from "@/helpers/date"
 
@@ -135,9 +144,30 @@ export const loadCollections = async (): Promise<CollectionsData> => {
       collections[row.id] = {
         name: row.name,
         fieldOrder: parse(row.field_order),
-        fields: parse(row.fields),
+        fields: Object.fromEntries(
+          Object.entries(parse(row.fields)).map(([fieldId, field]) => [
+            fieldId,
+            normalizeField(field),
+          ]),
+        ) as Record<FieldId, Field>,
         itemOrder: parse(row.item_order),
-        items: parse(row.items),
+        items: Object.fromEntries(
+          // horrendous temp logic to convert nulls back to undefineds in field value arrays
+          Object.entries(parse(row.items) as Collection["items"]).map(
+            ([itemId, item]) => {
+              const normalizedItem = Object.fromEntries(
+                Object.entries(item).map(([key, value]) => {
+                  if (Array.isArray(value)) {
+                    return [key, value.map(v => v ?? undefined)]
+                  }
+                  return [key, value]
+                }),
+              )
+
+              return [itemId, normalizedItem]
+            },
+          ),
+        ),
         color: (row.color as HexColor | null) ?? undefined,
         _meta: {
           createdAt: row.created_at,
@@ -218,4 +248,19 @@ export const resetDatabase = async (): Promise<void> => {
     "[RESET] Reloading app to re-initialize DB and trigger seeding...",
   )
   await Updates.reloadAsync()
+}
+
+export function normalizeField(field: any): RawField {
+  const registryEntry = fieldRegistry[field.type as FieldType]
+  if (!registryEntry) {
+    console.warn(`Unknown field type: ${field.type}`)
+    return field as RawField
+  }
+  return {
+    ...field,
+    config: {
+      ...registryEntry.defaultConfig,
+      ...field.config,
+    },
+  }
 }
