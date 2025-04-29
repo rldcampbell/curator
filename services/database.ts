@@ -357,6 +357,26 @@ const loadCollectionOrder = async (): Promise<CollectionId[]> => {
   return parse(row.items)
 }
 
+// NEW touchCollection:
+const touchCollection = async (
+  collectionId: CollectionId,
+  timestamp?: number,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  await db.runAsync(
+    `
+    UPDATE collections
+    SET updatedAt = ?
+    WHERE id = ?
+    `,
+    timestamp ?? timestampNow(),
+    collectionId,
+  )
+
+  console.log("[DB] Touched collection:", collectionId)
+}
+
 export const saveCollectionOrder = async (
   order: CollectionId[],
 ): Promise<void> => {
@@ -426,6 +446,8 @@ export const addField = async (
       now,
     )
 
+    await touchCollection(collectionId, now)
+
     await db.execAsync("COMMIT")
     console.log("[DB] Field added:", fieldId)
   } catch (err) {
@@ -441,15 +463,34 @@ export const deleteField = async (fieldId: FieldId): Promise<void> => {
 
   console.log("[DB] Deleting field:", fieldId)
 
+  // 1. Load collectionId for this field
+  const row = await db.getFirstAsync<{ collectionId: CollectionId }>(
+    `SELECT collectionId FROM fields WHERE id = ?`,
+    fieldId,
+  )
+
+  if (!row) {
+    console.warn("[DB] Tried to delete non-existing field:", fieldId)
+    return
+  }
+
+  const { collectionId } = row
+
   await db.execAsync("BEGIN")
   try {
+    // 2. Delete field
     await db.runAsync(
       `
       DELETE FROM fields WHERE id = ?
       `,
       fieldId,
     )
+
+    // 3. Bump updatedAt on parent collection
+    await touchCollection(collectionId)
+
     await db.execAsync("COMMIT")
+
     console.log("[DB] Field deleted:", fieldId)
   } catch (err) {
     console.error("[DB] Error deleting field:", err)
@@ -512,6 +553,8 @@ export const addItem = async (
       )
     }
 
+    await touchCollection(collectionId, now)
+
     await db.execAsync("COMMIT")
     console.log("[DB] Item added:", itemId)
   } catch (err) {
@@ -527,15 +570,32 @@ export const deleteItem = async (itemId: ItemId): Promise<void> => {
 
   console.log("[DB] Deleting item:", itemId)
 
+  // 1. Look up collectionId for this item
+  const row = await db.getFirstAsync<{ collectionId: CollectionId }>(
+    `SELECT collectionId FROM items WHERE id = ?`,
+    itemId,
+  )
+
+  if (!row) {
+    console.warn("[DB] Tried to delete non-existing item:", itemId)
+    return
+  }
+
+  const { collectionId } = row
+
   await db.execAsync("BEGIN")
   try {
-    // delete should cascade to item_values table
+    // 2. Delete item (cascades to item_values)
     await db.runAsync(
       `
       DELETE FROM items WHERE id = ?
       `,
       itemId,
     )
+
+    // 3. Touch parent collection
+    await touchCollection(collectionId)
+
     await db.execAsync("COMMIT")
     console.log("[DB] Item deleted:", itemId)
   } catch (err) {
