@@ -151,7 +151,23 @@ export const loadCollections = async (): Promise<CollectionsData> => {
           ]),
         ) as Record<FieldId, Field>,
         itemOrder: parse(row.item_order),
-        items: parse(row.items),
+        items: Object.fromEntries(
+          // horrendous temp logic to convert nulls back to undefineds in field value arrays
+          Object.entries(parse(row.items) as Collection["items"]).map(
+            ([itemId, item]) => {
+              const normalizedItem = Object.fromEntries(
+                Object.entries(item).map(([key, value]) => {
+                  if (Array.isArray(value)) {
+                    return [key, value.map(v => v ?? undefined)]
+                  }
+                  return [key, value]
+                }),
+              )
+
+              return [itemId, normalizedItem]
+            },
+          ),
+        ),
         color: (row.color as HexColor | null) ?? undefined,
         _meta: {
           createdAt: row.created_at,

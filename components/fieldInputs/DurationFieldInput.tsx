@@ -46,13 +46,8 @@ const DurationFieldInput = ({
     const fullArray: DateTimeArray = []
     let cursor = 0
 
-    for (let i = 0; i < parts.length; i++) {
-      if (parts[i]) {
-        fullArray.push(newValues[cursor])
-        cursor++
-      } else {
-        fullArray.push(undefined)
-      }
+    for (const v of parts) {
+      fullArray.push(v ? newValues[cursor++] : undefined)
     }
 
     setValue(fullArray)
