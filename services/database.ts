@@ -19,6 +19,7 @@ import {
   Field,
   FieldId,
   FieldType,
+  RawCollection,
   RawField,
 } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
@@ -81,6 +82,72 @@ export const initDatabase = async (): Promise<{ isFreshDb: boolean }> => {
   log("Database initialized")
 
   return { isFreshDb }
+}
+
+// NEW addCollection:
+export const addCollection = async (
+  collectionId: CollectionId,
+  rawCollection: Omit<RawCollection, "itemOrder" | "items">,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Adding new collection:", collectionId)
+
+  const { name, color, fieldOrder, fields } = rawCollection
+
+  const now = timestampNow()
+
+  await db.execAsync("BEGIN")
+
+  try {
+    // 1. Find max sortOrder
+    const row = await db.getFirstAsync<{ max: number }>(
+      `SELECT MAX(sortOrder) as max FROM collections`,
+    )
+    const nextSortOrder = (row?.max ?? -1) + 1
+
+    // 2. Insert collection metadata
+    await db.runAsync(
+      `
+      INSERT INTO collections (
+        id, name, color, sortOrder, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      collectionId,
+      name,
+      color ?? null,
+      nextSortOrder,
+      now, // createdAt
+      now, // updatedAt
+    )
+
+    // 3. Insert fields
+    for (const [sortOrder, fieldId] of fieldOrder.entries()) {
+      const rawField = fields[fieldId]
+      await db.runAsync(
+        `
+        INSERT INTO fields (
+          id, collectionId, name, type, config, sortOrder, createdAt, updatedAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        fieldId,
+        collectionId,
+        rawField.name,
+        rawField.type,
+        JSON.stringify(rawField.config),
+        sortOrder,
+        now,
+        now,
+      )
+    }
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Collection added:", collectionId)
+  } catch (error) {
+    console.error("[DB] Error adding collection:", error)
+    await db.execAsync("ROLLBACK")
+    throw error
+  }
 }
 
 const upsertCollection = async (

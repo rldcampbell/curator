@@ -1,9 +1,7 @@
 import * as SQLite from "expo-sqlite"
 
 // Import compiled migration files as strings
-import up_001 from "./compiled/up_001_create_base_schema"
-import up_002 from "./compiled/up_002_seed_missing_createdAt"
-import up_003 from "./compiled/up_003_add_color_column"
+import up_001 from "./compiled/up_001_initial_schema"
 
 type Migration = {
   version: number
@@ -12,9 +10,7 @@ type Migration = {
 }
 
 const MIGRATIONS: Migration[] = [
-  { version: 1, name: "create_base_schema", sql: up_001 },
-  { version: 2, name: "seed_missing_createdAt", sql: up_002 },
-  { version: 3, name: "add_color_column", sql: up_003 },
+  { version: 1, name: "initial_schema", sql: up_001 },
 ]
 
 async function getDatabaseVersion(db: SQLite.SQLiteDatabase): Promise<number> {
