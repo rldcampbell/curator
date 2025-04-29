@@ -76,7 +76,7 @@ export default function ItemDetailScreen() {
       >
         <ScrollView contentContainerStyle={styles.container}>
           {fieldOrder.map(fieldId => {
-            const value = item[fieldId]
+            const value = item.values[fieldId]
             if (value === undefined) return null
             const field = fields[fieldId]
 

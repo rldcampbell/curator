@@ -44,8 +44,6 @@ CREATE TABLE IF NOT EXISTS item_values (
   itemId TEXT NOT NULL,
   fieldId TEXT NOT NULL,
   value TEXT,
-  createdAt INTEGER NOT NULL,
-  updatedAt INTEGER NOT NULL,
   PRIMARY KEY (itemId, fieldId),
   FOREIGN KEY (itemId) REFERENCES items(id) ON DELETE CASCADE,
   FOREIGN KEY (fieldId) REFERENCES fields(id) ON DELETE CASCADE

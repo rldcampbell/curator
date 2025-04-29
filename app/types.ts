@@ -131,7 +131,7 @@ export type RawField = OmitFromUnion<RawFieldAndValue, "value">
 export type Field = WithMeta<RawField>
 
 export type RawItem = {
-  [fieldId: FieldId]: FieldValue
+  values: Record<FieldId, FieldValue>
   tags?: string[]
 }
 export type Item = WithMeta<RawItem>

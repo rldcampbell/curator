@@ -72,9 +72,9 @@ export default function ItemFormModal({
 
   // Resolve all values, including any thunks, before submitting
   const handleSubmit = async () => {
-    const resolved = await resolveObjectValues(inputValues)
+    const values = await resolveObjectValues(inputValues)
 
-    onSubmit(resolved)
+    onSubmit({ values })
   }
 
   return (

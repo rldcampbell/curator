@@ -90,7 +90,7 @@ export default function CollectionDetailScreen() {
         contentContainerStyle={collectionDetailStyles.listContainer}
         renderItem={({ item, drag, isActive }: RenderItemParams<ItemId>) => {
           const value =
-            items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"
+            items[item]?.values?.[fieldOrder[0]]?.toString() || "Untitled Item"
 
           const buttons = [
             {

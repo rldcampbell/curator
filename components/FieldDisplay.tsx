@@ -26,7 +26,7 @@ export default function FieldDisplay({
 
   const fieldEntries = collection.fieldOrder.slice(0, 2).map(fieldId => ({
     name: collection.fields[fieldId].name,
-    value: format(collection.fields[fieldId], item[fieldId]),
+    value: format(collection.fields[fieldId], item.values[fieldId]),
   }))
 
   return (

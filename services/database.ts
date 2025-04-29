@@ -23,6 +23,7 @@ import {
   ItemId,
   RawCollection,
   RawField,
+  RawItem,
 } from "@/app/types"
 import { fieldRegistry } from "@/fieldRegistry"
 import { HexColor } from "@/helpers/color"
@@ -279,7 +280,8 @@ export const loadCollections = async (): Promise<CollectionsData> => {
     }
     itemsByCollection[item.collectionId].itemOrder.push(item.id)
     itemsByCollection[item.collectionId].items[item.id] = {
-      tags: item.tags ? item.tags.split(",") : [],
+      tags: item.tags ? JSON.parse(item.tags) : [],
+      values: {},
       _meta: {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
@@ -299,7 +301,7 @@ export const loadCollections = async (): Promise<CollectionsData> => {
         // null -> undefined in arrays for now
         parsed = parsed.map(v => v ?? undefined)
       }
-      item[valueRow.fieldId] = parsed
+      item.values[valueRow.fieldId] = parsed
     }
   }
 
@@ -382,6 +384,68 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
   await saveCollectionOrder(updatedOrder)
 
   log("Collection deleted and order updated:", id)
+}
+
+// ITEMS
+// NEW addItem:
+export const addItem = async (
+  collectionId: CollectionId,
+  itemId: ItemId,
+  item: RawItem,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Adding item:", itemId, "to collection:", collectionId)
+
+  const now = timestampNow()
+
+  const tagString = item.tags ? JSON.stringify(item.tags) : null
+
+  // 1. Compute next sortOrder in collection
+  const row = await db.getFirstAsync<{ max: number }>(
+    `SELECT MAX(sortOrder) as max FROM items WHERE collectionId = ?`,
+    collectionId,
+  )
+  const nextSortOrder = (row?.max ?? -1) + 1
+
+  await db.execAsync("BEGIN")
+  try {
+    // 2. Insert item metadata
+    await db.runAsync(
+      `
+      INSERT INTO items (
+        id, collectionId, tags, sortOrder, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      itemId,
+      collectionId,
+      tagString,
+      nextSortOrder,
+      now,
+      now,
+    )
+
+    // 3. Insert each value
+    for (const [fieldId, value] of Object.entries(item.values)) {
+      await db.runAsync(
+        `
+        INSERT INTO item_values (
+          itemId, fieldId, value
+        ) VALUES (?, ?, ?)
+        `,
+        itemId,
+        fieldId,
+        JSON.stringify(value),
+      )
+    }
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Item added:", itemId)
+  } catch (err) {
+    console.error("[DB] Error adding item:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
 }
 
 export const resetDatabase = async (): Promise<void> => {
