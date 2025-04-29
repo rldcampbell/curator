@@ -448,6 +448,30 @@ export const addItem = async (
   }
 }
 
+// NEW deleteItem:
+export const deleteItem = async (itemId: ItemId): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Deleting item:", itemId)
+
+  await db.execAsync("BEGIN")
+  try {
+    // delete should cascade to item_values table
+    await db.runAsync(
+      `
+      DELETE FROM items WHERE id = ?
+      `,
+      itemId,
+    )
+    await db.execAsync("COMMIT")
+    console.log("[DB] Item deleted:", itemId)
+  } catch (err) {
+    console.error("[DB] Error deleting item:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
 export const resetDatabase = async (): Promise<void> => {
   const dbPath = `${FileSystem.documentDirectory}SQLite/curator.db`
   console.log("[RESET] Deleting SQLite database at:", dbPath)
