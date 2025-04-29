@@ -386,7 +386,80 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
   log("Collection deleted and order updated:", id)
 }
 
-// ITEMS
+// -- FIELDS --
+
+// NEW addField:
+export const addField = async (
+  collectionId: CollectionId,
+  fieldId: FieldId,
+  rawField: RawField,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Adding field:", fieldId, "to collection:", collectionId)
+
+  const now = timestampNow()
+
+  await db.execAsync("BEGIN")
+  try {
+    // 1. Find max sortOrder for fields in this collection
+    const row = await db.getFirstAsync<{ max: number }>(
+      `SELECT MAX(sortOrder) as max FROM fields WHERE collectionId = ?`,
+      collectionId,
+    )
+    const nextSortOrder = (row?.max ?? -1) + 1
+
+    // 2. Insert field
+    await db.runAsync(
+      `
+      INSERT INTO fields (
+        id, collectionId, name, type, config, sortOrder, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      fieldId,
+      collectionId,
+      rawField.name,
+      rawField.type,
+      JSON.stringify(rawField.config),
+      nextSortOrder,
+      now,
+      now,
+    )
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Field added:", fieldId)
+  } catch (err) {
+    console.error("[DB] Error adding field:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
+// NEW deleteField:
+export const deleteField = async (fieldId: FieldId): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Deleting field:", fieldId)
+
+  await db.execAsync("BEGIN")
+  try {
+    await db.runAsync(
+      `
+      DELETE FROM fields WHERE id = ?
+      `,
+      fieldId,
+    )
+    await db.execAsync("COMMIT")
+    console.log("[DB] Field deleted:", fieldId)
+  } catch (err) {
+    console.error("[DB] Error deleting field:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
+// -- ITEMS --
+
 // NEW addItem:
 export const addItem = async (
   collectionId: CollectionId,
