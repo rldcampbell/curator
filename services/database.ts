@@ -564,6 +564,102 @@ export const addItem = async (
   }
 }
 
+// NEW updateItem:
+export const updateItem = async (
+  itemId: ItemId,
+  patch: Partial<RawItem>,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Updating item:", itemId)
+
+  const hasTags = "tags" in patch
+  const hasValues = "values" in patch
+
+  if (!hasTags && !hasValues) {
+    console.log("[DB] No changes provided, skipping update for:", itemId)
+    return
+  }
+
+  // 1. Load collectionId for this item
+  const itemRow = await db.getFirstAsync<{ collectionId: CollectionId }>(
+    `SELECT collectionId FROM items WHERE id = ?`,
+    itemId,
+  )
+
+  if (!itemRow) {
+    console.warn("[DB] Tried to update non-existing item:", itemId)
+    return
+  }
+
+  const { collectionId } = itemRow
+  const now = timestampNow()
+
+  await db.execAsync("BEGIN")
+  try {
+    // === Update values if present ===
+    if (hasValues && patch.values) {
+      const existingRows = await db.getAllAsync<{ fieldId: FieldId }>(
+        `
+        SELECT fieldId FROM item_values
+        WHERE itemId = ?
+        `,
+        itemId,
+      )
+      const existingFieldIds = new Set(existingRows.map(row => row.fieldId))
+
+      // Delete removed fields
+      for (const fieldId of existingFieldIds) {
+        if (patch.values[fieldId] === undefined) {
+          await db.runAsync(
+            `DELETE FROM item_values WHERE itemId = ? AND fieldId = ?`,
+            itemId,
+            fieldId,
+          )
+        }
+      }
+
+      // Upsert current fields
+      for (const [fieldId, value] of Object.entries(patch.values)) {
+        await db.runAsync(
+          `
+          INSERT OR REPLACE INTO item_values (
+            itemId, fieldId, value
+          ) VALUES (?, ?, ?)
+          `,
+          itemId,
+          fieldId,
+          JSON.stringify(value),
+        )
+      }
+    }
+
+    // === Update tags if present ===
+    if (hasTags) {
+      await db.runAsync(
+        `
+        UPDATE items
+        SET tags = ?, updatedAt = ?
+        WHERE id = ?
+        `,
+        patch.tags ? JSON.stringify(patch.tags) : null,
+        now,
+        itemId,
+      )
+    }
+
+    // === Update collection's updatedAt ===
+    await touchCollection(collectionId, now)
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Item updated:", itemId, "(changes saved)")
+  } catch (err) {
+    console.error("[DB] Error updating item:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
 // NEW deleteItem:
 export const deleteItem = async (itemId: ItemId): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
