@@ -19,6 +19,8 @@ import {
   Field,
   FieldId,
   FieldType,
+  Item,
+  ItemId,
   RawCollection,
   RawField,
 } from "@/app/types"
@@ -184,67 +186,145 @@ const upsertCollection = async (
   )
 }
 
+// NEW loadCollections:
 export const loadCollections = async (): Promise<CollectionsData> => {
   if (!db) throw new Error("Database not initialized")
 
-  const rows = await db.getAllAsync("SELECT * FROM collections")
-
-  type CollectionRow = {
-    id: CollectionId | "__order__"
+  // Load collections
+  const collectionRows = await db.getAllAsync<{
+    id: CollectionId
     name: string
-    field_order: string
-    fields: string
-    item_order: string
-    items: string
-    color: string | null
-    created_at: number
-    updated_at: number
-  }
+    color: HexColor | null
+    sortOrder: number
+    createdAt: number
+    updatedAt: number
+  }>(`
+    SELECT * FROM collections
+    ORDER BY sortOrder ASC
+  `)
 
-  const collections: Record<CollectionId, Collection> = {}
-  let collectionOrder: CollectionId[] = []
+  // Load fields
+  const fieldRows = await db.getAllAsync<{
+    id: FieldId
+    collectionId: CollectionId
+    name: string
+    type: string
+    config: string
+    sortOrder: number
+    createdAt: number
+    updatedAt: number
+  }>(`
+    SELECT * FROM fields
+    ORDER BY sortOrder ASC
+  `)
 
-  for (const row of rows as CollectionRow[]) {
-    if (row.id === "__order__") {
-      collectionOrder = parse(row.items)
-    } else {
-      collections[row.id] = {
-        name: row.name,
-        fieldOrder: parse(row.field_order),
-        fields: Object.fromEntries(
-          Object.entries(parse(row.fields)).map(([fieldId, field]) => [
-            fieldId,
-            normalizeField(field),
-          ]),
-        ) as Record<FieldId, Field>,
-        itemOrder: parse(row.item_order),
-        items: Object.fromEntries(
-          // horrendous temp logic to convert nulls back to undefineds in field value arrays
-          Object.entries(parse(row.items) as Collection["items"]).map(
-            ([itemId, item]) => {
-              const normalizedItem = Object.fromEntries(
-                Object.entries(item).map(([key, value]) => {
-                  if (Array.isArray(value)) {
-                    return [key, value.map(v => v ?? undefined)]
-                  }
-                  return [key, value]
-                }),
-              )
+  // Load items
+  const itemRows = await db.getAllAsync<{
+    id: ItemId
+    collectionId: CollectionId
+    tags: string | null
+    sortOrder: number
+    createdAt: number
+    updatedAt: number
+  }>(`
+    SELECT * FROM items
+    ORDER BY sortOrder ASC
+  `)
 
-              return [itemId, normalizedItem]
-            },
-          ),
-        ),
-        color: (row.color as HexColor | null) ?? undefined,
-        _meta: {
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
-        },
-      }
+  // Load item_values
+  const valueRows = await db.getAllAsync<{
+    itemId: ItemId
+    fieldId: FieldId
+    value: string | null
+    createdAt: number
+    updatedAt: number
+  }>(`
+    SELECT * FROM item_values
+  `)
+
+  // --- Organize fields ---
+  const fieldsByCollection: Record<
+    CollectionId,
+    { fieldOrder: FieldId[]; fields: Record<FieldId, Field> }
+  > = {}
+
+  for (const field of fieldRows) {
+    if (!fieldsByCollection[field.collectionId]) {
+      fieldsByCollection[field.collectionId] = { fieldOrder: [], fields: {} }
+    }
+    fieldsByCollection[field.collectionId].fieldOrder.push(field.id)
+    fieldsByCollection[field.collectionId].fields[field.id] = {
+      name: field.name,
+      type: field.type as FieldType,
+      config: JSON.parse(field.config),
+      _meta: {
+        createdAt: field.createdAt,
+        updatedAt: field.updatedAt,
+      },
     }
   }
 
-  log(`Loaded ${Object.keys(collections).length} collections`)
+  // --- Organize items ---
+  const itemsByCollection: Record<
+    CollectionId,
+    { itemOrder: ItemId[]; items: Record<ItemId, Item> }
+  > = {}
+
+  const collectionIdByItemId: Record<ItemId, CollectionId> = {}
+
+  for (const item of itemRows) {
+    collectionIdByItemId[item.id] = item.collectionId
+    if (!itemsByCollection[item.collectionId]) {
+      itemsByCollection[item.collectionId] = { itemOrder: [], items: {} }
+    }
+    itemsByCollection[item.collectionId].itemOrder.push(item.id)
+    itemsByCollection[item.collectionId].items[item.id] = {
+      tags: item.tags ? item.tags.split(",") : [],
+      _meta: {
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      },
+    }
+  }
+
+  // --- Apply item_values ---
+  for (const valueRow of valueRows) {
+    const item: Item | undefined =
+      itemsByCollection[collectionIdByItemId[valueRow.itemId]]?.items?.[
+        valueRow.itemId
+      ]
+    if (item && valueRow.value !== null) {
+      let parsed = JSON.parse(valueRow.value)
+      if (Array.isArray(parsed)) {
+        // null -> undefined in arrays for now
+        parsed = parsed.map(v => v ?? undefined)
+      }
+      item[valueRow.fieldId] = parsed
+    }
+  }
+
+  // --- Assemble collections ---
+  const collections: Record<CollectionId, Collection> = {}
+  const collectionOrder: CollectionId[] = []
+
+  for (const row of collectionRows) {
+    collections[row.id] = {
+      name: row.name,
+      color: row.color ?? undefined,
+      fieldOrder: fieldsByCollection[row.id]?.fieldOrder ?? [],
+      fields: fieldsByCollection[row.id]?.fields ?? {},
+      itemOrder: itemsByCollection[row.id]?.itemOrder ?? [],
+      items: itemsByCollection[row.id]?.items ?? {},
+      _meta: {
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      },
+    }
+    collectionOrder.push(row.id)
+  }
+
+  console.log("[DB] Loaded collections + fields + items + values")
+
   return { collections, collectionOrder }
 }
 

@@ -130,7 +130,10 @@ export type OmitFromUnion<T, K extends keyof any> = T extends any
 export type RawField = OmitFromUnion<RawFieldAndValue, "value">
 export type Field = WithMeta<RawField>
 
-export type RawItem = Record<FieldId, FieldValue>
+export type RawItem = {
+  [fieldId: FieldId]: FieldValue
+  tags?: string[]
+}
 export type Item = WithMeta<RawItem>
 
 export type RawCollection = {
