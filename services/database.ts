@@ -617,7 +617,7 @@ export const deleteField = async (fieldId: FieldId): Promise<void> => {
   )
 
   if (!row) {
-    console.warn("[DB] Tried to delete non-existing field:", fieldId)
+    console.warn("[DB] Tried to delete non-existent field:", fieldId)
     return
   }
 
@@ -641,6 +641,43 @@ export const deleteField = async (fieldId: FieldId): Promise<void> => {
     console.log("[DB] Field deleted:", fieldId)
   } catch (err) {
     console.error("[DB] Error deleting field:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
+// NEW updateFieldOrder:
+export const updateFieldOrder = async (
+  collectionId: CollectionId,
+  fieldOrder: FieldId[],
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Updating field sort order for collection:", collectionId)
+
+  await db.execAsync("BEGIN")
+  try {
+    for (const [index, fieldId] of fieldOrder.entries()) {
+      await db.runAsync(
+        `
+        UPDATE fields
+        SET sortOrder = ?
+        WHERE id = ? AND collectionId = ?
+        `,
+        index,
+        fieldId,
+        collectionId,
+      )
+    }
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Field order updated for collection:", collectionId)
+  } catch (err) {
+    console.error(
+      "[DB] Error updating field order for collection:",
+      collectionId,
+      err,
+    )
     await db.execAsync("ROLLBACK")
     throw err
   }
@@ -735,7 +772,7 @@ export const updateItem = async (
   )
 
   if (!itemRow) {
-    console.warn("[DB] Tried to update non-existing item:", itemId)
+    console.warn("[DB] Tried to update non-existent item:", itemId)
     return
   }
 
@@ -820,7 +857,7 @@ export const deleteItem = async (itemId: ItemId): Promise<void> => {
   )
 
   if (!row) {
-    console.warn("[DB] Tried to delete non-existing item:", itemId)
+    console.warn("[DB] Tried to delete non-existent item:", itemId)
     return
   }
 
