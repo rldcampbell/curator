@@ -153,6 +153,67 @@ export const addCollection = async (
   }
 }
 
+// NEW updateCollection:
+export const updateCollection = async (
+  collectionId: CollectionId,
+  patch: Partial<Pick<Collection, "name" | "color">>,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Updating collection:", collectionId)
+
+  if (!("name" in patch) && !("color" in patch)) {
+    console.log("[DB] No changes provided, skipping update for:", collectionId)
+    return
+  }
+
+  // Check the collection exists
+  const row = await db.getFirstAsync<{ id: string }>(
+    `SELECT id FROM collections WHERE id = ?`,
+    collectionId,
+  )
+
+  if (!row) {
+    console.warn("[DB] Tried to update non-existent collection:", collectionId)
+    return
+  }
+
+  const now = timestampNow()
+
+  await db.execAsync("BEGIN")
+  try {
+    const updates: string[] = []
+    const values: any[] = []
+
+    if ("name" in patch) {
+      updates.push("name = ?")
+      values.push(patch.name)
+    }
+
+    if ("color" in patch) {
+      updates.push("color = ?")
+      values.push(patch.color ?? null)
+    }
+
+    updates.push("updatedAt = ?")
+    values.push(now)
+
+    values.push(collectionId)
+
+    await db.runAsync(
+      `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
+      ...values,
+    )
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Collection updated:", collectionId)
+  } catch (err) {
+    console.error("[DB] Error updating collection:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
 const upsertCollection = async (
   id: CollectionId,
   collection: Collection,
