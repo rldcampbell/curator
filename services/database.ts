@@ -467,6 +467,37 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
   log("Collection deleted and order updated:", id)
 }
 
+// NEW updateCollectionOrder:
+export const updateCollectionOrder = async (
+  collectionOrder: CollectionId[],
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Updating collection sort order")
+
+  await db.execAsync("BEGIN")
+  try {
+    for (const [index, collectionId] of collectionOrder.entries()) {
+      await db.runAsync(
+        `
+        UPDATE collections
+        SET sortOrder = ?
+        WHERE id = ?
+        `,
+        index,
+        collectionId,
+      )
+    }
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Collection order updated")
+  } catch (err) {
+    console.error("[DB] Error updating collection order:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
 // -- FIELDS --
 
 // NEW addField:
