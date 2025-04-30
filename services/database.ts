@@ -457,6 +457,61 @@ export const addField = async (
   }
 }
 
+// NEW updateField:
+export const updateField = async (
+  fieldId: FieldId,
+  patch: Partial<Pick<RawField, "name">>,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Updating field:", fieldId)
+
+  if (patch.name === undefined) {
+    console.log(
+      "[DB] No supported changes provided, skipping update for:",
+      fieldId,
+    )
+    return
+  }
+
+  // Load collectionId for this field
+  const fieldRow = await db.getFirstAsync<{ collectionId: CollectionId }>(
+    `SELECT collectionId FROM fields WHERE id = ?`,
+    fieldId,
+  )
+
+  if (!fieldRow) {
+    console.warn("[DB] Tried to update non-existent field:", fieldId)
+    return
+  }
+
+  const { collectionId } = fieldRow
+  const now = timestampNow()
+
+  await db.execAsync("BEGIN")
+  try {
+    await db.runAsync(
+      `
+      UPDATE fields
+      SET name = ?, updatedAt = ?
+      WHERE id = ?
+      `,
+      patch.name,
+      now,
+      fieldId,
+    )
+
+    await touchCollection(collectionId, now)
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Field updated:", fieldId)
+  } catch (err) {
+    console.error("[DB] Error updating field:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
 // NEW deleteField:
 export const deleteField = async (fieldId: FieldId): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
