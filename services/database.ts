@@ -454,17 +454,25 @@ export const saveCollectionOrder = async (
   log("Collection order saved")
 }
 
-export const deleteCollection = async (id: CollectionId): Promise<void> => {
+// NEW deleteCollection:
+export const deleteCollection = async (
+  collectionId: CollectionId,
+): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
 
-  await db.runAsync("DELETE FROM collections WHERE id = ?", id)
+  console.log("[DB] Deleting collection:", collectionId)
 
-  const existingOrder = await loadCollectionOrder()
-  const updatedOrder = existingOrder.filter(cid => cid !== id)
+  await db.execAsync("BEGIN")
+  try {
+    await db.runAsync(`DELETE FROM collections WHERE id = ?`, collectionId)
 
-  await saveCollectionOrder(updatedOrder)
-
-  log("Collection deleted and order updated:", id)
+    await db.execAsync("COMMIT")
+    console.log("[DB] Collection deleted:", collectionId)
+  } catch (err) {
+    console.error("[DB] Error deleting collection:", collectionId, err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
 }
 
 // NEW editCollectionStructure
