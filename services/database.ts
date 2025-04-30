@@ -467,6 +467,137 @@ export const deleteCollection = async (id: CollectionId): Promise<void> => {
   log("Collection deleted and order updated:", id)
 }
 
+// NEW editCollectionStructure
+export const editCollectionStructure = async (
+  collectionId: CollectionId,
+  update: Partial<
+    Pick<RawCollection, "name" | "color" | "fieldOrder" | "fields">
+  >,
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Editing collection structure:", collectionId)
+
+  const now = timestampNow()
+
+  await db.execAsync("BEGIN")
+  try {
+    // 1. Update name/color if provided
+    if ("name" in update || "color" in update) {
+      const updates: string[] = []
+      const values: any[] = []
+
+      if ("name" in update) {
+        updates.push("name = ?")
+        values.push(update.name)
+      }
+
+      if ("color" in update) {
+        updates.push("color = ?")
+        values.push(update.color ?? null)
+      }
+
+      updates.push("updatedAt = ?")
+      values.push(now)
+      values.push(collectionId)
+
+      await db.runAsync(
+        `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
+        ...values,
+      )
+    }
+
+    // 2. Handle field diffs if fields object is provided
+    if ("fields" in update) {
+      const newFields = update.fields!
+      const newFieldIds = new Set(Object.keys(newFields))
+
+      const existingRows = await db.getAllAsync<{
+        id: FieldId
+        name: string
+      }>(
+        `
+        SELECT id, name FROM fields
+        WHERE collectionId = ?
+        `,
+        collectionId,
+      )
+
+      const existingFieldIds = new Set(existingRows.map(f => f.id))
+      const existingNameMap = Object.fromEntries(
+        existingRows.map(f => [f.id, f.name]),
+      )
+
+      // 2a. Delete fields that are missing
+      for (const fieldId of existingFieldIds) {
+        if (!newFieldIds.has(fieldId)) {
+          await db.runAsync(`DELETE FROM fields WHERE id = ?`, fieldId)
+        }
+      }
+
+      // 2b. Add or update fields
+      for (const [fieldId, rawField] of Object.entries(newFields)) {
+        if (!existingFieldIds.has(fieldId as FieldId)) {
+          // Insert new field
+          await db.runAsync(
+            `
+            INSERT INTO fields (
+              id, collectionId, name, type, config, sortOrder, createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+            fieldId,
+            collectionId,
+            rawField.name,
+            rawField.type,
+            JSON.stringify(rawField.config),
+            update.fieldOrder?.indexOf(fieldId as FieldId) ?? 0,
+            now,
+            now,
+          )
+        } else {
+          // Update name if changed (we don't allow config / type updates yet)
+          if (rawField.name !== existingNameMap[fieldId]) {
+            await db.runAsync(
+              `
+              UPDATE fields
+              SET name = ?, updatedAt = ?
+              WHERE id = ? AND collectionId = ?
+              `,
+              rawField.name,
+              now,
+              fieldId,
+              collectionId,
+            )
+          }
+        }
+      }
+    } else if ("fieldOrder" in update) {
+      // 3. Update field order (only if 'fields' not updated)
+      for (const [index, fieldId] of update.fieldOrder!.entries()) {
+        await db.runAsync(
+          `
+          UPDATE fields SET sortOrder = ?
+          WHERE id = ? AND collectionId = ?
+          `,
+          index,
+          fieldId,
+          collectionId,
+        )
+      }
+    }
+
+    // 4. Touch collection if anything changed
+    await touchCollection(collectionId, now)
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Collection structure updated:", collectionId)
+  } catch (err) {
+    console.error("[DB] Error editing collection structure:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
 // NEW updateCollectionOrder:
 export const updateCollectionOrder = async (
   collectionOrder: CollectionId[],
@@ -880,6 +1011,53 @@ export const deleteItem = async (itemId: ItemId): Promise<void> => {
     console.log("[DB] Item deleted:", itemId)
   } catch (err) {
     console.error("[DB] Error deleting item:", err)
+    await db.execAsync("ROLLBACK")
+    throw err
+  }
+}
+
+// NEW updateItemOrder:
+/**
+ * Updates the sortOrder of all items in a collection based on the provided order.
+ *
+ * This method rewrites the sortOrder for all items, which is simple and robust.
+ *
+ * ⚠️ Performance note:
+ * In large collections, this may become inefficient.
+ * In future we may switch to a fractional sortOrder strategy,
+ * allowing O(1) moves with only one row updated per reordering action.
+ */
+export const updateItemOrder = async (
+  collectionId: CollectionId,
+  itemOrder: ItemId[],
+): Promise<void> => {
+  if (!db) throw new Error("Database not initialized")
+
+  console.log("[DB] Updating item sort order for collection:", collectionId)
+
+  await db.execAsync("BEGIN")
+  try {
+    for (let i = 0; i < itemOrder.length; i += 10) {
+      const batch = itemOrder.slice(i, i + 10)
+
+      const sql = batch
+        .map(
+          (id, iMap) =>
+            `UPDATE items SET sortOrder = ${i + iMap} WHERE id = '${id}'`,
+        )
+        .join(";\n")
+
+      await db.execAsync(sql)
+    }
+
+    await db.execAsync("COMMIT")
+    console.log("[DB] Item order updated for collection:", collectionId)
+  } catch (err) {
+    console.error(
+      "[DB] Error updating item order for collection:",
+      collectionId,
+      err,
+    )
     await db.execAsync("ROLLBACK")
     throw err
   }
