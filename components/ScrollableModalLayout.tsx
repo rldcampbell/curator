@@ -11,6 +11,8 @@ type Props = {
   children: ReactNode
   footer?: ReactNode
   contentStyle?: ViewStyle
+  visible: boolean
+  onRequestClose: () => void
 }
 
 export default function ScrollableModalLayout({
@@ -18,9 +20,11 @@ export default function ScrollableModalLayout({
   children,
   footer,
   contentStyle,
+  visible,
+  onRequestClose,
 }: Props) {
   return (
-    <ModalOverlay>
+    <ModalOverlay visible={visible} onRequestClose={onRequestClose}>
       <View
         style={[
           modalStyles.content,

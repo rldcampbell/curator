@@ -9,13 +9,13 @@ export type ItemId = `i-${RawId}`
 export type DateArray = [y: number, m: number, d: number]
 
 export type DateTimeArray = [
-  year?: number,
-  month?: number,
-  day?: number,
-  hour?: number,
-  minute?: number,
-  second?: number,
-  ms?: number,
+  year?: number | undefined,
+  month?: number | undefined,
+  day?: number | undefined,
+  hour?: number | undefined,
+  minute?: number | undefined,
+  second?: number | undefined,
+  ms?: number | undefined,
 ]
 
 export type DateTimeParts = [
@@ -142,7 +142,7 @@ export type RawCollection = {
   fields: Record<FieldId, RawField>
   itemOrder: ItemId[]
   items: Record<ItemId, RawItem>
-  color?: HexColor
+  color?: HexColor | undefined
 }
 
 export type Collection = WithMeta<{
@@ -151,7 +151,7 @@ export type Collection = WithMeta<{
   fields: Record<FieldId, Field>
   itemOrder: ItemId[]
   items: Record<ItemId, Item>
-  color?: HexColor
+  color?: HexColor | undefined
 }>
 
 export type CollectionsData = {

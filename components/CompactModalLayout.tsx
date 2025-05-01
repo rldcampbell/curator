@@ -7,7 +7,7 @@ import AppText from "./AppText"
 import ModalOverlay from "./ModalOverlay"
 
 type Props = {
-  title?: string
+  title?: string | undefined
   children: ReactNode
   footer?: ReactNode
   contentStyle?: ViewStyle

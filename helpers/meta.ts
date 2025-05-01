@@ -95,7 +95,7 @@ export const patchCollection = (
 
   // Top-level values
   const name = patch.name ?? existing.name
-  const color = "color" in patch ? patch.color : existing.color
+  const color = "color" in patch ? patch.color : existing.color // important to check via "in" in case trying to remove
   const fieldOrder = patch.fieldOrder ?? existing.fieldOrder
 
   // Field merging

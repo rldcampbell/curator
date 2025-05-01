@@ -11,6 +11,6 @@ export const text: FieldDefinition<"text"> = {
   display: TextDisplay,
   input: TextFieldInput,
   validate,
-  fromText: text => (text === "" ? undefined : text),
+  fromText: text => text || undefined,
   toText: value => value,
 } satisfies FieldDefinition<"text">

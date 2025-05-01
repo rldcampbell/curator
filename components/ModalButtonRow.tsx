@@ -8,7 +8,7 @@ import AppText from "./AppText"
 type ModalButtonRowProps = {
   onApply: () => void
   onDiscard: () => void
-  onClear?: () => void
+  onClear?: (() => void) | undefined
   applyLabel?: string
   discardLabel?: string
   clearLabel?: string

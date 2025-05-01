@@ -17,7 +17,7 @@ import ScrollableModalLayout from "./ScrollableModalLayout"
 type ItemFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
-  initialValues?: RawItem["values"]
+  initialValues?: RawItem["values"] | undefined
   fieldOrder: FieldId[]
   fields: Record<FieldId, RawField>
   onSubmit: (item: RawItem) => void
@@ -80,6 +80,8 @@ export default function ItemFormModal({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <ScrollableModalLayout
+        onRequestClose={onDiscard}
+        visible={visible}
         title={mode === "create" ? "New Item" : "Edit Item"}
         footer={
           <ModalButtonRow
