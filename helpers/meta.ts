@@ -54,83 +54,98 @@ const assertFieldTypesUnchanged = (
   }
 }
 
-export const patchCollection = (
-  existing: Collection,
-  incoming: Partial<RawCollection>,
-  options?: { strictFieldTypes?: boolean; timestamp?: Timestamp },
-): Collection => {
-  if (options?.strictFieldTypes && incoming.fields) {
-    assertFieldTypesUnchanged(existing.fields, incoming.fields)
-  }
-
-  const timestamp = options?.timestamp ?? timestampNow()
-
-  // Merge top-level props
-  const name = incoming.name ?? existing.name
-  const fieldOrder = incoming.fieldOrder ?? existing.fieldOrder
-  const itemOrder = incoming.itemOrder ?? existing.itemOrder
-  const color = "color" in incoming ? incoming.color : existing.color // to be able to clear!
-  // TODO: a lot of this logic might need a real clean-up as it has been
-  // difficult adding the ability to choose a colour for a collection
-  // when it feels like it should be pretty straight-forward
-
-  // Merge fields
-  const mergedFields = incoming.fields
-    ? mergeWithMeta(existing.fields, incoming.fields, timestamp)
-    : existing.fields
-
-  // Merge items
-  const mergedItems = incoming.items
-    ? mergeWithMeta(existing.items, incoming.items, timestamp)
-    : existing.items
-
-  // Detect if anything changed
-  const changed =
-    name !== existing.name ||
-    (incoming.fieldOrder && !isEqual(fieldOrder, existing.fieldOrder)) ||
-    (incoming.itemOrder && !isEqual(itemOrder, existing.itemOrder)) ||
-    (incoming.fields && !isEqual(mergedFields, existing.fields)) ||
-    (incoming.items && !isEqual(mergedItems, existing.items)) ||
-    color !== existing.color
-
-  return {
-    name,
-    fieldOrder,
-    itemOrder,
-    fields: mergedFields,
-    items: mergedItems,
-    color,
-    _meta: {
-      ...existing._meta,
-      updatedAt: changed ? timestamp : existing._meta.updatedAt,
-    },
-  }
-}
-
+// Merge raw fields with existing meta, touching updatedAt only when changed
 const mergeWithMeta = <Id extends string, T>(
   existing: Record<Id, WithMeta<T>>,
   incoming: Record<Id, T>,
   timestamp: Timestamp,
-): Record<Id, WithMeta<T>> => {
+): { merged: Record<Id, WithMeta<T>>; changed: boolean } => {
   const result = {} as Record<Id, WithMeta<T>>
+  let changed = false
 
-  for (const [id, incomingValue] of Object.entries(incoming) as [Id, T][]) {
-    const current = existing[id]
-    if (!current) {
-      result[id] = withMeta(incomingValue, timestamp)
-    } else if (!isEqual(current, incomingValue)) {
-      result[id] = touchMeta(
-        {
-          ...incomingValue,
-          _meta: current._meta,
-        },
-        timestamp,
-      )
+  for (const [id, newVal] of Object.entries(incoming) as [Id, T][]) {
+    const prev = existing[id]
+    if (!prev) {
+      result[id] = withMeta(newVal, timestamp)
+      changed = true
+    } else if (!isEqual(prev, newVal)) {
+      result[id] = touchMeta({ ...newVal, _meta: prev._meta }, timestamp)
+      changed = true
     } else {
-      // Unchanged, keep as-is
-      result[id] = current
+      result[id] = prev
     }
   }
 
-  return result
+  return { merged: result, changed }
+}
+
+export const patchCollection = (
+  existing: Collection,
+  patch: Partial<
+    Pick<RawCollection, "name" | "color" | "fieldOrder" | "fields">
+  >,
+  options?: { strictFieldTypes?: boolean; timestamp?: Timestamp },
+): Collection | null => {
+  const timestamp = options?.timestamp ?? timestampNow()
+
+  // Strict field type check (optional)
+  if (options?.strictFieldTypes && patch.fields) {
+    assertFieldTypesUnchanged(existing.fields, patch.fields)
+  }
+
+  // Top-level values
+  const name = patch.name ?? existing.name
+  const color = "color" in patch ? patch.color : existing.color
+  const fieldOrder = patch.fieldOrder ?? existing.fieldOrder
+
+  // Field merging
+  let fieldsChanged = false
+  let mergedFields = existing.fields
+
+  if (patch.fields) {
+    // Merge values and detect changes
+    const { merged, changed } = mergeWithMeta(
+      existing.fields,
+      patch.fields,
+      timestamp,
+    )
+    mergedFields = merged
+    fieldsChanged = changed
+
+    // Remove any deleted fields
+    // Note: we don't bother tidying up items - db will do so, and removed fields
+    // won't be displayed.
+    const deletedFieldIds = Object.keys(existing.fields).filter(
+      id => !(id in patch.fields!),
+    )
+
+    if (deletedFieldIds.length > 0) {
+      for (const fieldId of deletedFieldIds) {
+        delete mergedFields[fieldId as FieldId]
+      }
+      fieldsChanged = true
+    }
+  }
+
+  // Determine if anything changed
+  const changed =
+    name !== existing.name ||
+    color !== existing.color ||
+    (patch.fieldOrder && !isEqual(fieldOrder, existing.fieldOrder)) ||
+    fieldsChanged
+
+  if (!changed) return null
+
+  // Return patched collection
+  return {
+    ...existing,
+    name,
+    color,
+    fieldOrder,
+    fields: mergedFields,
+    _meta: {
+      ...existing._meta,
+      updatedAt: timestamp,
+    },
+  }
 }

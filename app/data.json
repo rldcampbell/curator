@@ -7,62 +7,75 @@
   "collections": {
     "c-abc0-1234-def1-5678": {
       "name": "Books",
+      "color": null,
       "fieldOrder": ["f-abc0-1234-def1-5678", "f-abc0-1234-def1-6789"],
       "fields": {
         "f-abc0-1234-def1-5678": {
           "name": "Title",
           "type": "text",
-          "charLim": 100
+          "config": {}
         },
         "f-abc0-1234-def1-6789": {
           "name": "Published Date",
           "type": "date",
-          "min": [1990, 1, 1],
-          "max": [2025, 12, 31]
+          "config": {}
         }
       },
       "itemOrder": ["i-abc0-1234-def1-7890", "i-abc0-1234-def1-7891"],
       "items": {
         "i-abc0-1234-def1-7890": {
-          "f-abc0-1234-def1-5678": "Harry Potter and the Philosopher's Stone",
-          "f-abc0-1234-def1-6789": [1997, 6, 26]
+          "values": {
+            "f-abc0-1234-def1-5678": "Harry Potter and the Philosopher's Stone",
+            "f-abc0-1234-def1-6789": [1997, 6, 26]
+          },
+          "tags": []
         },
         "i-abc0-1234-def1-7891": {
-          "f-abc0-1234-def1-5678": "The Hobbit",
-          "f-abc0-1234-def1-6789": [1937, 9, 21]
+          "values": {
+            "f-abc0-1234-def1-5678": "The Hobbit",
+            "f-abc0-1234-def1-6789": [1937, 9, 21]
+          },
+          "tags": []
         }
       }
     },
     "c-xyz0-2345-hij2-6789": {
       "name": "Movies",
+      "color": null,
       "fieldOrder": ["f-xyz0-2345-hij2-5678", "f-xyz0-2345-hij2-6789"],
       "fields": {
         "f-xyz0-2345-hij2-5678": {
           "name": "Title",
           "type": "text",
-          "charLim": 100
+          "config": {}
         },
         "f-xyz0-2345-hij2-6789": {
           "name": "Release Date",
           "type": "date",
-          "min": [1900, 1, 1],
-          "max": [2025, 12, 31]
+          "config": {}
         }
       },
       "itemOrder": ["i-xyz0-2345-hij2-7890", "i-xyz0-2345-hij2-7891"],
       "items": {
         "i-xyz0-2345-hij2-7890": {
-          "f-xyz0-2345-hij2-5678": "The Matrix",
-          "f-xyz0-2345-hij2-6789": [1999, 3, 31]
+          "values": {
+            "f-xyz0-2345-hij2-5678": "The Matrix",
+            "f-xyz0-2345-hij2-6789": [1999, 3, 31]
+          },
+          "tags": []
         },
         "i-xyz0-2345-hij2-7891": {
-          "f-xyz0-2345-hij2-5678": "Inception",
-          "f-xyz0-2345-hij2-6789": [2010, 7, 16]
+          "values": {
+            "f-xyz0-2345-hij2-5678": "Inception",
+            "f-xyz0-2345-hij2-6789": [2010, 7, 16]
+          },
+          "tags": []
         }
       }
     },
     "c-ani0-3456-klm3-7890": {
       "name": "Animals",
+      "color": null,
       "fieldOrder": [
         "f-ani0-3456-klm3-5678",
         "f-ani0-3456-klm3-6789",
@@ -72,17 +85,17 @@
         "f-ani0-3456-klm3-5678": {
           "name": "Animal",
           "type": "text",
-          "charLim": 50
+          "config": {}
         },
         "f-ani0-3456-klm3-6789": {
           "name": "Favourite Food",
           "type": "text",
-          "charLim": 50
+          "config": {}
         },
         "f-ani0-3456-klm3-6790": {
           "name": "Colour",
           "type": "text",
-          "charLim": 50
+          "config": {}
         }
       },
       "itemOrder": [
@@ -93,24 +106,36 @@
       ],
       "items": {
         "i-ani0-3456-klm3-7890": {
-          "f-ani0-3456-klm3-5678": "Sloth",
-          "f-ani0-3456-klm3-6789": "Leaves",
-          "f-ani0-3456-klm3-6790": "Grey"
+          "values": {
+            "f-ani0-3456-klm3-5678": "Sloth",
+            "f-ani0-3456-klm3-6789": "Leaves",
+            "f-ani0-3456-klm3-6790": "Grey"
+          },
+          "tags": []
         },
         "i-ani0-3456-klm3-7891": {
-          "f-ani0-3456-klm3-5678": "Seagull",
-          "f-ani0-3456-klm3-6789": "Chips",
-          "f-ani0-3456-klm3-6790": "White and grey"
+          "values": {
+            "f-ani0-3456-klm3-5678": "Seagull",
+            "f-ani0-3456-klm3-6789": "Chips",
+            "f-ani0-3456-klm3-6790": "White and grey"
+          },
+          "tags": []
         },
         "i-ani0-3456-klm3-7892": {
-          "f-ani0-3456-klm3-5678": "Llama",
-          "f-ani0-3456-klm3-6789": "Grass or something",
-          "f-ani0-3456-klm3-6790": "Yellow"
+          "values": {
+            "f-ani0-3456-klm3-5678": "Llama",
+            "f-ani0-3456-klm3-6789": "Grass or something",
+            "f-ani0-3456-klm3-6790": "Yellow"
+          },
+          "tags": []
         },
         "i-ani0-3456-klm3-7893": {
-          "f-ani0-3456-klm3-5678": "Turtle",
-          "f-ani0-3456-klm3-6789": "Aquatic plants",
-          "f-ani0-3456-klm3-6790": "Emerald"
+          "values": {
+            "f-ani0-3456-klm3-5678": "Turtle",
+            "f-ani0-3456-klm3-6789": "Aquatic plants",
+            "f-ani0-3456-klm3-6790": "Emerald"
+          },
+          "tags": []
         }
       }
     }
