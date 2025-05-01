@@ -17,7 +17,7 @@ import ScrollableModalLayout from "./ScrollableModalLayout"
 type ItemFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
-  initialValues?: RawItem
+  initialValues?: RawItem["values"]
   fieldOrder: FieldId[]
   fields: Record<FieldId, RawField>
   onSubmit: (item: RawItem) => void

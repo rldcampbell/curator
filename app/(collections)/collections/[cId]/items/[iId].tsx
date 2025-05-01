@@ -103,7 +103,7 @@ export default function ItemDetailScreen() {
         visible={itemModalVisible}
         fieldOrder={fieldOrder}
         fields={fields}
-        initialValues={item}
+        initialValues={item.values}
         onSubmit={updatedItem => {
           updateItem(itemId, updatedItem)
           setItemModalVisible(false)
