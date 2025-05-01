@@ -26,7 +26,16 @@ const TestScreen = () => {
   const fetchTable = async () => {
     try {
       const db = await SQLite.openDatabaseAsync("curator.db")
-      const results = await db.getAllAsync("SELECT * FROM collections")
+      const results = [
+        "COLLECTIONS",
+        ...(await db.getAllAsync("SELECT * FROM collections")),
+        "FIELDS",
+        ...(await db.getAllAsync("SELECT * FROM fields")),
+        "ITEMS",
+        ...(await db.getAllAsync("SELECT * FROM items")),
+        "ITEM_VALUES",
+        ...(await db.getAllAsync("SELECT * FROM item_values")),
+      ]
       const result = await db.getAllAsync("SELECT * FROM meta")
       console.log("[TEST] Meta table contents:", result)
 
