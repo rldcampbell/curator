@@ -240,7 +240,6 @@ export const CollectionsProvider = ({
       type: "update_item_order",
       collectionId,
       itemOrder,
-      timestamp: timestampNow(),
     })
 
     db.updateItemOrder(collectionId, itemOrder) // check!

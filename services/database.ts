@@ -595,7 +595,6 @@ export const updateItem = async (
     return
   }
 
-  const { collectionId } = itemRow
   const now = timestampNow()
 
   await db.execAsync("BEGIN")
@@ -651,8 +650,7 @@ export const updateItem = async (
       )
     }
 
-    // === Update collection's updatedAt ===
-    await touchCollection(collectionId, now)
+    // don't 'touch' collection - item update only
 
     await db.execAsync("COMMIT")
     console.log("[DB] Item updated:", itemId, "(changes saved)")

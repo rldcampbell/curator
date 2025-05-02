@@ -51,7 +51,6 @@ export type CollectionsAction =
       type: "update_item_order"
       collectionId: CollectionId
       itemOrder: ItemId[]
-      timestamp: number
     }
 
 export const collectionsReducer = (
@@ -121,6 +120,7 @@ export const collectionsReducer = (
                 ...action.item,
               },
             },
+            // DO update _meta
             _meta: {
               ...collection._meta,
               updatedAt: action.item._meta.updatedAt,
@@ -147,10 +147,7 @@ export const collectionsReducer = (
               ...collection.items,
               [action.itemId]: action.item,
             },
-            _meta: {
-              ...collection._meta,
-              updatedAt: action.item._meta.updatedAt,
-            },
+            // don't update collection _meta
           },
         },
       }
@@ -171,6 +168,7 @@ export const collectionsReducer = (
             ...collection,
             items,
             itemOrder: collection.itemOrder.filter(id => id !== action.itemId),
+            // DO update _meta
             _meta: {
               ...collection._meta,
               updatedAt: action.timestamp,
@@ -191,10 +189,7 @@ export const collectionsReducer = (
           [action.collectionId]: {
             ...collection,
             itemOrder: action.itemOrder,
-            _meta: {
-              ...collection._meta,
-              updatedAt: action.timestamp,
-            },
+            // don't update _meta
           },
         },
       }
