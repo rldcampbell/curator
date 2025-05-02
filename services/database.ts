@@ -2,6 +2,8 @@ import * as FileSystem from "expo-file-system"
 import * as SQLite from "expo-sqlite"
 import * as Updates from "expo-updates"
 
+import _ from "lodash"
+
 import {
   Collection,
   CollectionId,
@@ -115,147 +117,193 @@ export const addCollection = async (
   }
 }
 
+type CollectionRow = {
+  id: CollectionId
+  name: string
+  color: HexColor | null
+  createdAt: number
+  updatedAt: number
+}
+
+type FieldRow = {
+  id: FieldId
+  collectionId: CollectionId
+  name: string
+  type: FieldType
+  config: string
+  createdAt: number
+  updatedAt: number
+}
+
+type ItemRow = {
+  id: ItemId
+  collectionId: CollectionId
+  tags: string | null
+  createdAt: number
+  updatedAt: number
+}
+
+type ValueRow = {
+  itemId: ItemId
+  fieldId: FieldId
+  value: string | null
+}
+
+export const hydrateCollection = (
+  collectionRow: CollectionRow,
+  fieldRows: FieldRow[],
+  itemRows: ItemRow[],
+  valueRows: ValueRow[],
+): Collection => {
+  const fieldOrder = fieldRows.map(f => f.id)
+  const fields: Record<FieldId, Field> = {}
+  for (const f of fieldRows) {
+    fields[f.id] = {
+      name: f.name,
+      type: f.type,
+      config: JSON.parse(f.config),
+      _meta: {
+        createdAt: f.createdAt,
+        updatedAt: f.updatedAt,
+      },
+    }
+  }
+
+  const itemOrder = itemRows.map(i => i.id)
+  const items: Record<ItemId, Item> = {}
+  for (const i of itemRows) {
+    items[i.id] = {
+      tags: i.tags ? JSON.parse(i.tags) : [],
+      values: {},
+      _meta: {
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt,
+      },
+    }
+  }
+
+  for (const v of valueRows) {
+    const item = items[v.itemId]
+    if (!item) continue
+    let parsed = v.value ? JSON.parse(v.value) : undefined
+    if (Array.isArray(parsed)) parsed = parsed.map(v => v ?? undefined)
+    item.values[v.fieldId] = parsed
+  }
+
+  return {
+    name: collectionRow.name,
+    color: collectionRow.color ?? undefined,
+    fieldOrder,
+    fields,
+    itemOrder,
+    items,
+    _meta: {
+      createdAt: collectionRow.createdAt,
+      updatedAt: collectionRow.updatedAt,
+    },
+  }
+}
+
 // NEW loadCollections:
 export const loadCollections = async (): Promise<CollectionsData> => {
   if (!db) throw new Error("Database not initialized")
 
-  // Load collections
-  const collectionRows = await db.getAllAsync<{
-    id: CollectionId
-    name: string
-    color: HexColor | null
-    sortOrder: number
-    createdAt: number
-    updatedAt: number
-  }>(`
-    SELECT * FROM collections
-    ORDER BY sortOrder ASC
-  `)
+  const collectionRows = await db.getAllAsync<CollectionRow>(
+    `SELECT id, name, color, createdAt, updatedAt FROM collections ORDER BY sortOrder ASC`,
+  )
 
-  // Load fields
-  const fieldRows = await db.getAllAsync<{
-    id: FieldId
-    collectionId: CollectionId
-    name: string
-    type: string
-    config: string
-    sortOrder: number
-    createdAt: number
-    updatedAt: number
-  }>(`
-    SELECT * FROM fields
-    ORDER BY sortOrder ASC
-  `)
+  const fieldRows = await db.getAllAsync<FieldRow>(
+    `SELECT id, collectionId, name, type, config, createdAt, updatedAt FROM fields ORDER BY sortOrder ASC`,
+  )
 
-  // Load items
-  const itemRows = await db.getAllAsync<{
-    id: ItemId
-    collectionId: CollectionId
-    tags: string | null
-    sortOrder: number
-    createdAt: number
-    updatedAt: number
-  }>(`
-    SELECT * FROM items
-    ORDER BY sortOrder ASC
-  `)
+  const itemRows = await db.getAllAsync<ItemRow>(
+    `SELECT id, collectionId, tags, createdAt, updatedAt FROM items ORDER BY sortOrder ASC`,
+  )
 
-  // Load item_values
-  const valueRows = await db.getAllAsync<{
-    itemId: ItemId
-    fieldId: FieldId
-    value: string | null
-    createdAt: number
-    updatedAt: number
-  }>(`
-    SELECT * FROM item_values
-  `)
+  const valueRows = await db.getAllAsync<ValueRow>(
+    `SELECT itemId, fieldId, value FROM item_values`,
+  )
 
-  // --- Organize fields ---
-  const fieldsByCollection: Record<
-    CollectionId,
-    { fieldOrder: FieldId[]; fields: Record<FieldId, Field> }
-  > = {}
-
-  for (const field of fieldRows) {
-    if (!fieldsByCollection[field.collectionId]) {
-      fieldsByCollection[field.collectionId] = { fieldOrder: [], fields: {} }
-    }
-    fieldsByCollection[field.collectionId].fieldOrder.push(field.id)
-    fieldsByCollection[field.collectionId].fields[field.id] = {
-      name: field.name,
-      type: field.type as FieldType,
-      config: JSON.parse(field.config),
-      _meta: {
-        createdAt: field.createdAt,
-        updatedAt: field.updatedAt,
-      },
-    }
+  const fieldsByCollection: Record<CollectionId, FieldRow[]> = {}
+  for (const f of fieldRows) {
+    if (!fieldsByCollection[f.collectionId])
+      fieldsByCollection[f.collectionId] = []
+    fieldsByCollection[f.collectionId].push(f)
   }
 
-  // --- Organize items ---
-  const itemsByCollection: Record<
-    CollectionId,
-    { itemOrder: ItemId[]; items: Record<ItemId, Item> }
-  > = {}
-
-  const collectionIdByItemId: Record<ItemId, CollectionId> = {}
-
-  for (const item of itemRows) {
-    collectionIdByItemId[item.id] = item.collectionId
-    if (!itemsByCollection[item.collectionId]) {
-      itemsByCollection[item.collectionId] = { itemOrder: [], items: {} }
-    }
-    itemsByCollection[item.collectionId].itemOrder.push(item.id)
-    itemsByCollection[item.collectionId].items[item.id] = {
-      tags: item.tags ? JSON.parse(item.tags) : [],
-      values: {},
-      _meta: {
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      },
-    }
+  const itemsByCollection: Record<CollectionId, ItemRow[]> = {}
+  for (const i of itemRows) {
+    if (!itemsByCollection[i.collectionId])
+      itemsByCollection[i.collectionId] = []
+    itemsByCollection[i.collectionId].push(i)
   }
 
-  // --- Apply item_values ---
-  for (const valueRow of valueRows) {
-    const item: Item | undefined =
-      itemsByCollection[collectionIdByItemId[valueRow.itemId]]?.items?.[
-        valueRow.itemId
-      ]
-    if (item && valueRow.value !== null) {
-      let parsed = JSON.parse(valueRow.value)
-      if (Array.isArray(parsed)) {
-        // null -> undefined in arrays for now
-        parsed = parsed.map(v => v ?? undefined)
-      }
-      item.values[valueRow.fieldId] = parsed
-    }
+  const valuesByItem: Record<string, ValueRow[]> = {}
+  for (const v of valueRows) {
+    if (!valuesByItem[v.itemId]) valuesByItem[v.itemId] = []
+    valuesByItem[v.itemId].push(v)
   }
 
-  // --- Assemble collections ---
-  const collections: Record<CollectionId, Collection> = {}
+  const collections: CollectionsData["collections"] = {}
   const collectionOrder: CollectionId[] = []
 
   for (const row of collectionRows) {
-    collections[row.id] = {
-      name: row.name,
-      color: row.color ?? undefined,
-      fieldOrder: fieldsByCollection[row.id]?.fieldOrder ?? [],
-      fields: fieldsByCollection[row.id]?.fields ?? {},
-      itemOrder: itemsByCollection[row.id]?.itemOrder ?? [],
-      items: itemsByCollection[row.id]?.items ?? {},
-      _meta: {
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-      },
-    }
+    const fields = fieldsByCollection[row.id] ?? []
+    const items = itemsByCollection[row.id] ?? []
+    const relevantValues = items.flatMap(i => valuesByItem[i.id] ?? [])
+    collections[row.id] = hydrateCollection(row, fields, items, relevantValues)
     collectionOrder.push(row.id)
   }
 
-  console.log("[DB] Loaded collections + fields + items + values")
-
   return { collections, collectionOrder }
+}
+
+const loadCollectionById = async (
+  collectionId: CollectionId,
+): Promise<Collection> => {
+  if (!db) throw new Error("Database not initialized")
+
+  const collectionRow = await db.getFirstAsync<CollectionRow>(
+    `
+    SELECT id, name, color, createdAt, updatedAt
+    FROM collections
+    WHERE id = ?
+  `,
+    [collectionId],
+  )
+
+  if (!collectionRow) throw new Error(`Collection ${collectionId} not found`)
+
+  const fieldRows = await db.getAllAsync<FieldRow>(
+    `
+    SELECT id, collectionId, name, type, config, createdAt, updatedAt
+    FROM fields
+    WHERE collectionId = ?
+    ORDER BY sortOrder ASC
+  `,
+    [collectionId],
+  )
+
+  const itemRows = await db.getAllAsync<ItemRow>(
+    `
+    SELECT id, collectionId, tags, createdAt, updatedAt
+    FROM items
+    WHERE collectionId = ?
+    ORDER BY sortOrder ASC
+  `,
+    [collectionId],
+  )
+
+  const valueRows =
+    itemRows.length === 0
+      ? []
+      : await db.getAllAsync<ValueRow>(`
+    SELECT itemId, fieldId, value
+    FROM item_values
+    WHERE fieldId IN (${fieldRows.map(i => `'${i.id}'`).join(",")})
+  `)
+
+  return hydrateCollection(collectionRow, fieldRows, itemRows, valueRows)
 }
 
 // NEW touchCollection:
@@ -299,132 +347,125 @@ export const deleteCollection = async (
   }
 }
 
-// NEW editCollectionStructure
+// NEW updateCollection * now respecting collection updatedAt philosophy
+// (ignore sort order updates and field/item CHANGES - just respect direct
+// collection changes and field/item additions/deletions)
 export const updateCollection = async (
   collectionId: CollectionId,
-  update: Partial<
-    Pick<RawCollection, "name" | "color" | "fieldOrder" | "fields">
-  >,
+  raw: Partial<Pick<RawCollection, "name" | "color" | "fields" | "fieldOrder">>,
 ): Promise<void> => {
   if (!db) throw new Error("Database not initialized")
-
-  console.log("[DB] Editing collection structure:", collectionId)
+  console.log("[DB] Updating collection:", collectionId)
 
   const now = timestampNow()
-
   await db.execAsync("BEGIN")
+
   try {
-    // 1. Update name/color if provided
-    if ("name" in update || "color" in update) {
-      const updates: string[] = []
-      const values: any[] = []
+    const existing = await loadCollectionById(collectionId)
 
-      if ("name" in update) {
+    let hasMeaningfulChange = false
+
+    // === 1. Compare and update collection name/color ===
+    const nameChanged = "name" in raw && raw.name !== existing.name
+    const colorChanged = "color" in raw && raw.color !== existing.color
+
+    if (nameChanged || colorChanged) {
+      const updates = []
+      const values = []
+
+      if (nameChanged) {
         updates.push("name = ?")
-        values.push(update.name)
+        values.push(raw.name ?? null)
       }
 
-      if ("color" in update) {
+      if (colorChanged) {
         updates.push("color = ?")
-        values.push(update.color ?? null)
+        values.push(raw.color ?? null)
       }
 
-      updates.push("updatedAt = ?")
-      values.push(now)
-      values.push(collectionId)
-
-      await db.runAsync(
-        `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
-        ...values,
-      )
+      if (updates.length > 0) {
+        hasMeaningfulChange = true
+        values.push(collectionId)
+        await db.runAsync(
+          `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
+          ...values,
+        )
+      }
     }
 
-    // 2. Handle field diffs if fields object is provided
-    if ("fields" in update) {
-      const newFields = update.fields!
-      const newFieldIds = new Set(Object.keys(newFields))
+    // === 2. Compare and update fields ===
+    if (raw.fields) {
+      const newFieldIds = new Set(Object.keys(raw.fields))
+      const existingFieldIds = new Set(Object.keys(existing.fields))
 
-      const existingRows = await db.getAllAsync<{
-        id: FieldId
-        name: string
-      }>(
-        `
-        SELECT id, name FROM fields
-        WHERE collectionId = ?
-        `,
-        collectionId,
-      )
-
-      const existingFieldIds = new Set(existingRows.map(f => f.id))
-      const existingNameMap = Object.fromEntries(
-        existingRows.map(f => [f.id, f.name]),
-      )
-
-      // 2a. Delete fields that are missing
+      // 2a. Delete removed fields
       for (const fieldId of existingFieldIds) {
         if (!newFieldIds.has(fieldId)) {
-          await db.runAsync(`DELETE FROM fields WHERE id = ?`, fieldId)
+          await db.runAsync("DELETE FROM fields WHERE id = ?", fieldId)
+          hasMeaningfulChange = true
         }
       }
 
       // 2b. Add or update fields
-      for (const [fieldId, rawField] of Object.entries(newFields)) {
-        if (!existingFieldIds.has(fieldId as FieldId)) {
-          // Insert new field
+      for (const [fieldId, newField] of Object.entries(raw.fields)) {
+        const existingField = existing.fields[fieldId as FieldId]
+        if (!existingField) {
           await db.runAsync(
-            `
-            INSERT INTO fields (
-              id, collectionId, name, type, config, sortOrder, createdAt, updatedAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `,
+            `INSERT INTO fields (id, collectionId, name, type, config, sortOrder, createdAt, updatedAt)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             fieldId,
             collectionId,
-            rawField.name,
-            rawField.type,
-            JSON.stringify(rawField.config),
-            update.fieldOrder?.indexOf(fieldId as FieldId) ?? 0,
+            newField.name,
+            newField.type,
+            JSON.stringify(newField.config),
+            raw.fieldOrder?.indexOf(fieldId as FieldId) ?? 0,
             now,
             now,
           )
-        } else {
-          // Update name if changed (we don't allow config / type updates yet)
-          if (rawField.name !== existingNameMap[fieldId]) {
-            await db.runAsync(
-              `
-              UPDATE fields
-              SET name = ?, updatedAt = ?
-              WHERE id = ? AND collectionId = ?
-              `,
-              rawField.name,
-              now,
-              fieldId,
-              collectionId,
-            )
-          }
+          hasMeaningfulChange = true
+        } else if (
+          existingField.name !== newField.name ||
+          existingField.type !== newField.type ||
+          !_.isEqual(existingField.config, newField.config)
+        ) {
+          await db.runAsync(
+            `UPDATE fields SET name = ?, type = ?, config = ?, updatedAt = ? WHERE id = ?`,
+            newField.name,
+            newField.type,
+            JSON.stringify(newField.config),
+            now,
+            fieldId,
+          )
         }
       }
-    } else if ("fieldOrder" in update) {
-      // 3. Update field order (only if 'fields' not updated)
-      for (const [index, fieldId] of update.fieldOrder!.entries()) {
+    }
+
+    // === 3. Compare and update field order ===
+    if (raw.fieldOrder && !_.isEqual(raw.fieldOrder, existing.fieldOrder)) {
+      for (const [index, fieldId] of raw.fieldOrder.entries()) {
         await db.runAsync(
-          `
-          UPDATE fields SET sortOrder = ?
-          WHERE id = ? AND collectionId = ?
-          `,
+          `UPDATE fields SET sortOrder = ? WHERE id = ? AND collectionId = ?`,
           index,
           fieldId,
           collectionId,
         )
       }
+      // Note: sort order changes do NOT trigger updatedAt
     }
 
-    // 4. Touch collection if anything changed
-    await touchCollection(collectionId, now)
+    // === 4. Final updatedAt touch ===
+    if (hasMeaningfulChange) {
+      await db.runAsync(
+        `UPDATE collections SET updatedAt = ? WHERE id = ?`,
+        now,
+        collectionId,
+      )
+    }
 
     await db.execAsync("COMMIT")
-    console.log("[DB] Collection structure updated:", collectionId)
+    console.log("[DB] Collection updated:", collectionId)
   } catch (err) {
-    console.error("[DB] Error editing collection structure:", err)
+    console.error("[DB] Error updating collection:", err)
     await db.execAsync("ROLLBACK")
     throw err
   }
