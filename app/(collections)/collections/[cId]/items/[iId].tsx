@@ -104,8 +104,8 @@ export default function ItemDetailScreen() {
         fieldOrder={fieldOrder}
         fields={fields}
         initialValues={item.values}
-        onSubmit={updatedItem => {
-          updateItem(itemId, updatedItem)
+        onSubmit={values => {
+          updateItem(itemId, { values })
           setItemModalVisible(false)
         }}
         onDiscard={() => setItemModalVisible(false)}

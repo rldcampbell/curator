@@ -20,7 +20,7 @@ type ItemFormModalProps = {
   initialValues?: RawItem["values"] | undefined
   fieldOrder: FieldId[]
   fields: Record<FieldId, RawField>
-  onSubmit: (item: RawItem) => void
+  onSubmit: (values: RawItem["values"]) => void
   onDiscard: () => void
 }
 
@@ -74,7 +74,7 @@ export default function ItemFormModal({
   const handleSubmit = async () => {
     const values = await resolveObjectValues(inputValues)
 
-    onSubmit({ values })
+    onSubmit(values)
   }
 
   return (
