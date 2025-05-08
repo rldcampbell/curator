@@ -1,19 +1,20 @@
-import { useLayoutEffect, useState } from "react"
-import { ScrollView, StyleSheet, View } from "react-native"
+import { useLayoutEffect, useRef, useState } from "react"
 import {
-  GestureEvent,
-  GestureHandlerRootView,
-  PanGestureHandler,
-  PanGestureHandlerEventPayload,
-} from "react-native-gesture-handler"
+  Dimensions,
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native"
 
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
+import { useLocalSearchParams, useNavigation } from "expo-router"
 
 import { CollectionId, ItemId, RawFieldAndValue, WithMeta } from "@/app/types"
 import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
-import { safeAccess } from "@/helpers"
 import { useCollection } from "@/hooks/useCollection"
 import { fieldService } from "@/services/fieldService"
 
@@ -23,10 +24,7 @@ export default function ItemDetailScreen() {
   const collectionId = cId as unknown as CollectionId
   const itemId = iId as unknown as ItemId
 
-  const router = useRouter()
   const navigation = useNavigation()
-
-  const [itemModalVisible, setItemModalVisible] = useState(false)
 
   const {
     getItem,
@@ -38,18 +36,11 @@ export default function ItemDetailScreen() {
     updateItem,
   } = useCollection(collectionId)
 
-  const itemIndex = getItemIndex(itemId)
-  const item = getItem(itemId)
+  const initialIndex = getItemIndex(itemId)
+  const [currentIndex, setCurrentIndex] = useState(initialIndex)
 
-  const goToItem = (newIndex: number) => {
-    router.replace({
-      pathname: "/collections/[cId]/items/[iId]",
-      params: {
-        cId: collectionId,
-        iId: safeAccess(itemOrder, newIndex),
-      },
-    })
-  }
+  const flatListRef = useRef<FlatList<ItemId>>(null)
+  const screenWidth = Dimensions.get("window").width
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -63,62 +54,85 @@ export default function ItemDetailScreen() {
     })
   }, [navigation, name])
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <PanGestureHandler
-        onGestureEvent={(
-          event: GestureEvent<PanGestureHandlerEventPayload>,
-        ) => {
-          const { translationX } = event.nativeEvent
-          if (translationX < -50) goToItem(itemIndex + 1)
-          if (translationX > 50) goToItem(itemIndex - 1)
-        }}
-      >
+  const [itemModalVisible, setItemModalVisible] = useState(false)
+
+  const handleMomentumScrollEnd = (
+    e: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const newIndex = Math.round(
+      e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width,
+    )
+    setCurrentIndex(newIndex)
+  }
+
+  const renderItem = ({ item: currentItemId }: { item: ItemId }) => {
+    const item = getItem(currentItemId)
+    return (
+      <View style={{ width: screenWidth }}>
         <ScrollView contentContainerStyle={styles.container}>
           {fieldOrder.map(fieldId => {
             const value = item.values[fieldId]
             if (value === undefined) return null
             const field = fields[fieldId]
-
             const fieldWithValue = {
               ...field,
               value,
             } as WithMeta<RawFieldAndValue>
-            const label = fieldWithValue.name
 
             return (
               <View key={fieldId} style={styles.fieldRow}>
                 <AppText weight="bold" style={styles.label}>
-                  {label}
+                  {fieldWithValue.name}
                 </AppText>
                 {fieldService.display(fieldWithValue)}
               </View>
             )
           })}
         </ScrollView>
-      </PanGestureHandler>
+      </View>
+    )
+  }
+
+  return (
+    <>
+      <FlatList
+        ref={flatListRef}
+        data={itemOrder}
+        horizontal
+        pagingEnabled
+        keyExtractor={id => id}
+        initialScrollIndex={initialIndex}
+        getItemLayout={(_, index) => ({
+          length: screenWidth,
+          offset: screenWidth * index,
+          index,
+        })}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        windowSize={7}
+        maxToRenderPerBatch={4}
+        removeClippedSubviews={false}
+        renderItem={renderItem}
+      />
 
       <ItemFormModal
         mode="edit"
         visible={itemModalVisible}
         fieldOrder={fieldOrder}
         fields={fields}
-        initialValues={item.values}
+        initialValues={getItem(itemOrder[currentIndex]).values}
         onSubmit={values => {
-          updateItem(itemId, { values })
+          updateItem(itemOrder[currentIndex], { values })
           setItemModalVisible(false)
         }}
         onDiscard={() => setItemModalVisible(false)}
       />
-    </GestureHandlerRootView>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    gap: 16,
-  },
+  container: { padding: 20, gap: 16 },
   fieldRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -126,19 +140,5 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 8,
   },
-  label: {
-    fontSize: 16,
-    color: "#333",
-    maxWidth: "40%",
-    flexShrink: 1,
-  },
-  valueContainer: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  value: {
-    fontSize: 16,
-    color: "#555",
-    textAlign: "right",
-  },
+  label: { fontSize: 16, color: "#333", maxWidth: "40%", flexShrink: 1 },
 })
