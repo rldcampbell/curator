@@ -90,12 +90,12 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         color,
       })
     } else if (collectionId) {
-      updateCollection(collectionId, () => ({
+      updateCollection(collectionId, {
         name: collectionName,
         fieldOrder,
         fields,
         color,
-      }))
+      })
     }
     router.back()
   }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Modal, View } from "react-native"
+import { View } from "react-native"
 
 import {
   FieldId,
@@ -17,10 +17,10 @@ import ScrollableModalLayout from "./ScrollableModalLayout"
 type ItemFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
-  initialValues?: RawItem
+  initialValues?: RawItem["values"] | undefined
   fieldOrder: FieldId[]
   fields: Record<FieldId, RawField>
-  onSubmit: (item: RawItem) => void
+  onSubmit: (values: RawItem["values"]) => void
   onDiscard: () => void
 }
 
@@ -72,39 +72,39 @@ export default function ItemFormModal({
 
   // Resolve all values, including any thunks, before submitting
   const handleSubmit = async () => {
-    const resolved = await resolveObjectValues(inputValues)
+    const values = await resolveObjectValues(inputValues)
 
-    onSubmit(resolved)
+    onSubmit(values)
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <ScrollableModalLayout
-        title={mode === "create" ? "New Item" : "Edit Item"}
-        footer={
-          <ModalButtonRow
-            onApply={handleSubmit}
-            applyLabel={mode === "create" ? "Create" : "Update"}
-            onDiscard={onDiscard}
-          />
-        }
-      >
-        {fieldOrder.map(fieldId => {
-          const field = fields[fieldId]
-          const value = inputValues[fieldId]
+    <ScrollableModalLayout
+      onRequestClose={onDiscard}
+      visible={visible}
+      title={mode === "create" ? "New Item" : "Edit Item"}
+      footer={
+        <ModalButtonRow
+          onApply={handleSubmit}
+          applyLabel={mode === "create" ? "Create" : "Update"}
+          onDiscard={onDiscard}
+        />
+      }
+    >
+      {fieldOrder.map(fieldId => {
+        const field = fields[fieldId]
+        const value = inputValues[fieldId]
 
-          return (
-            <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-              {fieldService.input({
-                field,
-                initialValue: isResolved(value) ? value : undefined,
-                onChange: value => updateField(fieldId, value),
-              })}
-            </View>
-          )
-        })}
-      </ScrollableModalLayout>
-    </Modal>
+        return (
+          <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+            {fieldService.input({
+              field,
+              initialValue: isResolved(value) ? value : undefined,
+              onChange: value => updateField(fieldId, value),
+            })}
+          </View>
+        )
+      })}
+    </ScrollableModalLayout>
   )
 }
 

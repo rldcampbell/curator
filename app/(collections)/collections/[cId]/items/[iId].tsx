@@ -76,7 +76,7 @@ export default function ItemDetailScreen() {
       >
         <ScrollView contentContainerStyle={styles.container}>
           {fieldOrder.map(fieldId => {
-            const value = item[fieldId]
+            const value = item.values[fieldId]
             if (value === undefined) return null
             const field = fields[fieldId]
 
@@ -103,9 +103,9 @@ export default function ItemDetailScreen() {
         visible={itemModalVisible}
         fieldOrder={fieldOrder}
         fields={fields}
-        initialValues={item}
-        onSubmit={updatedItem => {
-          updateItem(itemId, updatedItem)
+        initialValues={item.values}
+        onSubmit={values => {
+          updateItem(itemId, { values })
           setItemModalVisible(false)
         }}
         onDiscard={() => setItemModalVisible(false)}

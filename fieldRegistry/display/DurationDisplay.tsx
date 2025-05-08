@@ -34,7 +34,11 @@ const formatDuration = (
   return parts.join(" ")
 }
 
-export const DurationDisplay = ({ value }: { value?: DateTimeArray }) => {
+export const DurationDisplay = ({
+  value,
+}: {
+  value?: DateTimeArray | undefined
+}) => {
   if (!value || value.every(v => v === undefined)) {
     return null
   }

@@ -4,7 +4,7 @@ import AppText from "@/components/AppText"
 
 import { sharedFieldStyles } from "./styles"
 
-export const TextDisplay = ({ value }: { value?: string }) => {
+export const TextDisplay = ({ value }: { value?: string | undefined }) => {
   if (value === undefined) {
     return null
   }

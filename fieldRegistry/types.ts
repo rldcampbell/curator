@@ -27,7 +27,7 @@ export type FieldDefinition<T extends FieldType> = {
   label: string
   defaultValue: FieldValueMap[T]
   validate: (value: unknown) => value is FieldValueMap[T]
-  display: (props: { value?: FieldValueMap[T] }) => React.ReactNode
+  display: (props: { value?: FieldValueMap[T] | undefined }) => React.ReactNode
   input: (props: InputProps<T>) => React.ReactNode
   configInput?: (props: ConfigInputProps<T>) => React.ReactNode
   defaultConfig: Extract<RawField, { type: T }>["config"]
@@ -45,7 +45,7 @@ export type FieldInputChangeHandler<T extends FieldType> = (
 ) => void
 
 export type InputProps<T extends FieldType> = {
-  initialValue?: FieldValueMap[T]
+  initialValue?: FieldValueMap[T] | undefined
   field: Extract<RawField, { type: T }>
   onChange: FieldInputChangeHandler<T>
 }

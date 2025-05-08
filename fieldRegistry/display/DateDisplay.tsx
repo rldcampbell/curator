@@ -6,7 +6,7 @@ import { dateArrayToUTCDate, formatDate } from "@/helpers"
 
 import { sharedFieldStyles } from "./styles"
 
-export const DateDisplay = ({ value }: { value?: DateArray }) => {
+export const DateDisplay = ({ value }: { value?: DateArray | undefined }) => {
   if (value === undefined) {
     return null
   }

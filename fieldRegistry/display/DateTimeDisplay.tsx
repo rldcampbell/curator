@@ -6,7 +6,11 @@ import { formatDateTimeArray } from "@/helpers/date"
 
 import { sharedFieldStyles } from "./styles"
 
-export const DateTimeDisplay = ({ value }: { value?: DateTimeArray }) => {
+export const DateTimeDisplay = ({
+  value,
+}: {
+  value?: DateTimeArray | undefined
+}) => {
   if (!value || value.every(v => v === undefined)) {
     return null
   }

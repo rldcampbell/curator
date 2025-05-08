@@ -70,7 +70,7 @@ export const collectionService = {
   ): string[] {
     return fieldOrder.map(fieldId => {
       const field = fields[fieldId]
-      const rawValue = item?.[fieldId]
+      const rawValue = item?.values?.[fieldId]
       return collectionService.getCsvValue(field, rawValue)
     })
   },

@@ -20,29 +20,23 @@ export default function ImageFieldInput({
   onChange,
 }: InputProps<typeof FieldType.Image>) {
   const [previewUri, setPreviewUri] = useState<string | undefined>()
-
-  const initialUriRef = useRef<string | undefined>()
+  const initialUriRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    if (
-      !initialUriRef.current &&
+    const initialUri =
       initialValue &&
       typeof initialValue !== "function" &&
       initialValue.length > 0
-    ) {
-      initialUriRef.current = initialValue[0]
-    }
-  }, [initialValue])
+        ? initialValue[0]
+        : undefined
 
-  useEffect(() => {
-    if (previewUri) return
-
-    if (
-      initialValue &&
-      typeof initialValue !== "function" &&
-      initialValue.length > 0
-    ) {
-      setPreviewUri(initialValue[0])
+    if (initialUri) {
+      if (!initialUriRef.current) {
+        initialUriRef.current = initialUri
+      }
+      if (!previewUri) {
+        setPreviewUri(initialUri)
+      }
     }
   }, [initialValue, previewUri])
 

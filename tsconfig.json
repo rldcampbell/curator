@@ -4,6 +4,9 @@
     "module": "ESNext",
     "resolveJsonModule": true,
     "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "exactOptionalPropertyTypes": true,
     "paths": {
       "@/*": ["./*"]
     }

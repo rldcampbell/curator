@@ -14,8 +14,7 @@ export function useCollection(collectionId: CollectionId) {
 
   return {
     ...collection,
-    update: (data: CollectionInput) =>
-      updateCollection(collectionId, () => data),
+    update: (data: CollectionInput) => updateCollection(collectionId, data),
     addItem: (item: RawItem) => addItem(collectionId, item),
     deleteItem: (itemId: ItemId) => deleteItem(collectionId, itemId),
     updateItem: (itemId: ItemId, item: RawItem) =>

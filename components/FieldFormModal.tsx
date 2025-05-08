@@ -15,7 +15,7 @@ import ModalButtonRow from "./ModalButtonRow"
 type FieldFormModalProps = {
   mode: "create" | "edit"
   visible: boolean
-  initialValues?: RawField
+  initialValues?: RawField | undefined
   typeUpdateDisabled?: boolean
   onClose: () => void
   onSubmit: (field: RawField) => void
@@ -115,7 +115,9 @@ export default function FieldFormModal({
       >
         <AppText style={sharedStyles.label}>Field Type</AppText>
         <DropDownPicker
-          disabled={typeUpdateDisabled}
+          {...(typeUpdateDisabled !== undefined
+            ? { disabled: typeUpdateDisabled }
+            : null)}
           open={open}
           value={field.type}
           items={items}

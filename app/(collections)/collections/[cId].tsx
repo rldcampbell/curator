@@ -62,11 +62,11 @@ export default function CollectionDetailScreen() {
     )
   }
 
-  const handleItemSubmit = (item: RawItem) => {
+  const handleItemValuesSubmit = (values: RawItem["values"]) => {
     if (editingItemId) {
-      updateItem(editingItemId, item)
+      updateItem(editingItemId, { values })
     } else {
-      addItem(item)
+      addItem({ values })
     }
     setEditingItemId(null)
     setItemModalVisible(false)
@@ -90,7 +90,7 @@ export default function CollectionDetailScreen() {
         contentContainerStyle={collectionDetailStyles.listContainer}
         renderItem={({ item, drag, isActive }: RenderItemParams<ItemId>) => {
           const value =
-            items[item]?.[fieldOrder[0]]?.toString() || "Untitled Item"
+            items[item]?.values?.[fieldOrder[0]]?.toString() || "Untitled Item"
 
           const buttons = [
             {
@@ -164,8 +164,10 @@ export default function CollectionDetailScreen() {
           visible={itemModalVisible}
           fieldOrder={fieldOrder}
           fields={fields}
-          initialValues={editingItemId ? items[editingItemId] : undefined}
-          onSubmit={handleItemSubmit}
+          initialValues={
+            editingItemId ? items[editingItemId].values : undefined
+          }
+          onSubmit={handleItemValuesSubmit}
           onDiscard={handleItemDiscard}
         />
       )}
