@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Modal, View } from "react-native"
+import { View } from "react-native"
 
 import {
   FieldId,
@@ -78,35 +78,33 @@ export default function ItemFormModal({
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <ScrollableModalLayout
-        onRequestClose={onDiscard}
-        visible={visible}
-        title={mode === "create" ? "New Item" : "Edit Item"}
-        footer={
-          <ModalButtonRow
-            onApply={handleSubmit}
-            applyLabel={mode === "create" ? "Create" : "Update"}
-            onDiscard={onDiscard}
-          />
-        }
-      >
-        {fieldOrder.map(fieldId => {
-          const field = fields[fieldId]
-          const value = inputValues[fieldId]
+    <ScrollableModalLayout
+      onRequestClose={onDiscard}
+      visible={visible}
+      title={mode === "create" ? "New Item" : "Edit Item"}
+      footer={
+        <ModalButtonRow
+          onApply={handleSubmit}
+          applyLabel={mode === "create" ? "Create" : "Update"}
+          onDiscard={onDiscard}
+        />
+      }
+    >
+      {fieldOrder.map(fieldId => {
+        const field = fields[fieldId]
+        const value = inputValues[fieldId]
 
-          return (
-            <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
-              {fieldService.input({
-                field,
-                initialValue: isResolved(value) ? value : undefined,
-                onChange: value => updateField(fieldId, value),
-              })}
-            </View>
-          )
-        })}
-      </ScrollableModalLayout>
-    </Modal>
+        return (
+          <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+            {fieldService.input({
+              field,
+              initialValue: isResolved(value) ? value : undefined,
+              onChange: value => updateField(fieldId, value),
+            })}
+          </View>
+        )
+      })}
+    </ScrollableModalLayout>
   )
 }
 
