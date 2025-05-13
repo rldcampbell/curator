@@ -2,8 +2,7 @@ import { View } from "react-native"
 
 import { DateTimeArray } from "@/app/types"
 import AppText from "@/components/AppText"
-
-import { sharedFieldStyles } from "./styles"
+import { sharedFieldStyles } from "@/styles/fieldStyles"
 
 const PART_LABELS_FULL = [
   ["year", "years"],

@@ -6,7 +6,7 @@ import { InputProps } from "@/fieldRegistry/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import FieldWrapper from "./FieldWrapper"
+import FieldWrapper from "../FieldWrapper"
 
 export default function NumberFieldInput({
   field,

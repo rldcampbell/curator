@@ -9,8 +9,8 @@ import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import AppText from "../AppText"
+import FieldWrapper from "../FieldWrapper"
 import MultiWheelPickerModal from "../MultiWheelPickerModal"
-import FieldWrapper from "./FieldWrapper"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const NATURAL_MAX = [999, 11, 31, 23, 59, 59, 999] as const

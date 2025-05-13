@@ -1,5 +1,5 @@
-import BooleanFieldInput from "@/components/fieldInputs/BooleanFieldInput"
 import { BooleanDisplay } from "@/fieldRegistry/display/BooleanDisplay"
+import { Input } from "@/fieldRegistry/fields/boolean/Input"
 import { FieldDefinition } from "@/fieldRegistry/types"
 
 export const boolean: FieldDefinition<"boolean"> = {
@@ -7,7 +7,7 @@ export const boolean: FieldDefinition<"boolean"> = {
   defaultValue: false,
   defaultConfig: {},
   display: BooleanDisplay,
-  input: BooleanFieldInput,
+  input: Input,
   validate: (v): v is boolean => typeof v === "boolean",
   fromText: text => {
     if (text !== undefined) {

@@ -1,8 +1,7 @@
 import { View } from "react-native"
 
 import AppText from "@/components/AppText"
-
-import { sharedFieldStyles } from "./styles"
+import { sharedFieldStyles } from "@/styles/fieldStyles"
 
 export const TextDisplay = ({ value }: { value?: string | undefined }) => {
   if (value === undefined) {

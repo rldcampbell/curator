@@ -10,7 +10,7 @@ import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import AppText from "../AppText"
-import FieldWrapper from "./FieldWrapper"
+import FieldWrapper from "../FieldWrapper"
 
 export default function DateFieldInput({
   field,

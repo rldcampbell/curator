@@ -9,8 +9,8 @@ import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 import AppText from "../AppText"
+import FieldWrapper from "../FieldWrapper"
 import MultiWheelPickerModal from "../MultiWheelPickerModal"
-import FieldWrapper from "./FieldWrapper"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const MIN = [0, 1, 1, 0, 0, 0, 0] as const

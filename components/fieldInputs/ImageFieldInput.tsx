@@ -11,8 +11,8 @@ import { pickImageAsset, storeImage } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
+import FieldWrapper from "../FieldWrapper"
 import ImagePreview from "../ImagePreview"
-import FieldWrapper from "./FieldWrapper"
 
 export default function ImageFieldInput({
   field,
