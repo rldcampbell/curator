@@ -5,11 +5,7 @@ import AppText from "@/components/AppText"
 import { formatDateTimeArray } from "@/helpers/date"
 import { sharedFieldStyles } from "@/styles/fieldStyles"
 
-export const DateTimeDisplay = ({
-  value,
-}: {
-  value?: DateTimeArray | undefined
-}) => {
+export const Display = ({ value }: { value?: DateTimeArray | undefined }) => {
   if (!value || value.every(v => v === undefined)) {
     return null
   }

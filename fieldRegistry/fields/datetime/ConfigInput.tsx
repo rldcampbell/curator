@@ -1,10 +1,10 @@
 import DatePartsPicker from "@/components/DatePartsPicker"
 import { ConfigInputProps } from "@/fieldRegistry/types"
 
-export default function DateTimeFieldConfigInput({
+export const ConfigInput = ({
   config,
   onConfigChange,
-}: ConfigInputProps<"datetime">) {
+}: ConfigInputProps<"datetime">) => {
   const parts = config.parts ?? [true, true, true, true, true, true, false]
 
   return (
