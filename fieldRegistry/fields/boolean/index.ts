@@ -1,12 +1,13 @@
-import { BooleanDisplay } from "@/fieldRegistry/display/BooleanDisplay"
-import { Input } from "@/fieldRegistry/fields/boolean/Input"
 import { FieldDefinition } from "@/fieldRegistry/types"
+
+import { Display } from "./Display"
+import { Input } from "./Input"
 
 export const boolean: FieldDefinition<"boolean"> = {
   label: "Boolean",
   defaultValue: false,
   defaultConfig: {},
-  display: BooleanDisplay,
+  display: Display,
   input: Input,
   validate: (v): v is boolean => typeof v === "boolean",
   fromText: text => {
