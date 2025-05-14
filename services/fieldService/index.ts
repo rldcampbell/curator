@@ -29,8 +29,7 @@ export const fieldService = {
   },
 
   validate(type: FieldType, value: unknown): boolean {
-    const validator = fieldRegistry[type].validate
-    return validator ? validator(value) : true
+    return fieldRegistry[type].validate(value)
   },
 
   fromText<T extends FieldType>(
