@@ -3,7 +3,7 @@ import { View } from "react-native"
 
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import AppText from "../AppText"
+import AppText from "./AppText"
 
 type Props = {
   label: string

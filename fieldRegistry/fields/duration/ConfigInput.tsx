@@ -1,10 +1,10 @@
 import DatePartsPicker from "@/components/DatePartsPicker"
 import { ConfigInputProps } from "@/fieldRegistry/types"
 
-export default function DurationFieldConfigInput({
+export const ConfigInput = ({
   config,
   onConfigChange,
-}: ConfigInputProps<"duration">) {
+}: ConfigInputProps<"duration">) => {
   const parts = config.parts ?? [true, true, true, true, true, true, false]
 
   return (

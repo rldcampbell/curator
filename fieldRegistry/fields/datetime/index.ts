@@ -1,9 +1,10 @@
 import { DateTimeArray, FieldType } from "@/app/types"
-import DateTimeFieldConfigInput from "@/components/fieldConfigInputs/DateTimeFieldConfigInput"
-import DateTimeFieldInput from "@/components/fieldInputs/DateTimeFieldInput"
-import { DateTimeDisplay } from "@/fieldRegistry/display/DateTimeDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
 import { safeDateTimeArrayToUTCDate } from "@/helpers/date"
+
+import { ConfigInput } from "./ConfigInput"
+import { Display } from "./Display"
+import { Input } from "./Input"
 
 const validate = (value: unknown): value is DateTimeArray =>
   Array.isArray(value) &&
@@ -14,9 +15,9 @@ export const datetime: FieldDefinition<typeof FieldType.DateTime> = {
   label: "Date/Time",
   defaultValue: [2000, 1, 1, 0, 0, 0, 0], // safe neutral starting point - used in toText!
   defaultConfig: { parts: [true, true, true, true, true, true, true] },
-  display: DateTimeDisplay,
-  input: DateTimeFieldInput,
-  configInput: DateTimeFieldConfigInput,
+  display: Display,
+  input: Input,
+  configInput: ConfigInput,
   validate,
   fromText: text => {
     if (!text) return undefined

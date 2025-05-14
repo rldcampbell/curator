@@ -2,15 +2,14 @@ import React, { useEffect, useState } from "react"
 import { Pressable, View } from "react-native"
 
 import { DateTimeArray, FieldType } from "@/app/types"
+import AppText from "@/components/AppText"
+import FieldWrapper from "@/components/FieldWrapper"
+import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
 import { formatDateTimeArray } from "@/helpers/date"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
-
-import AppText from "../AppText"
-import MultiWheelPickerModal from "../MultiWheelPickerModal"
-import FieldWrapper from "./FieldWrapper"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const MIN = [0, 1, 1, 0, 0, 0, 0] as const
@@ -22,7 +21,7 @@ const getDaysInMonth = (
   month: number, // this month is 1 based!
 ) => new Date(year, month, 0).getDate() // month 0 based!
 
-const DateTimeFieldInput = ({
+export const Input = ({
   field,
   initialValue,
   onChange,
@@ -130,5 +129,3 @@ const DateTimeFieldInput = ({
     </View>
   )
 }
-
-export default DateTimeFieldInput

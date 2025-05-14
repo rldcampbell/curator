@@ -2,17 +2,16 @@ import { useState } from "react"
 import { TextInput } from "react-native"
 
 import { FieldType } from "@/app/types"
+import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import FieldWrapper from "./FieldWrapper"
-
-export default function NumberFieldInput({
+export const Input = ({
   field,
   initialValue,
   onChange,
-}: InputProps<typeof FieldType.Number>) {
+}: InputProps<typeof FieldType.Number>) => {
   const [value, setValue] = useState(
     initialValue !== undefined ? initialValue.toString() : "",
   )

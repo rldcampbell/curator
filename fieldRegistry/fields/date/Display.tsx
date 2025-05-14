@@ -3,10 +3,9 @@ import { View } from "react-native"
 import { DateArray } from "@/app/types"
 import AppText from "@/components/AppText"
 import { dateArrayToUTCDate, formatDate } from "@/helpers"
+import { sharedFieldStyles } from "@/styles/fieldStyles"
 
-import { sharedFieldStyles } from "./styles"
-
-export const DateDisplay = ({ value }: { value?: DateArray | undefined }) => {
+export const Display = ({ value }: { value?: DateArray | undefined }) => {
   if (value === undefined) {
     return null
   }

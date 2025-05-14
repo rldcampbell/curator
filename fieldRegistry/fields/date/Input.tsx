@@ -4,19 +4,18 @@ import { Pressable } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
 
 import { FieldType } from "@/app/types"
+import AppText from "@/components/AppText"
+import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
 import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import AppText from "../AppText"
-import FieldWrapper from "./FieldWrapper"
-
-export default function DateFieldInput({
+export const Input = ({
   field,
   initialValue,
   onChange,
-}: InputProps<typeof FieldType.Date>) {
+}: InputProps<typeof FieldType.Date>) => {
   const [showPicker, setShowPicker] = useState(false)
   const [value, setValue] = useState(initialValue)
 

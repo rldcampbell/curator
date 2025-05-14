@@ -1,5 +1,5 @@
-import TextFieldInput from "@/components/fieldInputs/TextFieldInput"
-import { TextDisplay } from "@/fieldRegistry/display/TextDisplay"
+import { Display } from "@/fieldRegistry/fields/text/Display"
+import { Input } from "@/fieldRegistry/fields/text/Input"
 import { FieldDefinition } from "@/fieldRegistry/types"
 
 const validate = (value: unknown): value is string => typeof value === "string"
@@ -8,8 +8,8 @@ export const text: FieldDefinition<"text"> = {
   label: "Text",
   defaultValue: "",
   defaultConfig: {},
-  display: TextDisplay,
-  input: TextFieldInput,
+  display: Display,
+  input: Input,
   validate,
   fromText: text => text || undefined,
   toText: value => value,

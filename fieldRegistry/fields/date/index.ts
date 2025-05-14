@@ -1,7 +1,8 @@
 import { DateArray } from "@/app/types"
-import DateFieldInput from "@/components/fieldInputs/DateFieldInput"
-import { DateDisplay } from "@/fieldRegistry/display/DateDisplay"
 import { FieldDefinition } from "@/fieldRegistry/types"
+
+import { Display } from "./Display"
+import { Input } from "./Input"
 
 const validate = (value: unknown): value is DateArray =>
   Array.isArray(value) &&
@@ -12,8 +13,8 @@ export const date: FieldDefinition<"date"> = {
   label: "Date",
   defaultValue: [2024, 1, 1],
   defaultConfig: {},
-  display: DateDisplay,
-  input: DateFieldInput,
+  display: Display,
+  input: Input,
   validate,
   fromText: text => {
     if (!text) return undefined

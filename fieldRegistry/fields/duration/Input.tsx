@@ -2,20 +2,19 @@ import React, { useState } from "react"
 import { Pressable, View } from "react-native"
 
 import { DateTimeArray, FieldType } from "@/app/types"
+import AppText from "@/components/AppText"
+import FieldWrapper from "@/components/FieldWrapper"
+import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
 import { formatDurationArray } from "@/helpers/date"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import AppText from "../AppText"
-import MultiWheelPickerModal from "../MultiWheelPickerModal"
-import FieldWrapper from "./FieldWrapper"
-
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const NATURAL_MAX = [999, 11, 31, 23, 59, 59, 999] as const
 
-const DurationFieldInput = ({
+export const Input = ({
   field,
   initialValue,
   onChange,
@@ -94,5 +93,3 @@ const DurationFieldInput = ({
     </View>
   )
 }
-
-export default DurationFieldInput
