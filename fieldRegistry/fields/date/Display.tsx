@@ -5,7 +5,7 @@ import AppText from "@/components/AppText"
 import { dateArrayToUTCDate, formatDate } from "@/helpers"
 import { sharedFieldStyles } from "@/styles/fieldStyles"
 
-export const DateDisplay = ({ value }: { value?: DateArray | undefined }) => {
+export const Display = ({ value }: { value?: DateArray | undefined }) => {
   if (value === undefined) {
     return null
   }
