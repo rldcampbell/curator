@@ -67,3 +67,23 @@ export const storeImage = async (originalUri: string): Promise<string> => {
 
   return destination
 }
+
+export const takePhoto =
+  async (): Promise<ImagePicker.ImagePickerAsset | null> => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync()
+    if (status !== "granted") {
+      console.warn("Permission to access camera denied")
+      return null
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      quality: 0.8,
+    })
+
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      return null
+    }
+
+    return result.assets[0]
+  }
