@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Pressable, View } from "react-native"
+import { Alert, Pressable, View } from "react-native"
 
 import * as FileSystem from "expo-file-system"
 
@@ -9,7 +9,7 @@ import { FieldType } from "@/app/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import ImagePreview from "@/components/ImagePreview"
 import { InputProps } from "@/fieldRegistry/types"
-import { pickImageAsset, storeImage } from "@/helpers/image"
+import { pickImageAsset, storeImage, takePhoto } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -23,11 +23,7 @@ export const Input = ({
 
   useEffect(() => {
     const initialUri =
-      initialValue &&
-      typeof initialValue !== "function" &&
-      initialValue.length > 0
-        ? initialValue[0]
-        : undefined
+      initialValue && initialValue.length > 0 ? initialValue[0] : undefined
 
     if (initialUri) {
       if (!initialUriRef.current) {
@@ -39,14 +35,31 @@ export const Input = ({
     }
   }, [initialValue, previewUri])
 
-  const handlePickImage = async () => {
-    const picked = await pickImageAsset()
-    if (!picked) return
+  const handleAddImage = async () => {
+    Alert.alert("Add Image", "Choose image source", [
+      {
+        text: "Take Photo",
+        onPress: async () => {
+          const captured = await takePhoto()
+          if (captured) handleSetImage(captured.uri)
+        },
+      },
+      {
+        text: "Choose from Library",
+        onPress: async () => {
+          const picked = await pickImageAsset()
+          if (picked) handleSetImage(picked.uri)
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ])
+  }
 
-    setPreviewUri(picked.uri)
+  const handleSetImage = async (uri: string) => {
+    setPreviewUri(uri)
 
     onChange(async () => {
-      const storedUri = await storeImage(picked.uri)
+      const storedUri = await storeImage(uri)
       console.log("[ImageFieldInput] Stored image at:", storedUri)
 
       const oldUri = initialUriRef.current
@@ -88,16 +101,17 @@ export const Input = ({
           <>
             <ImagePreview uri={previewUri} style={{ marginBottom: 12 }} />
             <View style={{ flexDirection: "row", gap: 24 }}>
-              <Pressable onPress={handlePickImage}>
+              <Pressable onPress={handleAddImage}>
                 <Feather name="refresh-ccw" size={24} color="#007AFF" />
               </Pressable>
+
               <Pressable onPress={handleRemoveImage}>
                 <Feather name="trash-2" size={24} color="#FF3B30" />
               </Pressable>
             </View>
           </>
         ) : (
-          <Pressable onPress={handlePickImage}>
+          <Pressable onPress={handleAddImage}>
             <Feather name="image" size={32} color="#999" />
           </Pressable>
         )}

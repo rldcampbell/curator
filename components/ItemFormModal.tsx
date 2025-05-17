@@ -30,6 +30,10 @@ const resolve = async <T,>(input: Resolvable<T>): Promise<T> => {
   return await result
 }
 
+export function isResolved<T>(val: Resolvable<T>): val is Resolved<T> {
+  return typeof val !== "function" && !(val instanceof Promise)
+}
+
 const resolveObjectValues = async <K extends string, V>(
   obj: Record<K, Resolvable<V>>,
 ): Promise<Record<K, V>> => {
@@ -90,6 +94,33 @@ export default function ItemFormModal({
         />
       }
     >
+      <ItemFormBody
+        key={visible ? "form-visible" : "form-hidden"}
+        fieldOrder={fieldOrder}
+        fields={fields}
+        inputValues={inputValues}
+        updateField={updateField}
+      />
+    </ScrollableModalLayout>
+  )
+}
+
+// Force remount of field inputs on modal reopen to reset internal state (e.g. image previews)
+// This ensures that discarded changes don't persist when the modal is reopened
+// See: https://react.dev/learn/preserving-and-resetting-state#resetting-state-with-a-key
+const ItemFormBody = ({
+  fieldOrder,
+  fields,
+  inputValues,
+  updateField,
+}: {
+  fieldOrder: FieldId[]
+  fields: Record<FieldId, RawField>
+  inputValues: Record<FieldId, Resolvable<FieldValue>>
+  updateField: (id: FieldId, value: Resolvable<FieldValue | undefined>) => void
+}) => {
+  return (
+    <>
       {fieldOrder.map(fieldId => {
         const field = fields[fieldId]
         const value = inputValues[fieldId]
@@ -104,10 +135,6 @@ export default function ItemFormModal({
           </View>
         )
       })}
-    </ScrollableModalLayout>
+    </>
   )
-}
-
-export function isResolved<T>(val: Resolvable<T>): val is Resolved<T> {
-  return typeof val !== "function" && !(val instanceof Promise)
 }
