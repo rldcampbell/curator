@@ -1,4 +1,5 @@
-import * as FileSystem from "expo-file-system"
+// TODO: upgrade properly to use new FileSystem import and refactor  accordingly
+import * as FileSystem from "expo-file-system/legacy"
 import * as ImageManipulator from "expo-image-manipulator"
 import * as ImagePicker from "expo-image-picker"
 

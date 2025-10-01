@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { View } from "react-native"
 
-import * as FileSystem from "expo-file-system"
+import * as FileSystem from "expo-file-system/legacy"
 import * as Sharing from "expo-sharing"
 
 import { format } from "date-fns"
@@ -10,6 +10,7 @@ import AddButton from "@/components/AddButton"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { useCollections } from "@/context/CollectionsContext"
+import { safeDeleteFile } from "@/helpers/file"
 import { resetDatabase } from "@/services/database"
 import { sharedStyles } from "@/styles/sharedStyles"
 
@@ -46,7 +47,7 @@ export default function DevScreen() {
 
     // clean-up
     try {
-      await FileSystem.deleteAsync(fileUri)
+      await safeDeleteFile(fileUri)
     } catch (error) {
       console.warn("Failed to delete temp export file:", error)
     }
