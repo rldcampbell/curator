@@ -5,6 +5,15 @@ import importPlugin from "eslint-plugin-import"
 import unusedImports from "eslint-plugin-unused-imports"
 
 export default [
+  {
+    ignores: [
+      ".expo/**",
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+    ],
+  },
   prettierConfig,
   {
     files: ["**/*.{js,ts,tsx}"],

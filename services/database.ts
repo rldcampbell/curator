@@ -1,4 +1,5 @@
-import * as FileSystem from "expo-file-system"
+// TODO: upgrade properly to use new FileSystem import and refactor  accordingly
+import * as FileSystem from "expo-file-system/legacy"
 import * as SQLite from "expo-sqlite"
 import * as Updates from "expo-updates"
 
@@ -18,6 +19,7 @@ import {
 } from "@/app/types"
 import { HexColor } from "@/helpers/color"
 import { timestampNow } from "@/helpers/date"
+import { safeDeleteFile } from "@/helpers/file"
 
 import { migrateDatabase } from "./migrations/runMigrations"
 
@@ -753,7 +755,7 @@ export const resetDatabase = async (): Promise<void> => {
   const dbPath = `${FileSystem.documentDirectory}SQLite/curator.db`
   console.log("[RESET] Deleting SQLite database at:", dbPath)
 
-  await FileSystem.deleteAsync(dbPath, { idempotent: true })
+  await safeDeleteFile(dbPath)
   console.log("[RESET] Database file deleted")
 
   console.log(

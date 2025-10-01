@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 import { Alert, Pressable, View } from "react-native"
 
-import * as FileSystem from "expo-file-system"
-
 import { Feather } from "@expo/vector-icons"
 
 import { FieldType } from "@/app/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import ImagePreview from "@/components/ImagePreview"
 import { InputProps } from "@/fieldRegistry/types"
+import { safeDeleteFile } from "@/helpers/file"
 import { pickImageAsset, storeImage, takePhoto } from "@/helpers/image"
 import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
@@ -63,8 +62,9 @@ export const Input = ({
       console.log("[ImageFieldInput] Stored image at:", storedUri)
 
       const oldUri = initialUriRef.current
+
       if (oldUri && oldUri !== storedUri) {
-        await FileSystem.deleteAsync(oldUri, { idempotent: true })
+        await safeDeleteFile(oldUri)
         console.log("[ImageFieldInput] Deleted old image at:", oldUri)
       }
       return [storedUri]
@@ -76,8 +76,9 @@ export const Input = ({
 
     onChange(async () => {
       const oldUri = initialUriRef.current
+
       if (oldUri) {
-        await FileSystem.deleteAsync(oldUri, { idempotent: true })
+        await safeDeleteFile(oldUri)
         console.log("[ImageFieldInput] Deleted image at:", oldUri)
       }
       return []
