@@ -116,15 +116,7 @@ export default function CollectionDetailScreen() {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
                 drag()
               }}
-              onPress={() =>
-                router.push({
-                  pathname: "/collections/[cId]/items/[iId]",
-                  params: {
-                    cId: collectionId,
-                    iId: item,
-                  },
-                })
-              }
+              onPress={() => router.push(`./items/${item}`)}
               buttons={buttons}
               renderContent={() => (
                 <Animated.View
