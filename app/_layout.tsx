@@ -7,7 +7,7 @@ import { Tabs } from "expo-router"
 
 import { Ionicons } from "@expo/vector-icons"
 
-import AppText from "@/components/AppText"
+import ScreenMessage from "@/components/ScreenMessage"
 import {
   CollectionsProvider,
   useCollections,
@@ -30,18 +30,7 @@ function CollectionsProviderWrapper({
   }
 
   if (error) {
-    return (
-      <View
-        style={[
-          sharedStyles.container,
-          { justifyContent: "center", padding: 20 },
-        ]}
-      >
-        <AppText style={[sharedStyles.errorText, { textAlign: "center" }]}>
-          {error.message}
-        </AppText>
-      </View>
-    )
+    return <ScreenMessage message={error.message} />
   }
 
   return <>{children}</>
