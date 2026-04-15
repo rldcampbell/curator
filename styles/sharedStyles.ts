@@ -25,12 +25,6 @@ export const sharedStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  cardText: {
-    fontSize: 18,
-  },
-  activeCard: {
-    backgroundColor: "#d0f0ff",
-  },
   container: {
     flex: 1,
     alignItems: "center",

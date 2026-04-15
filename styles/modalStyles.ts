@@ -3,12 +3,6 @@ import { Dimensions, StyleSheet } from "react-native"
 const screenWidth = Dimensions.get("window").width
 
 export const modalStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   content: {
     width: screenWidth * 0.9,
     backgroundColor: "white",
