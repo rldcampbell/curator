@@ -4,7 +4,7 @@ import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
 
-import { router, useNavigation } from "expo-router"
+import { useNavigation } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
@@ -15,6 +15,7 @@ import FullPageLayout from "@/components/FullPageLayout"
 import { HeaderButton } from "@/components/HeaderButton"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
+import { useSafeRouter } from "@/hooks/useSafeRouter"
 import { collectionService } from "@/services/collectionService"
 import { spacing } from "@/styles"
 
@@ -29,20 +30,17 @@ export default function CollectionsScreen() {
   const [pendingDeleteId, setPendingDeleteId] = useState<CollectionId | null>(
     null,
   )
-
+  const { pushOnce } = useSafeRouter()
   const navigation = useNavigation()
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: "Collections",
       headerRight: () => (
-        <HeaderButton
-          iconName="add"
-          onPress={() => router.push("/configure")}
-        />
+        <HeaderButton iconName="add" onPress={() => pushOnce("/configure")} />
       ),
     })
-  }, [navigation])
+  }, [navigation, pushOnce])
 
   return (
     <FullPageLayout>
@@ -62,7 +60,7 @@ export default function CollectionsScreen() {
             {
               icon: <Feather name="edit-3" size={20} color="black" />,
               onPress: () => {
-                router.push({
+                pushOnce({
                   pathname: "/configure/[cId]",
                   params: { cId: item },
                 })
@@ -90,7 +88,7 @@ export default function CollectionsScreen() {
               item={item}
               onDrag={drag}
               onPress={() =>
-                router.push({
+                pushOnce({
                   pathname: "/collections/[cId]",
                   params: { cId: item },
                 })

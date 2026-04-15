@@ -5,7 +5,7 @@ import DraggableFlatList, {
 } from "react-native-draggable-flatlist"
 
 import * as Haptics from "expo-haptics"
-import { router, useNavigation } from "expo-router"
+import { useNavigation } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
@@ -19,6 +19,7 @@ import ScreenMessage from "@/components/ScreenMessage"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { useCollectionRoute } from "@/hooks/useRouteEntities"
+import { useSafeRouter } from "@/hooks/useSafeRouter"
 import { collectionDetailStyles, colors, spacing } from "@/styles"
 
 export default function CollectionDetailScreen() {
@@ -33,6 +34,7 @@ export default function CollectionDetailScreen() {
   const [itemModalVisible, setItemModalVisible] = useState(false)
   const [editingItemId, setEditingItemId] = useState<ItemId | null>(null)
   const [deleteItemId, setDeleteItemId] = useState<ItemId | null>(null)
+  const { pushOnce } = useSafeRouter()
   const editingItem =
     route && editingItemId ? route.collection.items[editingItemId] : undefined
 
@@ -125,7 +127,7 @@ export default function CollectionDetailScreen() {
                 drag()
               }}
               onPress={() =>
-                router.push({
+                pushOnce({
                   pathname: "/collections/[cId]/items/[iId]",
                   params: {
                     cId: collectionId,
