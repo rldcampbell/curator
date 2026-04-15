@@ -68,7 +68,7 @@ const mergeWithMeta = <Id extends string, T>(
     if (!prev) {
       result[id] = withMeta(newVal, timestamp)
       changed = true
-    } else if (!isEqual(prev, newVal)) {
+    } else if (!isEqual(stripMeta(prev), newVal)) {
       result[id] = touchMeta({ ...newVal, _meta: prev._meta }, timestamp)
       changed = true
     } else {
@@ -103,28 +103,18 @@ export const patchCollection = (
   let mergedFields = existing.fields
 
   if (patch.fields) {
+    const hasDeletedFields = Object.keys(existing.fields).some(
+      id => !(id in patch.fields!),
+    )
+
     // Merge values and detect changes
     const { merged, changed } = mergeWithMeta(
       existing.fields,
       patch.fields,
       timestamp,
     )
-    mergedFields = merged
-    fieldsChanged = changed
-
-    // Remove any deleted fields
-    // Note: we don't bother tidying up items - db will do so, and removed fields
-    // won't be displayed.
-    const deletedFieldIds = Object.keys(existing.fields).filter(
-      id => !(id in patch.fields!),
-    )
-
-    if (deletedFieldIds.length > 0) {
-      for (const fieldId of deletedFieldIds) {
-        delete mergedFields[fieldId as FieldId]
-      }
-      fieldsChanged = true
-    }
+    fieldsChanged = changed || hasDeletedFields
+    mergedFields = fieldsChanged ? merged : existing.fields
   }
 
   // Determine if anything changed
