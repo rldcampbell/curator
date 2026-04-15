@@ -1,6 +1,6 @@
 import { Switch, View } from "react-native"
 
-import { FieldType } from "@/app/types"
+import { FieldType } from "@/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
 

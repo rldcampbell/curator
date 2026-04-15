@@ -14,7 +14,7 @@
  * - Validation and default values
  * - Type-safe conversion between field types
  */
-import { FieldType } from "@/app/types"
+import { FieldType } from "@/types"
 
 import { boolean } from "./fields/boolean"
 import { date } from "./fields/date"

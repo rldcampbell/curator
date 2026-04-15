@@ -16,7 +16,7 @@ import {
   ItemId,
   RawCollection,
   RawItem,
-} from "@/app/types"
+} from "@/types"
 import { genCollectionId, genItemId } from "@/helpers"
 import { timestampNow } from "@/helpers/date"
 import { patchCollection, touchMeta, withMeta } from "@/helpers/meta"

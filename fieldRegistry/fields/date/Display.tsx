@@ -1,6 +1,6 @@
 import { View } from "react-native"
 
-import { DateArray } from "@/app/types"
+import { DateArray } from "@/types"
 import AppText from "@/components/AppText"
 import { dateArrayToUTCDate, formatDate } from "@/helpers"
 import { sharedFieldStyles } from "@/styles/fieldStyles"

@@ -13,8 +13,7 @@
     "tsc": "tsc"
   },
   "jest": {
-    "preset": "jest-expo",
-    "testPathIgnorePatterns": ["<rootDir>/app/test.tsx"]
+    "preset": "jest-expo"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",

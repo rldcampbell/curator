@@ -14,7 +14,7 @@ import { safeDeleteFile } from "@/helpers/file"
 import { resetDatabase } from "@/services/database"
 import { sharedStyles } from "@/styles/sharedStyles"
 
-import { CollectionsData } from "./types"
+import { CollectionsData } from "@/types"
 
 export default function DevScreen() {
   const [modalVisible, setModalVisible] = useState(false)

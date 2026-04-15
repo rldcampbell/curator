@@ -16,7 +16,7 @@ import {
   ItemId,
   RawCollection,
   RawItem,
-} from "@/app/types"
+} from "@/types"
 import { HexColor } from "@/helpers/color"
 import { timestampNow } from "@/helpers/date"
 import { safeDeleteFile } from "@/helpers/file"

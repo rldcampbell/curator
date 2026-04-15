@@ -7,7 +7,7 @@ import { router, useNavigation } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId } from "@/app/types"
+import { CollectionId } from "@/types"
 import CollectionListItem from "@/components/CollectionListItem"
 import ConfirmModal from "@/components/ConfirmModal"
 import FullPageLayout from "@/components/FullPageLayout"

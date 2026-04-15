@@ -10,7 +10,7 @@ import { useLocalSearchParams } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId, ItemId, RawItem } from "@/app/types"
+import { CollectionId, ItemId, RawItem } from "@/types"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { HeaderButton } from "@/components/HeaderButton"

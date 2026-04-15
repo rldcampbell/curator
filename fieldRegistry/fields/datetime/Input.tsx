@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Pressable, View } from "react-native"
 
-import { DateTimeArray, FieldType } from "@/app/types"
+import { DateTimeArray, FieldType } from "@/types"
 import AppText from "@/components/AppText"
 import FieldWrapper from "@/components/FieldWrapper"
 import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"

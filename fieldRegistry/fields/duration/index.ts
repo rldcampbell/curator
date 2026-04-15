@@ -1,4 +1,4 @@
-import { FieldType, FieldValueMap } from "@/app/types"
+import { FieldType, FieldValueMap } from "@/types"
 import { FieldDefinition } from "@/fieldRegistry/types"
 import {
   dateTimeArrayToIsoDuration,

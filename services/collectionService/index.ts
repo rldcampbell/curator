@@ -12,7 +12,7 @@ import {
   RawCollection,
   RawField,
   RawItem,
-} from "@/app/types"
+} from "@/types"
 import { fieldRegistry } from "@/fieldRegistry"
 
 export const collectionService = {

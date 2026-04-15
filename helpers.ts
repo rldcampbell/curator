@@ -1,6 +1,6 @@
 import { customAlphabet } from "nanoid"
 
-import { CollectionId, DateArray, FieldId, ItemId, RawId } from "./app/types"
+import { CollectionId, DateArray, FieldId, ItemId, RawId } from "./types"
 
 const BASE62_ALPHABET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"

@@ -1,4 +1,4 @@
-import { Collection } from "@/app/types"
+import { Collection } from "@/types"
 import { patchCollection } from "@/helpers/meta"
 
 describe("patchCollection", () => {

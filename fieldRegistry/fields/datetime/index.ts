@@ -1,4 +1,4 @@
-import { DateTimeArray, FieldType } from "@/app/types"
+import { DateTimeArray, FieldType } from "@/types"
 import { FieldDefinition } from "@/fieldRegistry/types"
 import { safeDateTimeArrayToUTCDate } from "@/helpers/date"
 

@@ -3,7 +3,7 @@ import React from "react"
 import { View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
-import { DateTimeParts } from "@/app/types"
+import { DateTimeParts } from "@/types"
 import AppText from "@/components/AppText"
 import { sharedStyles } from "@/styles/sharedStyles"
 

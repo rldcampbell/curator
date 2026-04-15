@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { TextInput, View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
-import { FieldType, RawField } from "@/app/types"
+import { FieldType, RawField } from "@/types"
 import { fieldRegistry } from "@/fieldRegistry"
 import { fieldService } from "@/services/fieldService"
 import { modalStyles } from "@/styles/modalStyles"
