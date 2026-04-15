@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
 
-import { sharedStyles } from "@/styles/sharedStyles"
+import { formStyles } from "@/styles"
 
 import AppText from "./AppText"
 
@@ -12,9 +12,16 @@ type Props = {
 
 export default function FieldWrapper({ label, children }: Props) {
   return (
-    <View style={{ width: "100%", marginBottom: 8 }}>
-      <AppText style={sharedStyles.label}>{label}</AppText>
+    <View style={styles.container}>
+      <AppText style={formStyles.label}>{label}</AppText>
       {children}
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    marginBottom: 8,
+  },
+})

@@ -8,6 +8,8 @@ import {
   ViewStyle,
 } from "react-native"
 
+import { colors } from "@/styles"
+
 type Props = {
   header?: ReactNode
   footer?: ReactNode
@@ -52,16 +54,16 @@ export default function FullPageLayout({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   header: {
     borderBottomWidth: 1,
-    borderColor: "#eee",
-    backgroundColor: "#fff",
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surface,
   },
   footer: {
     borderTopWidth: 1,
-    borderColor: "#eee",
-    backgroundColor: "#fff",
+    borderColor: colors.borderSubtle,
+    backgroundColor: colors.surface,
   },
 })

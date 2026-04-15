@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Alert, Pressable, View } from "react-native"
+import { Alert, Pressable, StyleSheet, View } from "react-native"
 
 import { Feather } from "@expo/vector-icons"
 
@@ -9,8 +9,7 @@ import ImagePreview from "@/components/ImagePreview"
 import { InputProps } from "@/fieldRegistry/types"
 import { safeDeleteFile } from "@/helpers/file"
 import { pickImageAsset, storeImage, takePhoto } from "@/helpers/image"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { modalStyles, surfaceStyles } from "@/styles"
 
 export const Input = ({
   field,
@@ -89,19 +88,15 @@ export const Input = ({
     <FieldWrapper label={field.name}>
       <View
         style={[
-          sharedStyles.inputCard,
+          surfaceStyles.inputCard,
           modalStyles.buttonInModal,
-          {
-            flexDirection: "column",
-            alignItems: "center",
-            paddingVertical: 16,
-          },
+          styles.inputSurface,
         ]}
       >
         {previewUri ? (
           <>
-            <ImagePreview uri={previewUri} style={{ marginBottom: 12 }} />
-            <View style={{ flexDirection: "row", gap: 24 }}>
+            <ImagePreview uri={previewUri} style={styles.preview} />
+            <View style={styles.actions}>
               <Pressable onPress={handleAddImage}>
                 <Feather name="refresh-ccw" size={24} color="#007AFF" />
               </Pressable>
@@ -120,3 +115,18 @@ export const Input = ({
     </FieldWrapper>
   )
 }
+
+const styles = StyleSheet.create({
+  inputSurface: {
+    flexDirection: "column",
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  preview: {
+    marginBottom: 12,
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 24,
+  },
+})

@@ -18,7 +18,7 @@ import ItemFormModal from "@/components/ItemFormModal"
 import ScreenMessage from "@/components/ScreenMessage"
 import { useCollections } from "@/context/CollectionsContext"
 import { useItemRoute } from "@/hooks/useRouteEntities"
-import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
+import { collectionDetailStyles, colors, spacing } from "@/styles"
 import { fieldService } from "@/services/fieldService"
 
 export default function ItemDetailScreen() {
@@ -89,7 +89,7 @@ export default function ItemDetailScreen() {
     if (!item) return null
 
     return (
-      <View style={{ width: screenWidth }}>
+      <View style={[styles.itemPage, { width: screenWidth }]}>
         <ScrollView contentContainerStyle={styles.container}>
           {fieldOrder.map(fieldId => {
             const value = item.values[fieldId]
@@ -152,13 +152,24 @@ export default function ItemDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, gap: 16 },
+  container: {
+    padding: spacing.xl,
+    gap: spacing.lg,
+  },
+  itemPage: {
+    width: "100%",
+  },
   fieldRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    paddingVertical: 8,
-    gap: 8,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
   },
-  label: { fontSize: 16, color: "#333", maxWidth: "40%", flexShrink: 1 },
+  label: {
+    fontSize: 16,
+    color: colors.textLabel,
+    maxWidth: "40%",
+    flexShrink: 1,
+  },
 })

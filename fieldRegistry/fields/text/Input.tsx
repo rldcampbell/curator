@@ -4,8 +4,7 @@ import { TextInput } from "react-native"
 import { FieldType } from "@/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { modalStyles, surfaceStyles } from "@/styles"
 
 export const Input = ({
   autoFocus,
@@ -19,7 +18,7 @@ export const Input = ({
     <FieldWrapper label={field.name}>
       <TextInput
         autoFocus={autoFocus}
-        style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+        style={[surfaceStyles.inputCard, modalStyles.buttonInModal]}
         placeholder={field.name}
         value={value}
         onChangeText={text => {

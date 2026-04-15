@@ -1,13 +1,14 @@
 import { Dimensions, StyleSheet } from "react-native"
 
+import { colors, radii } from "./tokens"
+
 const screenWidth = Dimensions.get("window").width
 
 export const modalStyles = StyleSheet.create({
   content: {
     width: screenWidth * 0.9,
-    backgroundColor: "white",
-    borderRadius: 16,
-    // margin: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
     maxHeight: "90%",
   },
   title: {
@@ -15,13 +16,13 @@ export const modalStyles = StyleSheet.create({
     marginBottom: 15,
   },
   addButton: {
-    backgroundColor: "#e0f7fa",
+    backgroundColor: colors.accentSoft,
   },
   clearButton: {
-    backgroundColor: "#fff8e1",
+    backgroundColor: colors.warningSoft,
   },
   closeButton: {
-    backgroundColor: "#eee",
+    backgroundColor: colors.borderSubtle,
   },
   buttonInModal: {
     width: "100%",

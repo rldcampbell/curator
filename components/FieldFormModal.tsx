@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react"
-import { TextInput, View } from "react-native"
+import { StyleSheet, TextInput, View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
 import { FieldType, RawField } from "@/types"
 import { fieldRegistry } from "@/fieldRegistry"
 import { fieldService } from "@/services/fieldService"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { formStyles, modalStyles, stateStyles, surfaceStyles } from "@/styles"
 
 import AppText from "./AppText"
 import CompactModalLayout from "./CompactModalLayout"
@@ -94,11 +93,11 @@ export default function FieldFormModal({
         />
       }
     >
-      <View style={{ width: "100%", marginBottom: 12 }}>
-        <AppText style={sharedStyles.label}>Field Name</AppText>
+      <View style={styles.nameFieldBlock}>
+        <AppText style={formStyles.label}>Field Name</AppText>
         <TextInput
           ref={inputRef}
-          style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+          style={[surfaceStyles.inputCard, modalStyles.buttonInModal]}
           placeholder="e.g. Title"
           placeholderTextColor="#999"
           value={field.name}
@@ -109,11 +108,11 @@ export default function FieldFormModal({
 
       <View
         style={[
-          { width: "100%", marginBottom: 24 },
-          typeUpdateDisabled ? sharedStyles.disabled : null,
+          styles.typeFieldBlock,
+          typeUpdateDisabled ? stateStyles.disabled : null,
         ]}
       >
-        <AppText style={sharedStyles.label}>Field Type</AppText>
+        <AppText style={formStyles.label}>Field Type</AppText>
         <DropDownPicker
           {...(typeUpdateDisabled !== undefined
             ? { disabled: typeUpdateDisabled }
@@ -123,20 +122,14 @@ export default function FieldFormModal({
           items={items}
           setOpen={setOpen}
           setValue={handleTypeChange}
-          style={{
-            borderRadius: 12,
-            borderColor: "#ccc",
-          }}
-          containerStyle={{ width: "100%" }}
-          dropDownContainerStyle={{
-            borderRadius: 12,
-            borderColor: "#ccc",
-          }}
+          style={formStyles.dropdown}
+          containerStyle={styles.fullWidth}
+          dropDownContainerStyle={formStyles.dropdownMenu}
         />
       </View>
 
       {fieldRegistry[field.type].configInput && (
-        <View style={{ width: "100%", marginBottom: 24 }}>
+        <View style={styles.typeFieldBlock}>
           {fieldService.configInput({
             type: field.type,
             config: field.config,
@@ -154,3 +147,17 @@ export default function FieldFormModal({
     </CompactModalLayout>
   )
 }
+
+const styles = StyleSheet.create({
+  fullWidth: {
+    width: "100%",
+  },
+  nameFieldBlock: {
+    width: "100%",
+    marginBottom: 12,
+  },
+  typeFieldBlock: {
+    width: "100%",
+    marginBottom: 24,
+  },
+})

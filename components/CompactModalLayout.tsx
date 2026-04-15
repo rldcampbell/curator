@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
-import { View, ViewStyle } from "react-native"
+import { StyleSheet, View, ViewStyle } from "react-native"
 
-import { modalStyles } from "@/styles/modalStyles"
+import { colors, modalStyles, spacing } from "@/styles"
 
 import AppText from "./AppText"
 import ModalOverlay from "./ModalOverlay"
@@ -28,20 +28,11 @@ export default function CompactModalLayout({
       <View
         style={[
           modalStyles.content,
-          {
-            alignSelf: "center",
-            // flexShrink: 1,
-            maxWidth: "90%",
-            paddingHorizontal: 16,
-          },
+          styles.content,
           contentStyle,
         ]}
       >
-        <View
-          style={{
-            paddingVertical: 16,
-          }}
-        >
+        <View style={styles.body}>
           {title && (
             <AppText weight="bold" style={modalStyles.title}>
               {title}
@@ -51,13 +42,7 @@ export default function CompactModalLayout({
         </View>
 
         {footer && (
-          <View
-            style={{
-              paddingVertical: 16,
-              borderTopWidth: 1,
-              borderColor: "#eee",
-            }}
-          >
+          <View style={styles.footer}>
             {footer}
           </View>
         )}
@@ -65,3 +50,19 @@ export default function CompactModalLayout({
     </ModalOverlay>
   )
 }
+
+const styles = StyleSheet.create({
+  content: {
+    alignSelf: "center",
+    maxWidth: "90%",
+    paddingHorizontal: spacing.lg,
+  },
+  body: {
+    paddingVertical: spacing.lg,
+  },
+  footer: {
+    paddingVertical: spacing.lg,
+    borderTopWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+})

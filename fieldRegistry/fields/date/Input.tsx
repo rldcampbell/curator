@@ -8,8 +8,7 @@ import AppText from "@/components/AppText"
 import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
 import { dateArrayToUTCDate, dateToDateArray, formatDate } from "@/helpers"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { modalStyles, surfaceStyles } from "@/styles"
 
 export const Input = ({
   field,
@@ -23,7 +22,7 @@ export const Input = ({
     <FieldWrapper label={field.name}>
       <Pressable
         onPress={() => setShowPicker(true)}
-        style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+        style={[surfaceStyles.inputCard, modalStyles.buttonInModal]}
       >
         <AppText>
           {Array.isArray(value)

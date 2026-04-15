@@ -4,8 +4,7 @@ import { TextInput } from "react-native"
 import { FieldType } from "@/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { modalStyles, surfaceStyles } from "@/styles"
 
 export const Input = ({
   field,
@@ -19,7 +18,7 @@ export const Input = ({
   return (
     <FieldWrapper label={field.name}>
       <TextInput
-        style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
+        style={[surfaceStyles.inputCard, modalStyles.buttonInModal]}
         placeholder={field.name}
         keyboardType="numeric"
         value={value}

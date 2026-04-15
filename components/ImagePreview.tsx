@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react"
-import { Image, ImageStyle, StyleProp } from "react-native"
+import { Image, ImageStyle, StyleProp, StyleSheet } from "react-native"
+
+import { radii } from "@/styles"
 
 type ImagePreviewProps = {
   uri: string
@@ -23,8 +25,15 @@ export default function ImagePreview({ uri, style }: ImagePreviewProps) {
   return (
     <Image
       source={{ uri }}
-      style={[{ width: "100%", aspectRatio, borderRadius: 12 }, style]}
+      style={[styles.image, { aspectRatio }, style]}
       resizeMode="cover"
     />
   )
 }
+
+const styles = StyleSheet.create({
+  image: {
+    width: "100%",
+    borderRadius: radii.sm,
+  },
+})

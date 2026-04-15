@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
 
 import * as FileSystem from "expo-file-system/legacy"
 import * as Sharing from "expo-sharing"
@@ -12,7 +12,7 @@ import ConfirmModal from "@/components/ConfirmModal"
 import { useCollections } from "@/context/CollectionsContext"
 import { safeDeleteFile } from "@/helpers/file"
 import { resetDatabase } from "@/services/database"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { layoutStyles, screenStyles } from "@/styles"
 
 import { CollectionsData } from "@/types"
 
@@ -54,8 +54,8 @@ export default function DevScreen() {
   }
 
   return (
-    <View style={sharedStyles.container}>
-      <AppText weight="bold" style={sharedStyles.title}>
+    <View style={[screenStyles.mutedCanvas, layoutStyles.alignCenter]}>
+      <AppText weight="bold" style={styles.title}>
         Developer Tools
       </AppText>
 
@@ -74,3 +74,9 @@ export default function DevScreen() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+  },
+})

@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Pressable, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 
 import { DateTimeArray, FieldType } from "@/types"
 import AppText from "@/components/AppText"
@@ -8,8 +8,7 @@ import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
 import { formatDurationArray } from "@/helpers/date"
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { colors, modalStyles, surfaceStyles } from "@/styles"
 
 const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const NATURAL_MAX = [999, 11, 31, 23, 59, 59, 999] as const
@@ -68,14 +67,10 @@ export const Input = ({
     <View>
       <FieldWrapper label={field.name}>
         <Pressable
-          style={[
-            sharedStyles.inputCard,
-            modalStyles.buttonInModal,
-            { justifyContent: "center" },
-          ]}
+          style={[surfaceStyles.inputCard, modalStyles.buttonInModal, styles.button]}
           onPress={() => setPickerVisible(true)}
         >
-          <AppText style={{ color: value ? "#000" : "#999" }}>
+          <AppText style={value ? styles.valueText : styles.placeholderText}>
             {displayedValue}
           </AppText>
         </Pressable>
@@ -93,3 +88,15 @@ export const Input = ({
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  button: {
+    justifyContent: "center",
+  },
+  valueText: {
+    color: "#000",
+  },
+  placeholderText: {
+    color: colors.textPlaceholder,
+  },
+})

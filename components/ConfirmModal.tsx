@@ -1,4 +1,5 @@
 import React from "react"
+import { StyleSheet } from "react-native"
 
 import AppText from "./AppText"
 import CompactModalLayout from "./CompactModalLayout"
@@ -37,9 +38,15 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         />
       }
     >
-      {message && <AppText style={{ fontSize: 16 }}>{message}</AppText>}
+      {message && <AppText style={styles.message}>{message}</AppText>}
     </CompactModalLayout>
   )
 }
 
 export default ConfirmModal
+
+const styles = StyleSheet.create({
+  message: {
+    fontSize: 16,
+  },
+})

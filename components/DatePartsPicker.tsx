@@ -1,11 +1,11 @@
 // DatePartsPicker.tsx
 import React from "react"
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
 import { DateTimeParts } from "@/types"
 import AppText from "@/components/AppText"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { formStyles, spacing } from "@/styles"
 
 const LABELS = [
   "Year",
@@ -71,10 +71,10 @@ export default function DatePartsPicker({
   const dropdownItems = KEYS.map((key, i) => ({ label: LABELS[i], value: key }))
 
   return (
-    <View style={{ gap: 16 }}>
-      <View style={{ flexDirection: "row", gap: 16 }}>
-        <View style={{ flex: 1 }}>
-          <AppText style={sharedStyles.label}>Largest Unit</AppText>
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <View style={styles.pickerColumn}>
+          <AppText style={formStyles.label}>Largest Unit</AppText>
           <DropDownPicker
             open={maxOpen}
             setOpen={setMaxOpen}
@@ -86,8 +86,8 @@ export default function DatePartsPicker({
             zIndexInverse={1000}
           />
         </View>
-        <View style={{ flex: 1 }}>
-          <AppText style={sharedStyles.label}>Smallest Unit</AppText>
+        <View style={styles.pickerColumn}>
+          <AppText style={formStyles.label}>Smallest Unit</AppText>
           <DropDownPicker
             open={minOpen}
             setOpen={setMinOpen}
@@ -103,3 +103,16 @@ export default function DatePartsPicker({
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    gap: spacing.lg,
+  },
+  row: {
+    flexDirection: "row",
+    gap: spacing.lg,
+  },
+  pickerColumn: {
+    flex: 1,
+  },
+})

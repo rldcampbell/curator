@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native"
 
+import { colors } from "./tokens"
+
 export const sharedFieldStyles = StyleSheet.create({
   valueContainer: {
     flex: 1,
@@ -7,7 +9,7 @@ export const sharedFieldStyles = StyleSheet.create({
   },
   value: {
     fontSize: 16,
-    color: "#555",
+    color: colors.textMuted,
     textAlign: "right",
   },
 })
