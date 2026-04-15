@@ -7,7 +7,7 @@ import { router, useNavigation } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId } from "@/app/types"
+import { CollectionId } from "@/types"
 import CollectionListItem from "@/components/CollectionListItem"
 import ConfirmModal from "@/components/ConfirmModal"
 import FullPageLayout from "@/components/FullPageLayout"
@@ -36,12 +36,7 @@ export default function CollectionsScreen() {
       headerRight: () => (
         <HeaderButton
           iconName="add"
-          onPress={() =>
-            router.push({
-              pathname: "/(collections)/configure/[cId]",
-              params: { cId: "" },
-            })
-          }
+          onPress={() => router.push("/configure")}
         />
       ),
     })
@@ -66,7 +61,7 @@ export default function CollectionsScreen() {
               icon: <Feather name="edit-3" size={20} color="black" />,
               onPress: () => {
                 router.push({
-                  pathname: "/(collections)/configure/[cId]",
+                  pathname: "/configure/[cId]",
                   params: { cId: item },
                 })
               },

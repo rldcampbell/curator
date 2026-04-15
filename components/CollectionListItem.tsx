@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native"
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated"
 
-import { Collection, CollectionId } from "@/app/types"
+import { Collection, CollectionId } from "@/types"
 import { getCollectionColorScheme } from "@/helpers/color"
 
 import AppText from "./AppText"

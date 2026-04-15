@@ -6,7 +6,7 @@ import { router } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId, FieldId, RawField } from "@/app/types"
+import { CollectionId, FieldId, RawField } from "@/types"
 import AddButton from "@/components/AddButton"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"

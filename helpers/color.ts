@@ -1,4 +1,4 @@
-import { CollectionId, RawCollection } from "@/app/types"
+import { CollectionId, RawCollection } from "@/types"
 
 export type HexColor = `#${string}`
 

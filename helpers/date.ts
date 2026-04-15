@@ -1,4 +1,4 @@
-import { DateTimeArray, DateTimeParts } from "@/app/types"
+import { DateTimeArray, DateTimeParts } from "@/types"
 
 const MONTHS = [
   "Jan",

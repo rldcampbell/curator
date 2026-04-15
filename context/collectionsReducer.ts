@@ -4,7 +4,7 @@ import {
   CollectionsData,
   Item,
   ItemId,
-} from "@/app/types"
+} from "@/types"
 
 export type CollectionsAction =
   | {

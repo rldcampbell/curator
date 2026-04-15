@@ -1,4 +1,4 @@
-import { DateArray } from "@/app/types"
+import { DateArray } from "@/types"
 import { FieldDefinition } from "@/fieldRegistry/types"
 
 import { Display } from "./Display"

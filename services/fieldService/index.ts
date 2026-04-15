@@ -1,4 +1,4 @@
-import { FieldType, FieldValue, FieldValueMap } from "@/app/types"
+import { FieldType, FieldValue, FieldValueMap } from "@/types"
 import { fieldRegistry } from "@/fieldRegistry"
 import { ConfigInputProps, InputProps } from "@/fieldRegistry/types"
 

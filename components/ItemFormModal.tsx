@@ -8,7 +8,7 @@ import {
   RawItem,
   Resolvable,
   Resolved,
-} from "@/app/types"
+} from "@/types"
 import { fieldService } from "@/services/fieldService"
 
 import ModalButtonRow from "./ModalButtonRow"

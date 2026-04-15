@@ -1,4 +1,4 @@
-import { CollectionId, ItemId, RawItem } from "@/app/types"
+import { CollectionId, ItemId, RawItem } from "@/types"
 import { CollectionInput, useCollections } from "@/context/CollectionsContext"
 
 export function useCollection(collectionId: CollectionId) {

@@ -1,4 +1,4 @@
-import { FieldType, FieldValueMap, RawField, Resolvable } from "@/app/types"
+import { FieldType, FieldValueMap, RawField, Resolvable } from "@/types"
 
 /**
  * FieldDefinition<T>

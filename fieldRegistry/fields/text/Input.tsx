@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { TextInput } from "react-native"
 
-import { FieldType } from "@/app/types"
+import { FieldType } from "@/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"
 import { modalStyles } from "@/styles/modalStyles"

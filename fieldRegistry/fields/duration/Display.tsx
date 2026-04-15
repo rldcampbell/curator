@@ -1,6 +1,6 @@
 import { View } from "react-native"
 
-import { DateTimeArray } from "@/app/types"
+import { DateTimeArray } from "@/types"
 import AppText from "@/components/AppText"
 import { sharedFieldStyles } from "@/styles/fieldStyles"
 

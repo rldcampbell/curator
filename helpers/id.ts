@@ -1,4 +1,4 @@
-import { CollectionId, FieldId, ItemId } from "@/app/types"
+import { CollectionId, FieldId, ItemId } from "@/types"
 
 const BASE62 = "[A-Za-z0-9]"
 const BASE62BLOCK = `${BASE62}{4}`

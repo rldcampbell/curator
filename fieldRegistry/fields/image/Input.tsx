@@ -3,7 +3,7 @@ import { Alert, Pressable, View } from "react-native"
 
 import { Feather } from "@expo/vector-icons"
 
-import { FieldType } from "@/app/types"
+import { FieldType } from "@/types"
 import FieldWrapper from "@/components/FieldWrapper"
 import ImagePreview from "@/components/ImagePreview"
 import { InputProps } from "@/fieldRegistry/types"

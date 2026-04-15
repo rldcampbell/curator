@@ -1,4 +1,4 @@
-import { FieldId } from "@/app/types"
+import { FieldId } from "@/types"
 import { CollectionInput } from "@/context/CollectionsContext"
 
 export function changeSummary(

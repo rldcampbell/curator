@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native"
 
 import { formatDistanceToNow } from "date-fns"
 
-import { Timestamp } from "@/app/types"
+import { Timestamp } from "@/types"
 
 import AppText from "./AppText"
 

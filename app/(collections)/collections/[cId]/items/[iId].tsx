@@ -11,7 +11,7 @@ import {
 
 import { useLocalSearchParams, useNavigation } from "expo-router"
 
-import { CollectionId, ItemId, RawFieldAndValue, WithMeta } from "@/app/types"
+import { CollectionId, ItemId, RawFieldAndValue, WithMeta } from "@/types"
 import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"

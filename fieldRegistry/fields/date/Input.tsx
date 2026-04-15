@@ -3,7 +3,7 @@ import { Pressable } from "react-native"
 
 import DateTimePicker from "@react-native-community/datetimepicker"
 
-import { FieldType } from "@/app/types"
+import { FieldType } from "@/types"
 import AppText from "@/components/AppText"
 import FieldWrapper from "@/components/FieldWrapper"
 import { InputProps } from "@/fieldRegistry/types"

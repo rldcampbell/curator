@@ -115,7 +115,7 @@ export default function Layout() {
               }}
             />
             <Tabs.Screen
-              name="test"
+              name="test/index"
               options={{
                 title: "Test",
                 tabBarIcon: ({ color, size }) => (

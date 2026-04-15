@@ -1,4 +1,4 @@
-import { FieldType, RawFieldAndValue } from "@/app/types"
+import { FieldType, RawFieldAndValue } from "@/types"
 
 // this to be deprecated in favour of the field type registry?
 export function formatFieldValue(field: RawFieldAndValue): string {

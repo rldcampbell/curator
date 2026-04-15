@@ -7,7 +7,7 @@ import {
   RawField,
   Timestamp,
   WithMeta,
-} from "@/app/types"
+} from "@/types"
 import { timestampNow } from "@/helpers/date"
 
 export const withMeta = <T>(
