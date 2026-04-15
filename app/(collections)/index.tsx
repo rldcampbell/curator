@@ -36,7 +36,7 @@ export default function CollectionsScreen() {
       headerRight: () => (
         <HeaderButton
           iconName="add"
-          onPress={() => router.push("./configure")}
+          onPress={() => router.push("/configure")}
         />
       ),
     })
@@ -60,7 +60,10 @@ export default function CollectionsScreen() {
             {
               icon: <Feather name="edit-3" size={20} color="black" />,
               onPress: () => {
-                router.push(`./configure/${item}`)
+                router.push({
+                  pathname: "/configure/[cId]",
+                  params: { cId: item },
+                })
               },
             },
             {
@@ -84,7 +87,12 @@ export default function CollectionsScreen() {
             <SwaggableRow
               item={item}
               onDrag={drag}
-              onPress={() => router.push(`./collections/${item}`)}
+              onPress={() =>
+                router.push({
+                  pathname: "/collections/[cId]",
+                  params: { cId: item },
+                })
+              }
               buttons={buttons}
               renderContent={id => (
                 <CollectionListItem
