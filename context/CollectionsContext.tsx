@@ -270,10 +270,17 @@ export const CollectionsProvider = ({
     const { collectionOrder, collections } = data as unknown as CollectionsData
 
     for (const cId of collectionOrder) {
-      const { name, fieldOrder, fields, itemOrder, items } = collections[cId]
+      const { color, name, fieldOrder, fields, itemOrder, items } =
+        collections[cId]
 
       console.log(`[SEED] Adding collection: ${name}`)
-      const newId = addCollection({ name, fieldOrder, fields })
+      const newId = genCollectionId()
+      await db.addCollection(newId, {
+        color,
+        name,
+        fieldOrder,
+        fields,
+      })
 
       console.log(
         `[SEED] Adding ${itemOrder.length} items to collection ${name} [${newId}]`,
@@ -281,14 +288,7 @@ export const CollectionsProvider = ({
 
       for (const iId of itemOrder) {
         const item = items[iId]
-
-        // Wait one tick before next addItem
-        await new Promise(resolve => {
-          requestAnimationFrame(() => {
-            addItem(newId, item)
-            resolve(null)
-          })
-        })
+        await db.addItem(newId, genItemId(), item)
       }
     }
 

@@ -29,6 +29,16 @@ const log = (...args: any[]) => {
 }
 
 let db: SQLite.SQLiteDatabase | null = null
+let writeQueue: Promise<void> = Promise.resolve()
+
+const queueWrite = <T>(operation: () => Promise<T>): Promise<T> => {
+  const nextWrite = writeQueue.then(operation, operation)
+  writeQueue = nextWrite.then(
+    () => undefined,
+    () => undefined,
+  )
+  return nextWrite
+}
 
 // NEW initDatabase:
 export const initDatabase = async (): Promise<{ isFreshDb: boolean }> => {
@@ -58,65 +68,67 @@ export const addCollection = async (
   collectionId: CollectionId,
   rawCollection: Omit<RawCollection, "itemOrder" | "items">,
 ): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
 
-  console.log("[DB] Adding new collection:", collectionId)
+    console.log("[DB] Adding new collection:", collectionId)
 
-  const { name, color, fieldOrder, fields } = rawCollection
+    const { name, color, fieldOrder, fields } = rawCollection
 
-  const now = timestampNow()
+    const now = timestampNow()
 
-  await db.execAsync("BEGIN")
+    await db.execAsync("BEGIN")
 
-  try {
-    // 1. Find max sortOrder
-    const row = await db.getFirstAsync<{ max: number }>(
-      `SELECT MAX(sortOrder) as max FROM collections`,
-    )
-    const nextSortOrder = (row?.max ?? -1) + 1
+    try {
+      // 1. Find max sortOrder
+      const row = await db.getFirstAsync<{ max: number }>(
+        `SELECT MAX(sortOrder) as max FROM collections`,
+      )
+      const nextSortOrder = (row?.max ?? -1) + 1
 
-    // 2. Insert collection metadata
-    await db.runAsync(
-      `
-      INSERT INTO collections (
-        id, name, color, sortOrder, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?)
-      `,
-      collectionId,
-      name,
-      color ?? null,
-      nextSortOrder,
-      now, // createdAt
-      now, // updatedAt
-    )
-
-    // 3. Insert fields
-    for (const [sortOrder, fieldId] of fieldOrder.entries()) {
-      const rawField = fields[fieldId]
+      // 2. Insert collection metadata
       await db.runAsync(
         `
-        INSERT INTO fields (
-          id, collectionId, name, type, config, sortOrder, createdAt, updatedAt
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO collections (
+          id, name, color, sortOrder, createdAt, updatedAt
+        ) VALUES (?, ?, ?, ?, ?, ?)
         `,
-        fieldId,
         collectionId,
-        rawField.name,
-        rawField.type,
-        JSON.stringify(rawField.config),
-        sortOrder,
-        now,
-        now,
+        name,
+        color ?? null,
+        nextSortOrder,
+        now, // createdAt
+        now, // updatedAt
       )
-    }
 
-    await db.execAsync("COMMIT")
-    console.log("[DB] Collection added:", collectionId)
-  } catch (error) {
-    console.error("[DB] Error adding collection:", error)
-    await db.execAsync("ROLLBACK")
-    throw error
-  }
+      // 3. Insert fields
+      for (const [sortOrder, fieldId] of fieldOrder.entries()) {
+        const rawField = fields[fieldId]
+        await db.runAsync(
+          `
+          INSERT INTO fields (
+            id, collectionId, name, type, config, sortOrder, createdAt, updatedAt
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `,
+          fieldId,
+          collectionId,
+          rawField.name,
+          rawField.type,
+          JSON.stringify(rawField.config),
+          sortOrder,
+          now,
+          now,
+        )
+      }
+
+      await db.execAsync("COMMIT")
+      console.log("[DB] Collection added:", collectionId)
+    } catch (error) {
+      console.error("[DB] Error adding collection:", error)
+      await db.execAsync("ROLLBACK")
+      throw error
+    }
+  })
 }
 
 type CollectionRow = {
@@ -332,21 +344,23 @@ const touchCollection = async (
 export const deleteCollection = async (
   collectionId: CollectionId,
 ): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
 
-  console.log("[DB] Deleting collection:", collectionId)
+    console.log("[DB] Deleting collection:", collectionId)
 
-  await db.execAsync("BEGIN")
-  try {
-    await db.runAsync(`DELETE FROM collections WHERE id = ?`, collectionId)
+    await db.execAsync("BEGIN")
+    try {
+      await db.runAsync(`DELETE FROM collections WHERE id = ?`, collectionId)
 
-    await db.execAsync("COMMIT")
-    console.log("[DB] Collection deleted:", collectionId)
-  } catch (err) {
-    console.error("[DB] Error deleting collection:", collectionId, err)
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
+      await db.execAsync("COMMIT")
+      console.log("[DB] Collection deleted:", collectionId)
+    } catch (err) {
+      console.error("[DB] Error deleting collection:", collectionId, err)
+      await db.execAsync("ROLLBACK")
+      throw err
+    }
+  })
 }
 
 // NEW updateCollection * now respecting collection updatedAt philosophy
@@ -356,152 +370,156 @@ export const updateCollection = async (
   collectionId: CollectionId,
   raw: Partial<Pick<RawCollection, "name" | "color" | "fields" | "fieldOrder">>,
 ): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
-  console.log("[DB] Updating collection:", collectionId)
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
+    console.log("[DB] Updating collection:", collectionId)
 
-  const now = timestampNow()
-  await db.execAsync("BEGIN")
+    const now = timestampNow()
+    await db.execAsync("BEGIN")
 
-  try {
-    const existing = await loadCollectionById(collectionId)
+    try {
+      const existing = await loadCollectionById(collectionId)
 
-    let hasMeaningfulChange = false
+      let hasMeaningfulChange = false
 
-    // === 1. Compare and update collection name/color ===
-    const nameChanged = "name" in raw && raw.name !== existing.name
-    const colorChanged = "color" in raw && raw.color !== existing.color
+      // === 1. Compare and update collection name/color ===
+      const nameChanged = "name" in raw && raw.name !== existing.name
+      const colorChanged = "color" in raw && raw.color !== existing.color
 
-    if (nameChanged || colorChanged) {
-      const updates = []
-      const values = []
+      if (nameChanged || colorChanged) {
+        const updates = []
+        const values = []
 
-      if (nameChanged) {
-        updates.push("name = ?")
-        values.push(raw.name ?? null)
-      }
+        if (nameChanged) {
+          updates.push("name = ?")
+          values.push(raw.name ?? null)
+        }
 
-      if (colorChanged) {
-        updates.push("color = ?")
-        values.push(raw.color ?? null)
-      }
+        if (colorChanged) {
+          updates.push("color = ?")
+          values.push(raw.color ?? null)
+        }
 
-      if (updates.length > 0) {
-        hasMeaningfulChange = true
-        values.push(collectionId)
-        await db.runAsync(
-          `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
-          ...values,
-        )
-      }
-    }
-
-    // === 2. Compare and update fields ===
-    if (raw.fields) {
-      const newFieldIds = new Set(Object.keys(raw.fields))
-      const existingFieldIds = new Set(Object.keys(existing.fields))
-
-      // 2a. Delete removed fields
-      for (const fieldId of existingFieldIds) {
-        if (!newFieldIds.has(fieldId)) {
-          await db.runAsync("DELETE FROM fields WHERE id = ?", fieldId)
+        if (updates.length > 0) {
           hasMeaningfulChange = true
+          values.push(collectionId)
+          await db.runAsync(
+            `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
+            ...values,
+          )
         }
       }
 
-      // 2b. Add or update fields
-      for (const [fieldId, newField] of Object.entries(raw.fields)) {
-        const existingField = existing.fields[fieldId as FieldId]
-        if (!existingField) {
+      // === 2. Compare and update fields ===
+      if (raw.fields) {
+        const newFieldIds = new Set(Object.keys(raw.fields))
+        const existingFieldIds = new Set(Object.keys(existing.fields))
+
+        // 2a. Delete removed fields
+        for (const fieldId of existingFieldIds) {
+          if (!newFieldIds.has(fieldId)) {
+            await db.runAsync("DELETE FROM fields WHERE id = ?", fieldId)
+            hasMeaningfulChange = true
+          }
+        }
+
+        // 2b. Add or update fields
+        for (const [fieldId, newField] of Object.entries(raw.fields)) {
+          const existingField = existing.fields[fieldId as FieldId]
+          if (!existingField) {
+            await db.runAsync(
+              `INSERT INTO fields (id, collectionId, name, type, config, sortOrder, createdAt, updatedAt)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              fieldId,
+              collectionId,
+              newField.name,
+              newField.type,
+              JSON.stringify(newField.config),
+              raw.fieldOrder?.indexOf(fieldId as FieldId) ?? 0,
+              now,
+              now,
+            )
+            hasMeaningfulChange = true
+          } else if (
+            existingField.name !== newField.name ||
+            existingField.type !== newField.type ||
+            !_.isEqual(existingField.config, newField.config)
+          ) {
+            await db.runAsync(
+              `UPDATE fields SET name = ?, type = ?, config = ?, updatedAt = ? WHERE id = ?`,
+              newField.name,
+              newField.type,
+              JSON.stringify(newField.config),
+              now,
+              fieldId,
+            )
+          }
+        }
+      }
+
+      // === 3. Compare and update field order ===
+      if (raw.fieldOrder && !_.isEqual(raw.fieldOrder, existing.fieldOrder)) {
+        for (const [index, fieldId] of raw.fieldOrder.entries()) {
           await db.runAsync(
-            `INSERT INTO fields (id, collectionId, name, type, config, sortOrder, createdAt, updatedAt)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            `UPDATE fields SET sortOrder = ? WHERE id = ? AND collectionId = ?`,
+            index,
             fieldId,
             collectionId,
-            newField.name,
-            newField.type,
-            JSON.stringify(newField.config),
-            raw.fieldOrder?.indexOf(fieldId as FieldId) ?? 0,
-            now,
-            now,
-          )
-          hasMeaningfulChange = true
-        } else if (
-          existingField.name !== newField.name ||
-          existingField.type !== newField.type ||
-          !_.isEqual(existingField.config, newField.config)
-        ) {
-          await db.runAsync(
-            `UPDATE fields SET name = ?, type = ?, config = ?, updatedAt = ? WHERE id = ?`,
-            newField.name,
-            newField.type,
-            JSON.stringify(newField.config),
-            now,
-            fieldId,
           )
         }
+        // Note: sort order changes do NOT trigger updatedAt
       }
-    }
 
-    // === 3. Compare and update field order ===
-    if (raw.fieldOrder && !_.isEqual(raw.fieldOrder, existing.fieldOrder)) {
-      for (const [index, fieldId] of raw.fieldOrder.entries()) {
+      // === 4. Final updatedAt touch ===
+      if (hasMeaningfulChange) {
         await db.runAsync(
-          `UPDATE fields SET sortOrder = ? WHERE id = ? AND collectionId = ?`,
-          index,
-          fieldId,
+          `UPDATE collections SET updatedAt = ? WHERE id = ?`,
+          now,
           collectionId,
         )
       }
-      // Note: sort order changes do NOT trigger updatedAt
-    }
 
-    // === 4. Final updatedAt touch ===
-    if (hasMeaningfulChange) {
-      await db.runAsync(
-        `UPDATE collections SET updatedAt = ? WHERE id = ?`,
-        now,
-        collectionId,
-      )
+      await db.execAsync("COMMIT")
+      console.log("[DB] Collection updated:", collectionId)
+    } catch (err) {
+      console.error("[DB] Error updating collection:", err)
+      await db.execAsync("ROLLBACK")
+      throw err
     }
-
-    await db.execAsync("COMMIT")
-    console.log("[DB] Collection updated:", collectionId)
-  } catch (err) {
-    console.error("[DB] Error updating collection:", err)
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
+  })
 }
 
 // NEW updateCollectionOrder:
 export const updateCollectionOrder = async (
   collectionOrder: CollectionId[],
 ): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
 
-  console.log("[DB] Updating collection sort order")
+    console.log("[DB] Updating collection sort order")
 
-  await db.execAsync("BEGIN")
-  try {
-    for (const [index, collectionId] of collectionOrder.entries()) {
-      await db.runAsync(
-        `
-        UPDATE collections
-        SET sortOrder = ?
-        WHERE id = ?
-        `,
-        index,
-        collectionId,
-      )
+    await db.execAsync("BEGIN")
+    try {
+      for (const [index, collectionId] of collectionOrder.entries()) {
+        await db.runAsync(
+          `
+          UPDATE collections
+          SET sortOrder = ?
+          WHERE id = ?
+          `,
+          index,
+          collectionId,
+        )
+      }
+
+      await db.execAsync("COMMIT")
+      console.log("[DB] Collection order updated")
+    } catch (err) {
+      console.error("[DB] Error updating collection order:", err)
+      await db.execAsync("ROLLBACK")
+      throw err
     }
-
-    await db.execAsync("COMMIT")
-    console.log("[DB] Collection order updated")
-  } catch (err) {
-    console.error("[DB] Error updating collection order:", err)
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
+  })
 }
 
 // -- ITEMS --
@@ -512,122 +530,44 @@ export const addItem = async (
   itemId: ItemId,
   item: RawItem,
 ): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
 
-  console.log("[DB] Adding item:", itemId, "to collection:", collectionId)
+    console.log("[DB] Adding item:", itemId, "to collection:", collectionId)
 
-  const now = timestampNow()
+    const now = timestampNow()
 
-  const tagString = item.tags ? JSON.stringify(item.tags) : null
+    const tagString = item.tags ? JSON.stringify(item.tags) : null
 
-  // 1. Compute next sortOrder in collection
-  const row = await db.getFirstAsync<{ max: number }>(
-    `SELECT MAX(sortOrder) as max FROM items WHERE collectionId = ?`,
-    collectionId,
-  )
-  const nextSortOrder = (row?.max ?? -1) + 1
-
-  await db.execAsync("BEGIN")
-  try {
-    // 2. Insert item metadata
-    await db.runAsync(
-      `
-      INSERT INTO items (
-        id, collectionId, tags, sortOrder, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?)
-      `,
-      itemId,
+    // 1. Compute next sortOrder in collection
+    const row = await db.getFirstAsync<{ max: number }>(
+      `SELECT MAX(sortOrder) as max FROM items WHERE collectionId = ?`,
       collectionId,
-      tagString,
-      nextSortOrder,
-      now,
-      now,
     )
+    const nextSortOrder = (row?.max ?? -1) + 1
 
-    // 3. Insert each value
-    for (const [fieldId, value] of Object.entries(item.values)) {
+    await db.execAsync("BEGIN")
+    try {
+      // 2. Insert item metadata
       await db.runAsync(
         `
-        INSERT INTO item_values (
-          itemId, fieldId, value
-        ) VALUES (?, ?, ?)
+        INSERT INTO items (
+          id, collectionId, tags, sortOrder, createdAt, updatedAt
+        ) VALUES (?, ?, ?, ?, ?, ?)
         `,
         itemId,
-        fieldId,
-        JSON.stringify(value),
+        collectionId,
+        tagString,
+        nextSortOrder,
+        now,
+        now,
       )
-    }
 
-    await touchCollection(collectionId, now)
-
-    await db.execAsync("COMMIT")
-    console.log("[DB] Item added:", itemId)
-  } catch (err) {
-    console.error("[DB] Error adding item:", err)
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
-}
-
-// NEW updateItem:
-export const updateItem = async (
-  itemId: ItemId,
-  patch: Partial<RawItem>,
-): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
-
-  console.log("[DB] Updating item:", itemId)
-
-  const hasTags = "tags" in patch
-  const hasValues = "values" in patch
-
-  if (!hasTags && !hasValues) {
-    console.log("[DB] No changes provided, skipping update for:", itemId)
-    return
-  }
-
-  // 1. Load collectionId for this item
-  const itemRow = await db.getFirstAsync<{ collectionId: CollectionId }>(
-    `SELECT collectionId FROM items WHERE id = ?`,
-    itemId,
-  )
-
-  if (!itemRow) {
-    console.warn("[DB] Tried to update non-existent item:", itemId)
-    return
-  }
-
-  const now = timestampNow()
-
-  await db.execAsync("BEGIN")
-  try {
-    // === Update values if present ===
-    if (hasValues && patch.values) {
-      const existingRows = await db.getAllAsync<{ fieldId: FieldId }>(
-        `
-        SELECT fieldId FROM item_values
-        WHERE itemId = ?
-        `,
-        itemId,
-      )
-      const existingFieldIds = new Set(existingRows.map(row => row.fieldId))
-
-      // Delete removed fields
-      for (const fieldId of existingFieldIds) {
-        if (patch.values[fieldId] === undefined) {
-          await db.runAsync(
-            `DELETE FROM item_values WHERE itemId = ? AND fieldId = ?`,
-            itemId,
-            fieldId,
-          )
-        }
-      }
-
-      // Upsert current fields
-      for (const [fieldId, value] of Object.entries(patch.values)) {
+      // 3. Insert each value
+      for (const [fieldId, value] of Object.entries(item.values)) {
         await db.runAsync(
           `
-          INSERT OR REPLACE INTO item_values (
+          INSERT INTO item_values (
             itemId, fieldId, value
           ) VALUES (?, ?, ?)
           `,
@@ -636,72 +576,156 @@ export const updateItem = async (
           JSON.stringify(value),
         )
       }
+
+      await touchCollection(collectionId, now)
+
+      await db.execAsync("COMMIT")
+      console.log("[DB] Item added:", itemId)
+    } catch (err) {
+      console.error("[DB] Error adding item:", err)
+      await db.execAsync("ROLLBACK")
+      throw err
+    }
+  })
+}
+
+// NEW updateItem:
+export const updateItem = async (
+  itemId: ItemId,
+  patch: Partial<RawItem>,
+): Promise<void> => {
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
+
+    console.log("[DB] Updating item:", itemId)
+
+    const hasTags = "tags" in patch
+    const hasValues = "values" in patch
+
+    if (!hasTags && !hasValues) {
+      console.log("[DB] No changes provided, skipping update for:", itemId)
+      return
     }
 
-    // === Update tags if present ===
-    if (hasTags) {
-      await db.runAsync(
-        `
-        UPDATE items
-        SET tags = ?, updatedAt = ?
-        WHERE id = ?
-        `,
-        patch.tags ? JSON.stringify(patch.tags) : null,
-        now,
-        itemId,
-      )
+    // 1. Load collectionId for this item
+    const itemRow = await db.getFirstAsync<{ collectionId: CollectionId }>(
+      `SELECT collectionId FROM items WHERE id = ?`,
+      itemId,
+    )
+
+    if (!itemRow) {
+      console.warn("[DB] Tried to update non-existent item:", itemId)
+      return
     }
 
-    // don't 'touch' collection - item update only
+    const now = timestampNow()
 
-    await db.execAsync("COMMIT")
-    console.log("[DB] Item updated:", itemId, "(changes saved)")
-  } catch (err) {
-    console.error("[DB] Error updating item:", err)
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
+    await db.execAsync("BEGIN")
+    try {
+      // === Update values if present ===
+      if (hasValues && patch.values) {
+        const existingRows = await db.getAllAsync<{ fieldId: FieldId }>(
+          `
+          SELECT fieldId FROM item_values
+          WHERE itemId = ?
+          `,
+          itemId,
+        )
+        const existingFieldIds = new Set(existingRows.map(row => row.fieldId))
+
+        // Delete removed fields
+        for (const fieldId of existingFieldIds) {
+          if (patch.values[fieldId] === undefined) {
+            await db.runAsync(
+              `DELETE FROM item_values WHERE itemId = ? AND fieldId = ?`,
+              itemId,
+              fieldId,
+            )
+          }
+        }
+
+        // Upsert current fields
+        for (const [fieldId, value] of Object.entries(patch.values)) {
+          await db.runAsync(
+            `
+            INSERT OR REPLACE INTO item_values (
+              itemId, fieldId, value
+            ) VALUES (?, ?, ?)
+            `,
+            itemId,
+            fieldId,
+            JSON.stringify(value),
+          )
+        }
+      }
+
+      // === Update tags if present ===
+      if (hasTags) {
+        await db.runAsync(
+          `
+          UPDATE items
+          SET tags = ?, updatedAt = ?
+          WHERE id = ?
+          `,
+          patch.tags ? JSON.stringify(patch.tags) : null,
+          now,
+          itemId,
+        )
+      }
+
+      // don't 'touch' collection - item update only
+
+      await db.execAsync("COMMIT")
+      console.log("[DB] Item updated:", itemId, "(changes saved)")
+    } catch (err) {
+      console.error("[DB] Error updating item:", err)
+      await db.execAsync("ROLLBACK")
+      throw err
+    }
+  })
 }
 
 // NEW deleteItem:
 export const deleteItem = async (itemId: ItemId): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
 
-  console.log("[DB] Deleting item:", itemId)
+    console.log("[DB] Deleting item:", itemId)
 
-  // 1. Look up collectionId for this item
-  const row = await db.getFirstAsync<{ collectionId: CollectionId }>(
-    `SELECT collectionId FROM items WHERE id = ?`,
-    itemId,
-  )
-
-  if (!row) {
-    console.warn("[DB] Tried to delete non-existent item:", itemId)
-    return
-  }
-
-  const { collectionId } = row
-
-  await db.execAsync("BEGIN")
-  try {
-    // 2. Delete item (cascades to item_values)
-    await db.runAsync(
-      `
-      DELETE FROM items WHERE id = ?
-      `,
+    // 1. Look up collectionId for this item
+    const row = await db.getFirstAsync<{ collectionId: CollectionId }>(
+      `SELECT collectionId FROM items WHERE id = ?`,
       itemId,
     )
 
-    // 3. Touch parent collection
-    await touchCollection(collectionId)
+    if (!row) {
+      console.warn("[DB] Tried to delete non-existent item:", itemId)
+      return
+    }
 
-    await db.execAsync("COMMIT")
-    console.log("[DB] Item deleted:", itemId)
-  } catch (err) {
-    console.error("[DB] Error deleting item:", err)
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
+    const { collectionId } = row
+
+    await db.execAsync("BEGIN")
+    try {
+      // 2. Delete item (cascades to item_values)
+      await db.runAsync(
+        `
+        DELETE FROM items WHERE id = ?
+        `,
+        itemId,
+      )
+
+      // 3. Touch parent collection
+      await touchCollection(collectionId)
+
+      await db.execAsync("COMMIT")
+      console.log("[DB] Item deleted:", itemId)
+    } catch (err) {
+      console.error("[DB] Error deleting item:", err)
+      await db.execAsync("ROLLBACK")
+      throw err
+    }
+  })
 }
 
 // NEW updateItemOrder:
@@ -719,47 +743,51 @@ export const updateItemOrder = async (
   collectionId: CollectionId,
   itemOrder: ItemId[],
 ): Promise<void> => {
-  if (!db) throw new Error("Database not initialized")
+  return queueWrite(async () => {
+    if (!db) throw new Error("Database not initialized")
 
-  console.log("[DB] Updating item sort order for collection:", collectionId)
+    console.log("[DB] Updating item sort order for collection:", collectionId)
 
-  await db.execAsync("BEGIN")
-  try {
-    for (let i = 0; i < itemOrder.length; i += 10) {
-      const batch = itemOrder.slice(i, i + 10)
+    await db.execAsync("BEGIN")
+    try {
+      for (let i = 0; i < itemOrder.length; i += 10) {
+        const batch = itemOrder.slice(i, i + 10)
 
-      const sql = batch
-        .map(
-          (id, iMap) =>
-            `UPDATE items SET sortOrder = ${i + iMap} WHERE id = '${id}'`,
-        )
-        .join(";\n")
+        const sql = batch
+          .map(
+            (id, iMap) =>
+              `UPDATE items SET sortOrder = ${i + iMap} WHERE id = '${id}'`,
+          )
+          .join(";\n")
 
-      await db.execAsync(sql)
+        await db.execAsync(sql)
+      }
+
+      await db.execAsync("COMMIT")
+      console.log("[DB] Item order updated for collection:", collectionId)
+    } catch (err) {
+      console.error(
+        "[DB] Error updating item order for collection:",
+        collectionId,
+        err,
+      )
+      await db.execAsync("ROLLBACK")
+      throw err
     }
-
-    await db.execAsync("COMMIT")
-    console.log("[DB] Item order updated for collection:", collectionId)
-  } catch (err) {
-    console.error(
-      "[DB] Error updating item order for collection:",
-      collectionId,
-      err,
-    )
-    await db.execAsync("ROLLBACK")
-    throw err
-  }
+  })
 }
 
 export const resetDatabase = async (): Promise<void> => {
-  const dbPath = `${FileSystem.documentDirectory}SQLite/curator.db`
-  console.log("[RESET] Deleting SQLite database at:", dbPath)
+  return queueWrite(async () => {
+    const dbPath = `${FileSystem.documentDirectory}SQLite/curator.db`
+    console.log("[RESET] Deleting SQLite database at:", dbPath)
 
-  await safeDeleteFile(dbPath)
-  console.log("[RESET] Database file deleted")
+    await safeDeleteFile(dbPath)
+    console.log("[RESET] Database file deleted")
 
-  console.log(
-    "[RESET] Reloading app to re-initialize DB and trigger seeding...",
-  )
-  await Updates.reloadAsync()
+    console.log(
+      "[RESET] Reloading app to re-initialize DB and trigger seeding...",
+    )
+    await Updates.reloadAsync()
+  })
 }
