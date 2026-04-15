@@ -187,6 +187,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
             <AddButton onPress={handleOpenCreateField} />
           </View>
         }
+        contentContainerStyle={styles.fieldListContent}
         data={fieldOrder}
         keyExtractor={id => id}
         onDragEnd={({ data }) => setFieldOrder([...data])}
@@ -298,6 +299,9 @@ const styles = StyleSheet.create({
   listFooter: {
     marginTop: spacing.sm,
     alignItems: "center",
+  },
+  fieldListContent: {
+    paddingBottom: spacing.md,
   },
   fieldRow: {
     paddingVertical: spacing.lg,
