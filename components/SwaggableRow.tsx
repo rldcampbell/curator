@@ -1,29 +1,31 @@
-import React, { useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { Dimensions, Pressable, StyleSheet, View } from "react-native"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import Animated, {
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated"
+import { scheduleOnRN } from "react-native-worklets"
 
 import * as Haptics from "expo-haptics"
 
 // Module-level shared ref to track open row
 // 🔐 Module-scoped row manager (private to this file)
-let closeOpenRow: (() => void) | null = null
+let openRowId: number | null = null
+let nextRowId = 1
+const rowClosers = new Map<number, () => void>()
 
-function registerOpenRow(closeFn: () => void) {
-  if (closeOpenRow && closeOpenRow !== closeFn) {
-    closeOpenRow()
+function registerOpenRow(rowId: number) {
+  if (openRowId && openRowId !== rowId) {
+    rowClosers.get(openRowId)?.()
   }
-  closeOpenRow = closeFn
+  openRowId = rowId
 }
 
-function deregisterOpenRow(closeFn: () => void) {
-  if (closeOpenRow === closeFn) {
-    closeOpenRow = null
+function deregisterOpenRow(rowId: number) {
+  if (openRowId === rowId) {
+    openRowId = null
   }
 }
 
@@ -53,8 +55,10 @@ export default function SwaggableRow<T>({
   const translateX = useSharedValue(0)
   const idealButtonWidth = 60
   const idealTotalWidth = buttons.length * idealButtonWidth
+  const rowId = useRef(nextRowId++).current
 
   const wasOpenOnTouchStart = useRef(false)
+  const closeRowRef = useRef<() => void>(() => {})
 
   const closeRow = () => {
     translateX.value = withSpring(0, {
@@ -63,8 +67,19 @@ export default function SwaggableRow<T>({
     })
 
     // 🧹 Clear if we're the currently open row
-    runOnJS(deregisterOpenRow)(closeRow)
+    deregisterOpenRow(rowId)
   }
+
+  closeRowRef.current = closeRow
+
+  useEffect(() => {
+    rowClosers.set(rowId, () => closeRowRef.current())
+
+    return () => {
+      rowClosers.delete(rowId)
+      deregisterOpenRow(rowId)
+    }
+  }, [rowId])
 
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
@@ -77,7 +92,7 @@ export default function SwaggableRow<T>({
         Math.abs(translateX.value) > idealTotalWidth / 2 ? -idealTotalWidth : 0
 
       if (snapPoint !== 0) {
-        runOnJS(registerOpenRow)(closeRow)
+        scheduleOnRN(registerOpenRow, rowId)
       }
 
       translateX.value = withSpring(snapPoint, {
@@ -115,7 +130,7 @@ export default function SwaggableRow<T>({
             ]}
           >
             <Pressable
-              onPress={() => runOnJS(btn.onPress)(item)}
+              onPress={() => btn.onPress(item)}
               style={styles.pressable}
             >
               {btn.icon}
@@ -134,8 +149,8 @@ export default function SwaggableRow<T>({
               }
             }}
             onTouchStart={() => {
-              wasOpenOnTouchStart.current = !!closeOpenRow
-              if (closeOpenRow) runOnJS(closeOpenRow)()
+              wasOpenOnTouchStart.current = openRowId !== null
+              if (openRowId !== null) rowClosers.get(openRowId)?.()
             }}
             onLongPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
