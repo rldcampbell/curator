@@ -1,7 +1,7 @@
-import { StyleProp, TextStyle, View, ViewStyle } from "react-native"
+import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native"
 
 import AppText from "@/components/AppText"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { layoutStyles, screenStyles, spacing } from "@/styles"
 
 type ScreenMessageProps = {
   message: string
@@ -15,8 +15,24 @@ export default function ScreenMessage({
   textStyle,
 }: ScreenMessageProps) {
   return (
-    <View style={[sharedStyles.container, { justifyContent: "center" }, containerStyle]}>
-      <AppText style={[sharedStyles.errorText, textStyle]}>{message}</AppText>
+    <View
+      style={[
+        screenStyles.mutedCanvas,
+        layoutStyles.alignCenter,
+        layoutStyles.justifyCenter,
+        containerStyle,
+      ]}
+    >
+      <AppText style={[styles.text, textStyle]}>{message}</AppText>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  text: {
+    color: "red",
+    fontSize: 18,
+    textAlign: "center",
+    padding: spacing.xl,
+  },
+})

@@ -1,16 +1,18 @@
 import { StyleSheet } from "react-native"
 
+import { colors, spacing } from "./tokens"
+
 export const collectionDetailStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xxxl,
   },
   itemText: {
     fontSize: 16,
-    color: "#222",
+    color: colors.textBody,
   },
 })

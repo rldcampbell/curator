@@ -12,7 +12,7 @@ import {
   CollectionsProvider,
   useCollections,
 } from "@/context/CollectionsContext"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { layoutStyles, screenStyles } from "@/styles"
 
 function CollectionsProviderWrapper({
   children,
@@ -23,7 +23,7 @@ function CollectionsProviderWrapper({
 
   if (isLoading) {
     return (
-      <View style={[sharedStyles.container, { justifyContent: "center" }]}>
+      <View style={[screenStyles.mutedCanvas, layoutStyles.centered]}>
         <ActivityIndicator size="large" color="#007aff" />
       </View>
     )
@@ -62,7 +62,7 @@ export default function Layout() {
     return null
   }
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={layoutStyles.fill}>
       <CollectionsProvider>
         <CollectionsProviderWrapper>
           <Tabs>

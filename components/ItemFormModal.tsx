@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { View } from "react-native"
+import { StyleSheet, View } from "react-native"
 
 import {
   FieldId,
@@ -135,7 +135,7 @@ const ItemFormBody = ({
         const value = inputValues[fieldId]
 
         return (
-          <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
+          <View key={fieldId} style={styles.field}>
             {fieldService.input({
               autoFocus: fieldId === autoFocusFieldId,
               field,
@@ -148,3 +148,10 @@ const ItemFormBody = ({
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  field: {
+    width: "100%",
+    marginBottom: 8,
+  },
+})

@@ -1,7 +1,6 @@
-import { Pressable, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 
-import { modalStyles } from "@/styles/modalStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { modalStyles, stateStyles, surfaceStyles } from "@/styles"
 
 import AppText from "./AppText"
 
@@ -25,14 +24,14 @@ export default function ModalButtonRow({
   applyDisabled,
 }: ModalButtonRowProps) {
   return (
-    <View style={{ flexDirection: "row", gap: 12, width: "100%" }}>
+    <View style={styles.row}>
       {onClear && (
         <Pressable
           style={[
-            sharedStyles.card,
+            surfaceStyles.card,
             modalStyles.clearButton,
             modalStyles.buttonInModal,
-            { flex: 1 },
+            styles.button,
           ]}
           onPress={onClear}
         >
@@ -42,11 +41,11 @@ export default function ModalButtonRow({
 
       <Pressable
         style={[
-          sharedStyles.card,
+          surfaceStyles.card,
           modalStyles.addButton,
           modalStyles.buttonInModal,
-          applyDisabled ? sharedStyles.disabled : {},
-          { flex: 1 },
+          applyDisabled ? stateStyles.disabled : undefined,
+          styles.button,
         ]}
         onPress={() => {
           !applyDisabled && onApply()
@@ -57,10 +56,10 @@ export default function ModalButtonRow({
 
       <Pressable
         style={[
-          sharedStyles.card,
+          surfaceStyles.card,
           modalStyles.closeButton,
           modalStyles.buttonInModal,
-          { flex: 1 },
+          styles.button,
         ]}
         onPress={onDiscard}
       >
@@ -69,3 +68,14 @@ export default function ModalButtonRow({
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  button: {
+    flex: 1,
+  },
+})

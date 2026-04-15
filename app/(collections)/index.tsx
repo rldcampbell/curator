@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from "react"
+import { StyleSheet } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -15,6 +16,7 @@ import { HeaderButton } from "@/components/HeaderButton"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { collectionService } from "@/services/collectionService"
+import { spacing } from "@/styles"
 
 export default function CollectionsScreen() {
   const {
@@ -48,7 +50,7 @@ export default function CollectionsScreen() {
         data={collectionOrder}
         keyExtractor={item => item}
         onDragEnd={({ data }) => updateCollectionOrder(data)}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.listContent}
         renderItem={({
           item,
           drag,
@@ -123,3 +125,9 @@ export default function CollectionsScreen() {
     </FullPageLayout>
   )
 }
+
+const styles = StyleSheet.create({
+  listContent: {
+    paddingBottom: spacing.listFooter,
+  },
+})

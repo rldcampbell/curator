@@ -1,6 +1,6 @@
-import { Pressable, StyleProp, ViewStyle } from "react-native"
+import { Pressable, StyleProp, StyleSheet, ViewStyle } from "react-native"
 
-import { sharedStyles } from "@/styles/sharedStyles"
+import { colors, surfaceStyles } from "@/styles"
 
 import AppText from "./AppText"
 
@@ -16,13 +16,20 @@ export default function AddButton({
   label = "+",
 }: AddButtonProps) {
   return (
-    <Pressable
-      style={[sharedStyles.card, sharedStyles.addCard, style]}
-      onPress={onPress}
-    >
-      <AppText weight="bold" style={sharedStyles.addText}>
+    <Pressable style={[surfaceStyles.card, styles.card, style]} onPress={onPress}>
+      <AppText weight="bold" style={styles.text}>
         {label}
       </AppText>
     </Pressable>
   )
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colors.accentSoft,
+  },
+  text: {
+    fontSize: 32,
+    color: colors.accent,
+  },
+})

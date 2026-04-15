@@ -4,8 +4,11 @@ import {
   Modal,
   Platform,
   SafeAreaView,
+  StyleSheet,
   View,
 } from "react-native"
+
+import { colors, layoutStyles } from "@/styles"
 
 type ModalOverlayProps = {
   children: ReactNode
@@ -27,17 +30,10 @@ export default function ModalOverlay({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+        style={layoutStyles.fill}
       >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
-            }}
-          >
+        <SafeAreaView style={layoutStyles.fill}>
+          <View style={styles.overlay}>
             {children}
           </View>
         </SafeAreaView>
@@ -45,3 +41,12 @@ export default function ModalOverlay({
     </Modal>
   )
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.overlay,
+  },
+})

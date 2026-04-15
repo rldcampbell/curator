@@ -32,7 +32,7 @@ const MeasureTextWidth = ({
   textProps: Pick<AppTextProps, "weight" | "style">
 }) => {
   return (
-    <View style={{ position: "absolute", opacity: 0 }}>
+    <View style={styles.hiddenMeasure}>
       <AppText
         onLayout={e => onMeasure(e.nativeEvent.layout.width)}
         {...textProps}
@@ -96,9 +96,7 @@ export const WheelPicker = ({
     const isSelected = value === item
 
     return (
-      <View
-        style={[styles.itemContainer, { width: "100%" }]} // Make active region full width
-      >
+      <View style={styles.itemContainer}>
         <AppText
           weight={isSelected ? "semiBold" : "medium"}
           style={[styles.itemText, isSelected && styles.selectedItemText]}
@@ -155,10 +153,8 @@ export const WheelPicker = ({
           }
         }}
         onMomentumScrollEnd={onMomentumScrollEnd}
-        contentContainerStyle={{
-          paddingVertical: (ITEM_HEIGHT * (VISIBLE_ITEMS - 1)) / 2,
-        }}
-        style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS, overflow: "hidden" }}
+        contentContainerStyle={styles.listContent}
+        style={styles.list}
       />
       <AppText style={styles.label} weight="medium">
         {label}
@@ -171,8 +167,13 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
   },
+  hiddenMeasure: {
+    position: "absolute",
+    opacity: 0,
+  },
   itemContainer: {
     height: ITEM_HEIGHT,
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -189,6 +190,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     textAlign: "center",
+  },
+  listContent: {
+    paddingVertical: (ITEM_HEIGHT * (VISIBLE_ITEMS - 1)) / 2,
+  },
+  list: {
+    height: ITEM_HEIGHT * VISIBLE_ITEMS,
+    overflow: "hidden",
   },
 })
 

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from "react"
-import { Animated, View } from "react-native"
+import { Animated, StyleSheet, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist"
@@ -19,7 +19,7 @@ import ScreenMessage from "@/components/ScreenMessage"
 import SwaggableRow from "@/components/SwaggableRow"
 import { useCollections } from "@/context/CollectionsContext"
 import { useCollectionRoute } from "@/hooks/useRouteEntities"
-import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
+import { collectionDetailStyles, colors, spacing } from "@/styles"
 
 export default function CollectionDetailScreen() {
   const route = useCollectionRoute()
@@ -136,10 +136,10 @@ export default function CollectionDetailScreen() {
               buttons={buttons}
               renderContent={() => (
                 <Animated.View
-                  style={{
-                    backgroundColor: isActive ? "#d0ebff" : "#fff",
-                    padding: 16,
-                  }}
+                  style={[
+                    styles.rowContent,
+                    isActive ? styles.rowContentActive : undefined,
+                  ]}
                 >
                   <AppText style={collectionDetailStyles.itemText}>
                     {value}
@@ -180,3 +180,13 @@ export default function CollectionDetailScreen() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  rowContent: {
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+  },
+  rowContentActive: {
+    backgroundColor: "#d0ebff",
+  },
+})

@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
-import { ScrollView, View, ViewStyle } from "react-native"
+import { ScrollView, StyleSheet, View, ViewStyle } from "react-native"
 
-import { modalStyles } from "@/styles/modalStyles"
+import { colors, layoutStyles, modalStyles, spacing } from "@/styles"
 
 import AppText from "./AppText"
 import ModalOverlay from "./ModalOverlay"
@@ -28,17 +28,13 @@ export default function ScrollableModalLayout({
       <View
         style={[
           modalStyles.content,
-          {
-            flex: 1,
-          },
+          layoutStyles.fill,
           contentStyle,
         ]}
       >
         <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            padding: 16,
-          }}
+          style={layoutStyles.fill}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
           {title && (
@@ -50,13 +46,7 @@ export default function ScrollableModalLayout({
         </ScrollView>
 
         {footer && (
-          <View
-            style={{
-              padding: 16,
-              borderTopWidth: 1,
-              borderColor: "#eee",
-            }}
-          >
+          <View style={styles.footer}>
             {footer}
           </View>
         )}
@@ -64,3 +54,14 @@ export default function ScrollableModalLayout({
     </ModalOverlay>
   )
 }
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    padding: spacing.lg,
+  },
+  footer: {
+    padding: spacing.lg,
+    borderTopWidth: 1,
+    borderColor: colors.borderSubtle,
+  },
+})

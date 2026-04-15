@@ -1,4 +1,4 @@
-import { Switch, View } from "react-native"
+import { StyleSheet, Switch, View } from "react-native"
 
 import { FieldType } from "@/types"
 import FieldWrapper from "@/components/FieldWrapper"
@@ -11,9 +11,15 @@ export const Input = ({
 }: InputProps<typeof FieldType.Boolean>) => {
   return (
     <FieldWrapper label={field.name}>
-      <View style={{ alignSelf: "flex-start" }}>
+      <View style={styles.container}>
         <Switch value={!!initialValue} onValueChange={val => onChange(val)} />
       </View>
     </FieldWrapper>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignSelf: "flex-start",
+  },
+})

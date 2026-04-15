@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Pressable, TextInput, View } from "react-native"
+import { Pressable, StyleSheet, TextInput, View } from "react-native"
 import DraggableFlatList from "react-native-draggable-flatlist"
 
 import { router } from "expo-router"
@@ -18,7 +18,7 @@ import { useCollections } from "@/context/CollectionsContext"
 import { genFieldId } from "@/helpers"
 import { changeSummary } from "@/helpers/collection"
 import { COLLECTION_COLORS, HexColor, getPaleColor } from "@/helpers/color"
-import { sharedStyles } from "@/styles/sharedStyles"
+import { colors, spacing, surfaceStyles } from "@/styles"
 
 type Props = {
   mode: "create" | "edit"
@@ -123,7 +123,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
       header={
         <TextInput
           ref={inputRef}
-          style={sharedStyles.inputCard}
+          style={surfaceStyles.inputCard}
           placeholder="Collection Name"
           placeholderTextColor="#999"
           value={collectionName}
@@ -148,12 +148,12 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         />
       }
     >
-      <View style={{ marginBottom: 16 }}>
-        <AppText weight="medium" style={{ marginBottom: 8 }}>
+      <View style={styles.colorSection}>
+        <AppText weight="medium" style={styles.colorSectionTitle}>
           Choose a Color
         </AppText>
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+        <View style={styles.colorOptions}>
           {COLLECTION_COLORS.map(colorOption => {
             const isSelected = color === colorOption
             const pale = getPaleColor(colorOption)
@@ -168,17 +168,14 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
                     setColor(colorOption)
                   }
                 }}
-                style={({ pressed }) => ({
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: isSelected ? colorOption : pale,
-                  borderWidth: 2,
-                  borderColor: colorOption,
-                  opacity: pressed ? 0.8 : 1,
-                  marginRight: 8,
-                  marginBottom: 8,
-                })}
+                style={({ pressed }) => [
+                  styles.colorOption,
+                  {
+                    backgroundColor: isSelected ? colorOption : pale,
+                    borderColor: colorOption,
+                    opacity: pressed ? 0.8 : 1,
+                  },
+                ]}
               />
             )
           })}
@@ -186,7 +183,7 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
       </View>
       <DraggableFlatList
         ListFooterComponent={
-          <View style={{ marginTop: 8, alignItems: "center" }}>
+          <View style={styles.listFooter}>
             <AddButton onPress={handleOpenCreateField} />
           </View>
         }
@@ -223,13 +220,10 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
               onPress={() => {}}
               renderContent={() => (
                 <View
-                  style={{
-                    paddingVertical: 16,
-                    paddingHorizontal: 20,
-                    backgroundColor: isActive ? "#f0f0f0" : "#fff",
-                    borderBottomWidth: 1,
-                    borderBottomColor: "#ddd",
-                  }}
+                  style={[
+                    styles.fieldRow,
+                    isActive ? styles.fieldRowActive : undefined,
+                  ]}
                 >
                   <AppText weight="medium">
                     {field.name} (
@@ -281,3 +275,38 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
     </FullPageLayout>
   )
 }
+
+const styles = StyleSheet.create({
+  colorSection: {
+    marginBottom: spacing.lg,
+  },
+  colorSectionTitle: {
+    marginBottom: spacing.sm,
+  },
+  colorOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  colorOption: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    marginRight: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  listFooter: {
+    marginTop: spacing.sm,
+    alignItems: "center",
+  },
+  fieldRow: {
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderMuted,
+  },
+  fieldRowActive: {
+    backgroundColor: colors.rowActive,
+  },
+})
