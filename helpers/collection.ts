@@ -1,3 +1,5 @@
+import isEqual from "lodash/isEqual"
+
 import { FieldId } from "@/types"
 import { CollectionInput } from "@/context/CollectionsContext"
 
@@ -25,7 +27,11 @@ export function changeSummary(
     for (const id of originalFieldIds) {
       const o = original.fields[id]
       const e = edited.fields[id]
-      if (o.name !== e.name || o.type !== e.type) {
+      if (
+        o.name !== e.name ||
+        o.type !== e.type ||
+        !isEqual(o.config, e.config)
+      ) {
         result.fields = true
 
         break
