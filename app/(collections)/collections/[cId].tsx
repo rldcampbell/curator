@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useState } from "react"
 import { Animated, View } from "react-native"
 import DraggableFlatList, {
   RenderItemParams,
@@ -6,67 +6,75 @@ import DraggableFlatList, {
 
 import * as Haptics from "expo-haptics"
 import { router, useNavigation } from "expo-router"
-import { useLocalSearchParams } from "expo-router"
 
 import { Feather } from "@expo/vector-icons"
 
-import { CollectionId, ItemId, RawItem } from "@/types"
+import { ItemId, RawItem } from "@/types"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
 import MetaBar from "@/components/MetaBar"
+import ScreenMessage from "@/components/ScreenMessage"
 import SwaggableRow from "@/components/SwaggableRow"
-import { useCollection } from "@/hooks/useCollection"
+import { useCollections } from "@/context/CollectionsContext"
+import { useCollectionRoute } from "@/hooks/useRouteEntities"
 import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
-import { sharedStyles } from "@/styles/sharedStyles"
 
 export default function CollectionDetailScreen() {
-  const { cId } = useLocalSearchParams()
-  const collectionId = cId as CollectionId
+  const route = useCollectionRoute()
   const {
     addItem,
     deleteItem,
     updateItem,
-    fieldOrder,
-    fields,
-    itemOrder,
-    items,
-    name,
     updateItemOrder,
-    _meta,
-  } = useCollection(collectionId)
+  } = useCollections()
 
   const [itemModalVisible, setItemModalVisible] = useState(false)
   const [editingItemId, setEditingItemId] = useState<ItemId | null>(null)
   const [deleteItemId, setDeleteItemId] = useState<ItemId | null>(null)
+  const editingItem =
+    route && editingItemId ? route.collection.items[editingItemId] : undefined
 
   const navigation = useNavigation()
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <HeaderButton
-          iconName="add"
-          onPress={() => setItemModalVisible(true)}
-        />
-      ),
-      title: name,
+      headerRight: route
+        ? () => (
+            <HeaderButton
+              iconName="add"
+              onPress={() => setItemModalVisible(true)}
+            />
+          )
+        : undefined,
+      title: route?.collection.name ?? "Collection",
     })
-  }, [navigation, name])
+  }, [navigation, route?.collection.name])
 
-  if (!name) {
+  useEffect(() => {
+    if (editingItemId && !editingItem) {
+      setEditingItemId(null)
+      setItemModalVisible(false)
+    }
+  }, [editingItem, editingItemId])
+
+  if (!route) {
     return (
-      <View style={collectionDetailStyles.container}>
-        <AppText style={sharedStyles.errorText}>Collection not found</AppText>
-      </View>
+      <ScreenMessage
+        message="Collection not found"
+        containerStyle={collectionDetailStyles.container}
+      />
     )
   }
 
+  const { collection, collectionId } = route
+  const { fieldOrder, fields, itemOrder, items, _meta } = collection
+
   const handleItemValuesSubmit = (values: RawItem["values"]) => {
-    if (editingItemId) {
-      updateItem(editingItemId, { values })
+    if (editingItemId && editingItem) {
+      updateItem(collectionId, editingItemId, { values })
     } else {
-      addItem({ values })
+      addItem(collectionId, { values })
     }
     setEditingItemId(null)
     setItemModalVisible(false)
@@ -86,7 +94,7 @@ export default function CollectionDetailScreen() {
       <DraggableFlatList
         data={itemOrder}
         keyExtractor={item => item}
-        onDragEnd={({ data }) => updateItemOrder([...data])}
+        onDragEnd={({ data }) => updateItemOrder(collectionId, [...data])}
         contentContainerStyle={collectionDetailStyles.listContainer}
         renderItem={({ item, drag, isActive }: RenderItemParams<ItemId>) => {
           const value =
@@ -151,7 +159,7 @@ export default function CollectionDetailScreen() {
         cancelText="Cancel"
         onConfirm={() => {
           if (deleteItemId) {
-            deleteItem(deleteItemId)
+            deleteItem(collectionId, deleteItemId)
             setDeleteItemId(null)
           }
         }}
@@ -160,13 +168,11 @@ export default function CollectionDetailScreen() {
 
       {itemModalVisible && (
         <ItemFormModal
-          mode={editingItemId ? "edit" : "create"}
+          mode={editingItem ? "edit" : "create"}
           visible={itemModalVisible}
           fieldOrder={fieldOrder}
           fields={fields}
-          initialValues={
-            editingItemId ? items[editingItemId].values : undefined
-          }
+          initialValues={editingItem?.values}
           onSubmit={handleItemValuesSubmit}
           onDiscard={handleItemDiscard}
         />

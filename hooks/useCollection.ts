@@ -10,10 +10,11 @@ export function useCollection(collectionId: CollectionId) {
     updateItemOrder,
     updateItem,
   } = useCollections()
+
   const collection = collections[collectionId]
 
   return {
-    ...collection,
+    collection,
     update: (data: CollectionInput) => updateCollection(collectionId, data),
     addItem: (item: RawItem) => addItem(collectionId, item),
     deleteItem: (itemId: ItemId) => deleteItem(collectionId, itemId),
@@ -21,7 +22,8 @@ export function useCollection(collectionId: CollectionId) {
       updateItem(collectionId, itemId, item),
     updateItemOrder: (itemOrder: ItemId[]) =>
       updateItemOrder(collectionId, itemOrder),
-    getItem: (itemId: ItemId) => collection.items[itemId],
-    getItemIndex: (itemId: ItemId) => collection.itemOrder.indexOf(itemId),
+    getItem: (itemId: ItemId) => collection?.items[itemId],
+    getItemIndex: (itemId: ItemId) =>
+      collection?.itemOrder.indexOf(itemId) ?? -1,
   }
 }

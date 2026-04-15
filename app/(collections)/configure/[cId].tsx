@@ -1,12 +1,11 @@
-import { useLocalSearchParams } from "expo-router"
-
 import CollectionFormScreen from "@/components/CollectionFormScreen"
-import { isCollectionId } from "@/helpers/id"
+import ScreenMessage from "@/components/ScreenMessage"
+import { useCollectionRoute } from "@/hooks/useRouteEntities"
 
 export default function EditCollectionScreen() {
-  const { cId } = useLocalSearchParams()
+  const route = useCollectionRoute()
 
-  if (typeof cId !== "string" || !isCollectionId(cId)) return null
+  if (!route) return <ScreenMessage message="Collection not found" />
 
-  return <CollectionFormScreen mode="edit" collectionId={cId} />
+  return <CollectionFormScreen mode="edit" collectionId={route.collectionId} />
 }

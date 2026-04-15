@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useState } from "react"
 import {
   Dimensions,
   FlatList,
@@ -9,52 +9,71 @@ import {
   View,
 } from "react-native"
 
-import { useLocalSearchParams, useNavigation } from "expo-router"
+import { useNavigation } from "expo-router"
 
-import { CollectionId, ItemId, RawFieldAndValue, WithMeta } from "@/types"
+import { ItemId, RawFieldAndValue, WithMeta } from "@/types"
 import AppText from "@/components/AppText"
 import { HeaderButton } from "@/components/HeaderButton"
 import ItemFormModal from "@/components/ItemFormModal"
-import { useCollection } from "@/hooks/useCollection"
+import ScreenMessage from "@/components/ScreenMessage"
+import { useCollections } from "@/context/CollectionsContext"
+import { useItemRoute } from "@/hooks/useRouteEntities"
+import { collectionDetailStyles } from "@/styles/collectionDetailStyles"
 import { fieldService } from "@/services/fieldService"
 
 export default function ItemDetailScreen() {
-  const { cId, iId } = useLocalSearchParams()
-
-  const collectionId = cId as unknown as CollectionId
-  const itemId = iId as unknown as ItemId
-
+  const route = useItemRoute()
   const navigation = useNavigation()
+  const { updateItem } = useCollections()
+  const [currentIndex, setCurrentIndex] = useState(route?.itemIndex ?? 0)
 
-  const {
-    getItem,
-    getItemIndex,
-    itemOrder,
-    name,
-    fields,
-    fieldOrder,
-    updateItem,
-  } = useCollection(collectionId)
-
-  const initialIndex = getItemIndex(itemId)
-  const [currentIndex, setCurrentIndex] = useState(initialIndex)
-
-  const flatListRef = useRef<FlatList<ItemId>>(null)
   const screenWidth = Dimensions.get("window").width
+  const notFoundView = (
+    <ScreenMessage
+      message="Item not found"
+      containerStyle={collectionDetailStyles.container}
+    />
+  )
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: name,
-      headerRight: () => (
-        <HeaderButton
-          iconName="pencil"
-          onPress={() => setItemModalVisible(true)}
-        />
-      ),
+      title: route?.collection.name ?? "Item Details",
+      headerRight: route
+        ? () => (
+            <HeaderButton
+              iconName="pencil"
+              onPress={() => setItemModalVisible(true)}
+            />
+          )
+        : undefined,
     })
-  }, [navigation, name])
+  }, [navigation, route?.collection.name])
 
   const [itemModalVisible, setItemModalVisible] = useState(false)
+
+  useEffect(() => {
+    if (route) {
+      setCurrentIndex(route.itemIndex)
+    }
+  }, [route?.itemId, route?.itemIndex])
+
+  const maxIndex = route ? route.collection.itemOrder.length - 1 : 0
+  const safeCurrentIndex = route ? Math.min(currentIndex, maxIndex) : currentIndex
+
+  useEffect(() => {
+    if (route && safeCurrentIndex !== currentIndex) {
+      setCurrentIndex(safeCurrentIndex)
+    }
+  }, [currentIndex, route?.itemId, safeCurrentIndex])
+
+  if (!route) return notFoundView
+
+  const { collection, collectionId } = route
+  const { fields, fieldOrder, itemOrder } = collection
+  const currentItemId = itemOrder[safeCurrentIndex]
+  const currentItem = currentItemId ? collection.items[currentItemId] : undefined
+
+  if (!currentItemId || !currentItem) return notFoundView
 
   const handleMomentumScrollEnd = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
@@ -66,7 +85,9 @@ export default function ItemDetailScreen() {
   }
 
   const renderItem = ({ item: currentItemId }: { item: ItemId }) => {
-    const item = getItem(currentItemId)
+    const item = collection.items[currentItemId]
+    if (!item) return null
+
     return (
       <View style={{ width: screenWidth }}>
         <ScrollView contentContainerStyle={styles.container}>
@@ -96,12 +117,11 @@ export default function ItemDetailScreen() {
   return (
     <>
       <FlatList
-        ref={flatListRef}
         data={itemOrder}
         horizontal
         pagingEnabled
         keyExtractor={id => id}
-        initialScrollIndex={initialIndex}
+        initialScrollIndex={route.itemIndex}
         getItemLayout={(_, index) => ({
           length: screenWidth,
           offset: screenWidth * index,
@@ -120,9 +140,9 @@ export default function ItemDetailScreen() {
         visible={itemModalVisible}
         fieldOrder={fieldOrder}
         fields={fields}
-        initialValues={getItem(itemOrder[currentIndex]).values}
+        initialValues={currentItem.values}
         onSubmit={values => {
-          updateItem(itemOrder[currentIndex], { values })
+          updateItem(collectionId, currentItemId, { values })
           setItemModalVisible(false)
         }}
         onDiscard={() => setItemModalVisible(false)}
