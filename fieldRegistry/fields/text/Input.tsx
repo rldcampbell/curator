@@ -8,6 +8,7 @@ import { modalStyles } from "@/styles/modalStyles"
 import { sharedStyles } from "@/styles/sharedStyles"
 
 export const Input = ({
+  autoFocus,
   field,
   initialValue,
   onChange,
@@ -17,6 +18,7 @@ export const Input = ({
   return (
     <FieldWrapper label={field.name}>
       <TextInput
+        autoFocus={autoFocus}
         style={[sharedStyles.inputCard, modalStyles.buttonInModal]}
         placeholder={field.name}
         value={value}
