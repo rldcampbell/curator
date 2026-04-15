@@ -3,6 +3,7 @@ import { View } from "react-native"
 
 import {
   FieldId,
+  FieldType,
   FieldValue,
   RawField,
   RawItem,
@@ -60,6 +61,11 @@ export default function ItemFormModal({
     Record<FieldId, Resolvable<FieldValue>>
   >(initialValues ?? {})
 
+  const autoFocusFieldId =
+    mode === "create" && fields[fieldOrder[0]]?.type === FieldType.Text
+      ? fieldOrder[0]
+      : undefined
+
   useEffect(() => {
     if (visible) {
       setInputValues(initialValues ?? {})
@@ -100,6 +106,7 @@ export default function ItemFormModal({
         fields={fields}
         inputValues={inputValues}
         updateField={updateField}
+        autoFocusFieldId={autoFocusFieldId}
       />
     </ScrollableModalLayout>
   )
@@ -113,11 +120,13 @@ const ItemFormBody = ({
   fields,
   inputValues,
   updateField,
+  autoFocusFieldId,
 }: {
   fieldOrder: FieldId[]
   fields: Record<FieldId, RawField>
   inputValues: Record<FieldId, Resolvable<FieldValue>>
   updateField: (id: FieldId, value: Resolvable<FieldValue | undefined>) => void
+  autoFocusFieldId: FieldId | undefined
 }) => {
   return (
     <>
@@ -128,6 +137,7 @@ const ItemFormBody = ({
         return (
           <View key={fieldId} style={{ width: "100%", marginBottom: 8 }}>
             {fieldService.input({
+              autoFocus: fieldId === autoFocusFieldId,
               field,
               initialValue: isResolved(value) ? value : undefined,
               onChange: value => updateField(fieldId, value),

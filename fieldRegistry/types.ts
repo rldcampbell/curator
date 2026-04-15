@@ -45,6 +45,7 @@ export type FieldInputChangeHandler<T extends FieldType> = (
 ) => void
 
 export type InputProps<T extends FieldType> = {
+  autoFocus?: boolean
   initialValue?: FieldValueMap[T] | undefined
   field: Extract<RawField, { type: T }>
   onChange: FieldInputChangeHandler<T>
