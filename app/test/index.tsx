@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react"
 import {
   Button,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
+  Text,
   View,
 } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 import * as SQLite from "expo-sqlite"
 
@@ -48,7 +49,7 @@ const TestScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.testPickerContainer}>
-        <AppText style={styles.testTitle}>
+        <AppText weight="semiBold" style={styles.testTitle}>
           ⏰ Test Picker (Hours, Minutes, Seconds)
         </AppText>
         <MultiWheelPicker
@@ -61,13 +62,15 @@ const TestScreen = () => {
           onChange={setTestTime}
           gap={12}
         />
-        <AppText style={styles.testValue}>
+        <Text style={styles.testValue}>
           Selected: {testTime.join(" : ")}
-        </AppText>
+        </Text>
       </View>
 
       <View style={styles.header}>
-        <AppText style={styles.title}>📦 collections Table</AppText>
+        <AppText weight="semiBold" style={styles.title}>
+          📦 collections Table
+        </AppText>
         <Button title="Refresh" onPress={fetchTable} />
       </View>
 
@@ -75,9 +78,9 @@ const TestScreen = () => {
         {error && <AppText style={styles.error}>Error: {error}</AppText>}
         {rows.map((row, index) => (
           <View key={index} style={styles.row}>
-            <AppText style={styles.json}>
+            <Text style={styles.json}>
               {JSON.stringify(row, null, 2)}
-            </AppText>
+            </Text>
           </View>
         ))}
         {rows.length === 0 && !error && (
@@ -105,7 +108,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "600",
   },
   scroll: {
     padding: 16,
@@ -136,7 +138,6 @@ const styles = StyleSheet.create({
   },
   testTitle: {
     fontSize: 16,
-    fontWeight: "600",
     marginBottom: 12,
   },
   testValue: {
