@@ -303,16 +303,19 @@ const styles = StyleSheet.create({
   },
   fieldSection: {
     flex: 1,
+    position: "relative",
   },
   fieldList: {
     flex: 1,
   },
   fieldListContent: {
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.listFooter,
   },
   addFieldButtonContainer: {
-    width: "100%",
-    paddingTop: spacing.sm,
+    position: "absolute",
+    right: 0,
+    bottom: spacing.sm,
+    zIndex: 1,
   },
   fieldRow: {
     paddingVertical: spacing.lg,

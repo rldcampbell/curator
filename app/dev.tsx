@@ -1,18 +1,17 @@
 import { useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { Pressable, StyleSheet, View } from "react-native"
 
 import * as FileSystem from "expo-file-system/legacy"
 import * as Sharing from "expo-sharing"
 
 import { format } from "date-fns"
 
-import AddButton from "@/components/AddButton"
 import AppText from "@/components/AppText"
 import ConfirmModal from "@/components/ConfirmModal"
 import { useCollections } from "@/context/CollectionsContext"
 import { safeDeleteFile } from "@/helpers/file"
 import { resetDatabase } from "@/services/database"
-import { layoutStyles, screenStyles } from "@/styles"
+import { colors, layoutStyles, screenStyles, spacing } from "@/styles"
 
 import { CollectionsData } from "@/types"
 
@@ -54,13 +53,18 @@ export default function DevScreen() {
   }
 
   return (
-    <View style={[screenStyles.mutedCanvas, layoutStyles.alignCenter]}>
+    <View style={[screenStyles.mutedCanvas, layoutStyles.alignCenter, styles.container]}>
       <AppText weight="bold" style={styles.title}>
         Developer Tools
       </AppText>
 
-      <AddButton onPress={() => setModalVisible(true)} label="Reset Database" />
-      <AddButton label="Export Collections" onPress={handleExportCollections} />
+      <Pressable style={styles.actionButton} onPress={() => setModalVisible(true)}>
+        <AppText style={styles.actionText}>Reset Database</AppText>
+      </Pressable>
+
+      <Pressable style={styles.actionButton} onPress={handleExportCollections}>
+        <AppText style={styles.actionText}>Export Collections</AppText>
+      </Pressable>
 
       {modalVisible && (
         <ConfirmModal
@@ -76,7 +80,24 @@ export default function DevScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
   title: {
     fontSize: 24,
+  },
+  actionButton: {
+    width: "100%",
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionText: {
+    fontSize: 17,
+    color: colors.accent,
   },
 })
