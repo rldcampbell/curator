@@ -148,93 +148,99 @@ export default function CollectionFormScreen({ mode, collectionId }: Props) {
         />
       }
     >
-      <View style={styles.colorSection}>
-        <AppText weight="medium" style={styles.colorSectionTitle}>
-          Choose a Color
-        </AppText>
+      <View style={styles.fieldSection}>
+        <DraggableFlatList
+          containerStyle={styles.fieldList}
+          contentContainerStyle={styles.fieldListContent}
+          data={fieldOrder}
+          extraData={fields}
+          keyExtractor={id => id}
+          ListHeaderComponent={
+            <View style={styles.colorSection}>
+              <AppText weight="medium" style={styles.colorSectionTitle}>
+                Choose a Color
+              </AppText>
 
-        <View style={styles.colorOptions}>
-          {COLLECTION_COLORS.map(colorOption => {
-            const isSelected = color === colorOption
-            const pale = getPaleColor(colorOption)
+              <View style={styles.colorOptions}>
+                {COLLECTION_COLORS.map(colorOption => {
+                  const isSelected = color === colorOption
+                  const pale = getPaleColor(colorOption)
+
+                  return (
+                    <Pressable
+                      key={colorOption}
+                      onPress={() => {
+                        if (isSelected) {
+                          setColor(undefined) // Deselect on second tap
+                        } else {
+                          setColor(colorOption)
+                        }
+                      }}
+                      style={({ pressed }) => [
+                        styles.colorOption,
+                        {
+                          backgroundColor: isSelected ? colorOption : pale,
+                          borderColor: colorOption,
+                          opacity: pressed ? 0.8 : 1,
+                        },
+                      ]}
+                    />
+                  )
+                })}
+              </View>
+            </View>
+          }
+          onDragEnd={({ data }) => setFieldOrder([...data])}
+          renderItem={({ item, drag, isActive }) => {
+            const field = fields[item]
+
+            const buttons = [
+              {
+                icon: <Feather name="edit-3" size={20} color="black" />,
+                onPress: () => handleOpenEditField(item),
+              },
+              {
+                icon: <Feather name="trash-2" size={20} color="black" />,
+                onPress: () => {
+                  setFields(prev => {
+                    const updated = { ...prev }
+                    delete updated[item]
+                    return updated
+                  })
+                  setFieldOrder(prev => prev.filter(id => id !== item))
+                },
+                backgroundColor: "#e74c3c",
+              },
+            ]
 
             return (
-              <Pressable
-                key={colorOption}
-                onPress={() => {
-                  if (isSelected) {
-                    setColor(undefined) // Deselect on second tap
-                  } else {
-                    setColor(colorOption)
-                  }
-                }}
-                style={({ pressed }) => [
-                  styles.colorOption,
-                  {
-                    backgroundColor: isSelected ? colorOption : pale,
-                    borderColor: colorOption,
-                    opacity: pressed ? 0.8 : 1,
-                  },
-                ]}
+              <SwaggableRow
+                item={item}
+                onDrag={drag}
+                buttons={buttons}
+                onPress={() => {}}
+                renderContent={() => (
+                  <View
+                    style={[
+                      styles.fieldRow,
+                      isActive ? styles.fieldRowActive : undefined,
+                    ]}
+                  >
+                    <AppText weight="medium">
+                      {field.name} (
+                      {field.type.charAt(0).toUpperCase() + field.type.slice(1)})
+                    </AppText>
+                  </View>
+                )}
               />
             )
-          })}
+          }}
+        />
+
+        <View style={styles.addFieldButtonContainer}>
+          <AddButton onPress={handleOpenCreateField} />
         </View>
       </View>
-      <DraggableFlatList
-        ListFooterComponent={
-          <View style={styles.listFooter}>
-            <AddButton onPress={handleOpenCreateField} />
-          </View>
-        }
-        data={fieldOrder}
-        keyExtractor={id => id}
-        onDragEnd={({ data }) => setFieldOrder([...data])}
-        renderItem={({ item, drag, isActive }) => {
-          const field = fields[item]
-
-          const buttons = [
-            {
-              icon: <Feather name="edit-3" size={20} color="black" />,
-              onPress: () => handleOpenEditField(item),
-            },
-            {
-              icon: <Feather name="trash-2" size={20} color="black" />,
-              onPress: () => {
-                setFields(prev => {
-                  const updated = { ...prev }
-                  delete updated[item]
-                  return updated
-                })
-                setFieldOrder(prev => prev.filter(id => id !== item))
-              },
-              backgroundColor: "#e74c3c",
-            },
-          ]
-
-          return (
-            <SwaggableRow
-              item={item}
-              onDrag={drag}
-              buttons={buttons}
-              onPress={() => {}}
-              renderContent={() => (
-                <View
-                  style={[
-                    styles.fieldRow,
-                    isActive ? styles.fieldRowActive : undefined,
-                  ]}
-                >
-                  <AppText weight="medium">
-                    {field.name} (
-                    {field.type.charAt(0).toUpperCase() + field.type.slice(1)})
-                  </AppText>
-                </View>
-              )}
-            />
-          )
-        }}
-      />
 
       {modalVisible && (
         <FieldFormModal
@@ -295,9 +301,18 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     marginBottom: spacing.sm,
   },
-  listFooter: {
-    marginTop: spacing.sm,
-    alignItems: "center",
+  fieldSection: {
+    flex: 1,
+  },
+  fieldList: {
+    flex: 1,
+  },
+  fieldListContent: {
+    paddingBottom: spacing.sm,
+  },
+  addFieldButtonContainer: {
+    width: "100%",
+    paddingTop: spacing.sm,
   },
   fieldRow: {
     paddingVertical: spacing.lg,

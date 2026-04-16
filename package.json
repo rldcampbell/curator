@@ -8,6 +8,7 @@
     "start:clean": "expo start -c",
     "deps:check": "expo install --check",
     "deps:fix": "expo install --fix",
+    "postinstall": "node scripts/apply-local-patches.mjs",
     "test": "jest --watchAll",
     "lint": "eslint",
     "tsc": "tsc"

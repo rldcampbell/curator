@@ -2,11 +2,11 @@ import { ReactNode } from "react"
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   StyleSheet,
   View,
   ViewStyle,
 } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 import { colors } from "@/styles"
 
@@ -30,14 +30,19 @@ export default function FullPageLayout({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={[styles.root, { paddingHorizontal: padding }]}
     >
-      <SafeAreaView style={[styles.root, { paddingHorizontal: padding }]}>
+      <SafeAreaView
+        edges={["left", "right", "bottom"]}
+        style={[styles.root, { paddingHorizontal: padding }]}
+      >
         {header && (
           <View style={[styles.header, { paddingVertical: padding }]}>
             {header}
           </View>
         )}
 
-        <View style={[{ paddingVertical: padding }, contentContainerStyle]}>
+        <View
+          style={[styles.content, { paddingVertical: padding }, contentContainerStyle]}
+        >
           {children}
         </View>
 
@@ -60,6 +65,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: colors.borderSubtle,
     backgroundColor: colors.surface,
+  },
+  content: {
+    flex: 1,
   },
   footer: {
     borderTopWidth: 1,
