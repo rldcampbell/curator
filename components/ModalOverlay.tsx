@@ -3,10 +3,10 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  SafeAreaView,
   StyleSheet,
   View,
 } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 import { colors, layoutStyles } from "@/styles"
 

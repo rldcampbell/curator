@@ -1,6 +1,7 @@
 import { ActivityIndicator, View } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import "react-native-get-random-values"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 
 import { useFonts } from "expo-font"
 import { Tabs } from "expo-router"
@@ -63,58 +64,64 @@ export default function Layout() {
   }
   return (
     <GestureHandlerRootView style={layoutStyles.fill}>
-      <CollectionsProvider>
-        <CollectionsProviderWrapper>
-          <Tabs>
-            <Tabs.Screen
-              name="index"
-              options={{
-                title: "Home",
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="home-outline" size={size} color={color} />
-                ),
-              }}
-            />
-            <Tabs.Screen
-              name="(collections)"
-              options={{
-                title: "Collections",
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="albums-outline" size={size} color={color} />
-                ),
-                headerShown: false,
-              }}
-            />
-            <Tabs.Screen
-              name="settings"
-              options={{
-                title: "Settings",
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="settings-outline" size={size} color={color} />
-                ),
-              }}
-            />
-            <Tabs.Screen
-              name="dev"
-              options={{
-                title: "Dev",
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="bug-outline" size={size} color={color} />
-                ),
-              }}
-            />
-            <Tabs.Screen
-              name="test/index"
-              options={{
-                title: "Test",
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="flask" size={size} color={color} />
-                ),
-              }}
-            />
-          </Tabs>
-        </CollectionsProviderWrapper>
-      </CollectionsProvider>
+      <SafeAreaProvider style={layoutStyles.fill}>
+        <CollectionsProvider>
+          <CollectionsProviderWrapper>
+            <Tabs>
+              <Tabs.Screen
+                name="index"
+                options={{
+                  title: "Home",
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="home-outline" size={size} color={color} />
+                  ),
+                }}
+              />
+              <Tabs.Screen
+                name="(collections)"
+                options={{
+                  title: "Collections",
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="albums-outline" size={size} color={color} />
+                  ),
+                  headerShown: false,
+                }}
+              />
+              <Tabs.Screen
+                name="settings"
+                options={{
+                  title: "Settings",
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons
+                      name="settings-outline"
+                      size={size}
+                      color={color}
+                    />
+                  ),
+                }}
+              />
+              <Tabs.Screen
+                name="dev"
+                options={{
+                  title: "Dev",
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="bug-outline" size={size} color={color} />
+                  ),
+                }}
+              />
+              <Tabs.Screen
+                name="test/index"
+                options={{
+                  title: "Test",
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="flask" size={size} color={color} />
+                  ),
+                }}
+              />
+            </Tabs>
+          </CollectionsProviderWrapper>
+        </CollectionsProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   )
 }
