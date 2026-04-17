@@ -4,6 +4,11 @@
   - Maybe these could be special fields with fixed ids that are either toggled on or off.
   - Add default values for a collection when defining a collection?
   - Allow standard properties to have default values too...
+- Add a selectable-list field type:
+  - dropdown / pick-list style input
+  - allow new options to be created at entry time ("create on the fly")
+  - likely useful for repeated categories like grape, region, producer etc.
+  - needs thought about whether options live per field definition and how queries should treat them
 - When in process of creating new collection allow navigation back out - but the screen will then show a collection that is not yet complete. You can go back in and finish it / discard it as required.
 
 ## Search / Queries
