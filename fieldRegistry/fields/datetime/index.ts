@@ -1,5 +1,6 @@
 import { DateTimeArray, FieldType } from "@/types"
 import { FieldDefinition } from "@/fieldRegistry/types"
+import { defaultDateTimeFieldConfig } from "@/helpers/temporal"
 import { safeDateTimeArrayToUTCDate } from "@/helpers/date"
 
 import { ConfigInput } from "./ConfigInput"
@@ -8,18 +9,17 @@ import { Input } from "./Input"
 
 const validate = (value: unknown): value is DateTimeArray =>
   Array.isArray(value) &&
-  value.length === 7 &&
-  value.every(v => typeof v === "number")
+  value.every(v => v === undefined || typeof v === "number")
 
 export const datetime: FieldDefinition<typeof FieldType.DateTime> = {
   label: "Date/Time",
   defaultValue: [2000, 1, 1, 0, 0, 0, 0], // safe neutral starting point - used in toText!
-  defaultConfig: { parts: [true, true, true, true, true, true, true] },
-  display: Display,
+  defaultConfig: defaultDateTimeFieldConfig,
+  display: props => Display(props),
   input: Input,
   configInput: ConfigInput,
-  validate,
-  fromText: text => {
+  validate: (_field, value): value is DateTimeArray => validate(value),
+  fromText: (_field, text) => {
     if (!text) return undefined
 
     try {
@@ -42,7 +42,7 @@ export const datetime: FieldDefinition<typeof FieldType.DateTime> = {
       return undefined
     }
   },
-  toText: value => {
+  toText: (_field, value) => {
     if (!value) return undefined
 
     const date = safeDateTimeArrayToUTCDate(value, datetime.defaultValue)

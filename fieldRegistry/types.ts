@@ -26,13 +26,27 @@ import { FieldType, FieldValueMap, RawField, Resolvable } from "@/types"
 export type FieldDefinition<T extends FieldType> = {
   label: string
   defaultValue: FieldValueMap[T]
-  validate: (value: unknown) => value is FieldValueMap[T]
-  display: (props: { value?: FieldValueMap[T] | undefined }) => React.ReactNode
+  validate: (
+    field: Extract<RawField, { type: T }>,
+    value: unknown,
+  ) => value is FieldValueMap[T]
+  display: (
+    props: {
+      field: Extract<RawField, { type: T }>
+      value?: FieldValueMap[T] | undefined
+    },
+  ) => React.ReactNode
   input: (props: InputProps<T>) => React.ReactNode
   configInput?: (props: ConfigInputProps<T>) => React.ReactNode
   defaultConfig: Extract<RawField, { type: T }>["config"]
-  toText: (value: FieldValueMap[T] | undefined) => string | undefined
-  fromText: (text: string | undefined) => FieldValueMap[T] | undefined
+  toText: (
+    field: Extract<RawField, { type: T }>,
+    value: FieldValueMap[T] | undefined,
+  ) => string | undefined
+  fromText: (
+    field: Extract<RawField, { type: T }>,
+    text: string | undefined,
+  ) => FieldValueMap[T] | undefined
 }
 
 export type ConfigInputProps<T extends FieldType> = {

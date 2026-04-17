@@ -7,10 +7,10 @@ export const boolean: FieldDefinition<"boolean"> = {
   label: "Boolean",
   defaultValue: false,
   defaultConfig: {},
-  display: Display,
+  display: ({ value }) => Display({ value }),
   input: Input,
-  validate: (v): v is boolean => typeof v === "boolean",
-  fromText: text => {
+  validate: (_field, v): v is boolean => typeof v === "boolean",
+  fromText: (_field, text) => {
     if (text !== undefined) {
       const normalised = text.trim().toLowerCase()
       if (normalised === "true") return true
@@ -18,5 +18,6 @@ export const boolean: FieldDefinition<"boolean"> = {
     }
     return undefined
   },
-  toText: value => (value === undefined ? undefined : value ? "true" : "false"),
+  toText: (_field, value) =>
+    value === undefined ? undefined : value ? "true" : "false",
 }

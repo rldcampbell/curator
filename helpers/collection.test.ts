@@ -10,7 +10,8 @@ const baseCollection: CollectionInput = {
       name: "Watched At",
       type: "datetime",
       config: {
-        parts: [true, true, true, true, true, false, false],
+        topUnit: "year",
+        bottomUnit: "minute",
       },
     },
   },
@@ -24,7 +25,8 @@ describe("changeSummary", () => {
         "f-AAAA-BBBB-CCCC-DDDD": {
           ...baseCollection.fields["f-AAAA-BBBB-CCCC-DDDD"],
           config: {
-            parts: [true, true, true, true, true, true, false],
+            topUnit: "year",
+            bottomUnit: "second",
           },
         },
       },

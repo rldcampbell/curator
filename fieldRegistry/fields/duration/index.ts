@@ -4,6 +4,7 @@ import {
   dateTimeArrayToIsoDuration,
   isoDurationToDateTimeArray,
 } from "@/helpers/date"
+import { defaultDurationFieldConfig } from "@/helpers/temporal"
 
 import { ConfigInput } from "./ConfigInput"
 import { Display } from "./Display"
@@ -19,11 +20,14 @@ const validate = (value: unknown): value is FieldValueMap["duration"] => {
 export const duration: FieldDefinition<typeof FieldType.Duration> = {
   label: "Duration",
   defaultValue: [],
-  defaultConfig: { parts: [true, true, true, true, true, true, true] },
-  validate,
-  display: Display,
+  defaultConfig: defaultDurationFieldConfig,
+  validate: (_field, value): value is FieldValueMap["duration"] =>
+    validate(value),
+  display: props => Display(props),
   input: Input,
   configInput: ConfigInput,
-  toText: value => (value ? dateTimeArrayToIsoDuration(value) : undefined),
-  fromText: text => (text ? isoDurationToDateTimeArray(text) : undefined),
+  toText: (_field, value) =>
+    value ? dateTimeArrayToIsoDuration(value) : undefined,
+  fromText: (_field, text) =>
+    text ? isoDurationToDateTimeArray(text) : undefined,
 }

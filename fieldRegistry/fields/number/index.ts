@@ -10,13 +10,13 @@ export const number: FieldDefinition<"number"> = {
   label: "Number",
   defaultValue: 0,
   defaultConfig: {},
-  display: Display,
+  display: ({ value }) => Display({ value }),
   input: Input,
-  validate,
-  fromText: text => {
+  validate: (_field, value): value is number => validate(value),
+  fromText: (_field, text) => {
     if (text === undefined) return undefined
     const parsed = parseFloat(text)
     return isNaN(parsed) ? undefined : parsed
   },
-  toText: value => value?.toString(),
+  toText: (_field, value) => value?.toString(),
 }

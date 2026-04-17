@@ -17,8 +17,11 @@
         },
         "f-abc0-1234-def1-6789": {
           "name": "Published Date",
-          "type": "date",
-          "config": {}
+          "type": "datetime",
+          "config": {
+            "topUnit": "year",
+            "bottomUnit": "day"
+          }
         }
       },
       "itemOrder": ["i-abc0-1234-def1-7890", "i-abc0-1234-def1-7891"],
@@ -51,8 +54,11 @@
         },
         "f-xyz0-2345-hij2-6789": {
           "name": "Release Date",
-          "type": "date",
-          "config": {}
+          "type": "datetime",
+          "config": {
+            "topUnit": "year",
+            "bottomUnit": "day"
+          }
         }
       },
       "itemOrder": ["i-xyz0-2345-hij2-7890", "i-xyz0-2345-hij2-7891"],

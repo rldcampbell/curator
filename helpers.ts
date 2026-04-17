@@ -1,6 +1,6 @@
 import { customAlphabet } from "nanoid"
 
-import { CollectionId, DateArray, FieldId, ItemId, RawId } from "./types"
+import { CollectionId, FieldId, ItemId, RawId } from "./types"
 
 const BASE62_ALPHABET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -53,16 +53,3 @@ const normaliseIndex = (index: number, length: number) =>
 
 export const safeAccess = <T>(array: T[], index: number): T =>
   array[normaliseIndex(index, array.length)]
-
-export function dateToDateArray(date: Date): DateArray {
-  return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
-}
-
-export function dateArrayToUTCDate([y, m, d]: DateArray): Date {
-  return new Date(Date.UTC(y, m - 1, d))
-}
-
-export const formatDate = (date: Date) =>
-  `${date.getDate()} ${date.toLocaleString("default", {
-    month: "short",
-  })} ${date.getFullYear()}`

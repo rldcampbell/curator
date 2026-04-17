@@ -1,16 +1,20 @@
 import React, { useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 
-import { DateTimeArray, FieldType } from "@/types"
+import { DateTimeArray, FieldType, TEMPORAL_UNITS } from "@/types"
 import AppText from "@/components/AppText"
 import FieldWrapper from "@/components/FieldWrapper"
 import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
 import { formatDurationArray } from "@/helpers/date"
+import {
+  TEMPORAL_UNIT_SHORT_LABELS,
+  getTemporalIndicesInRange,
+  temporalConfigToParts,
+} from "@/helpers/temporal"
 import { colors, modalStyles, surfaceStyles } from "@/styles"
 
-const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const NATURAL_MAX = [999, 11, 31, 23, 59, 59, 999] as const
 
 export const Input = ({
@@ -20,32 +24,29 @@ export const Input = ({
 }: InputProps<typeof FieldType.Duration>) => {
   const [value, setValue] = useState(initialValue)
   const [pickerVisible, setPickerVisible] = useState(false)
-  const { parts } = field.config
-
-  const firstActiveIndex = parts.findIndex(p => p)
+  const config = field.config
+  const parts = temporalConfigToParts(config)
+  const activeIndices = getTemporalIndicesInRange(config)
+  const firstActiveIndex = activeIndices[0] ?? 0
 
   const pickerConfigs: Omit<WheelPickerProps, "value" | "onChange">[] = []
 
-  for (const [index, enabled] of parts.entries()) {
-    if (enabled) {
-      const isTopUnit = index === firstActiveIndex
-      const max = isTopUnit ? 999 : NATURAL_MAX[index]
+  for (const index of activeIndices) {
+    const isTopUnit = index === firstActiveIndex
+    const max = isTopUnit ? 999 : NATURAL_MAX[index]
 
-      pickerConfigs.push({
-        min: 0,
-        max,
-        label: LABELS[index],
-        showUndefined: true,
-      })
-    }
+    pickerConfigs.push({
+      min: 0,
+      max,
+      label: TEMPORAL_UNIT_SHORT_LABELS[TEMPORAL_UNITS[index]],
+      showUndefined: false,
+    })
   }
 
   const handlePickerSubmit = (newValues: (number | undefined)[]) => {
     const fullArray: DateTimeArray = []
-    let cursor = 0
-
-    for (const v of parts) {
-      fullArray.push(v ? newValues[cursor++] : undefined)
+    for (const [cursor, index] of activeIndices.entries()) {
+      fullArray[index] = newValues[cursor] ?? 0
     }
 
     setValue(fullArray)
@@ -59,9 +60,9 @@ export const Input = ({
     setPickerVisible(false)
   }
 
-  const displayedValue = formatDurationArray(value)
+  const displayedValue = formatDurationArray(value, parts)
 
-  const initialPickerValues = value ? value.filter((v, i) => parts[i]) : []
+  const initialPickerValues = activeIndices.map(index => value?.[index] ?? 0)
 
   return (
     <View>
