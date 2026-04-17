@@ -28,15 +28,8 @@ export type TemporalFieldConfig<TUnit extends TemporalUnit = TemporalUnit> = {
 export type DateTimeFieldConfig = TemporalFieldConfig<DateTimeUnit>
 export type DurationFieldConfig = TemporalFieldConfig<DurationUnit>
 
-export type DateTimeArray = [
-  year?: number | undefined,
-  month?: number | undefined,
-  day?: number | undefined,
-  hour?: number | undefined,
-  minute?: number | undefined,
-  second?: number | undefined,
-  ms?: number | undefined,
-]
+export type DateTimeArray = number[]
+export type DurationArray = number[]
 
 export type DateTimeParts = [
   year: boolean,
@@ -65,7 +58,7 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 export type FieldValueMap = {
   [FieldType.Boolean]: boolean
   [FieldType.DateTime]: DateTimeArray
-  [FieldType.Duration]: DateTimeArray
+  [FieldType.Duration]: DurationArray
   [FieldType.Image]: string[]
   [FieldType.Number]: number
   [FieldType.Text]: string

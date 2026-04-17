@@ -126,15 +126,14 @@ Current supported field types:
 - `text`
 - `number`
 - `boolean`
-- `date`
 - `datetime`
 - `duration`
 - `image`
 
 Directionally:
 
-- `date` should be treated as a legacy type and not expanded further without a clear temporal-model decision.
-- `datetime` and `duration` stay supported, but their semantics should not be over-specified in the main product doc yet.
+- `datetime` and `duration` stay supported.
+- Their detailed semantics are defined in dedicated ADRs rather than repeated in the main product doc.
 - A future selectable-list/dropdown field type is likely important.
 
 ### 8.4 Field Type Responsibilities
@@ -336,19 +335,13 @@ These should be handled in dedicated ADR-style follow-up docs rather than over-d
 2. Saved-view persistence model.
    Does a saved view store only a query tree, or also sort, visible fields, grouping, and presentation choices?
 
-3. Temporal semantics.
-   How should `date`, `datetime`, partial precision, timezone behavior, and comparisons work?
-
-4. Duration semantics.
-   How should ordering, range filtering, normalization, and display behave for `duration` values?
-
-5. Canonical image model.
+3. Canonical image model.
    Should image fields represent one primary image, multiple images, or a richer asset structure?
 
-6. Backup/export format.
+4. Backup/export format.
    What is the durable backup format for local-only structured data plus images?
 
-7. Selectable-list field design.
+5. Selectable-list field design.
    Where do options live, how are they created on the fly, and how do queries treat them?
 
 ## 14. What This Spec Implies for the Next Build Phase

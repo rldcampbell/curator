@@ -199,9 +199,7 @@ export const hydrateCollection = (
   for (const v of valueRows) {
     const item = items[v.itemId]
     if (!item) continue
-    let parsed = v.value ? JSON.parse(v.value) : undefined
-    if (Array.isArray(parsed)) parsed = parsed.map(v => v ?? undefined)
-    item.values[v.fieldId] = parsed
+    item.values[v.fieldId] = v.value ? JSON.parse(v.value) : undefined
   }
 
   return {
