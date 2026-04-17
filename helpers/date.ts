@@ -124,18 +124,19 @@ export const formatDateTimeArray = (
 
 export function formatDurationArray(
   value: DateTimeArray | undefined,
+  activeParts: DateTimeParts = [true, true, true, true, true, true, true],
   fallback: string = "Select duration",
 ): string {
   if (!value) return fallback
 
   const parts: string[] = []
 
-  for (let i = 0; i < value.length; i++) {
-    const v = value[i]
-    if (v !== undefined && v !== 0) {
+  for (let i = 0; i < LABELS.length; i++) {
+    if (activeParts[i]) {
+      const v = value[i] ?? 0
       parts.push(`${v}${LABELS[i]}`)
     }
   }
 
-  return parts.length > 0 ? parts.join(" ") : "-"
+  return parts.length > 0 ? parts.join(" ") : fallback
 }

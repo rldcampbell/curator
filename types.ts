@@ -6,7 +6,27 @@ export type CollectionId = `c-${RawId}`
 export type FieldId = `f-${RawId}`
 export type ItemId = `i-${RawId}`
 
-export type DateArray = [y: number, m: number, d: number]
+export const TEMPORAL_UNITS = [
+  "year",
+  "month",
+  "day",
+  "hour",
+  "minute",
+  "second",
+  "ms",
+] as const
+
+export type TemporalUnit = (typeof TEMPORAL_UNITS)[number]
+export type DateTimeUnit = TemporalUnit
+export type DurationUnit = TemporalUnit
+
+export type TemporalFieldConfig<TUnit extends TemporalUnit = TemporalUnit> = {
+  topUnit: TUnit
+  bottomUnit: TUnit
+}
+
+export type DateTimeFieldConfig = TemporalFieldConfig<DateTimeUnit>
+export type DurationFieldConfig = TemporalFieldConfig<DurationUnit>
 
 export type DateTimeArray = [
   year?: number | undefined,
@@ -33,7 +53,6 @@ export type Timestamp = number
 
 export const FieldType = {
   Boolean: "boolean",
-  Date: "date", // to deprecate
   DateTime: "datetime",
   Duration: "duration",
   Image: "image",
@@ -45,7 +64,6 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType]
 
 export type FieldValueMap = {
   [FieldType.Boolean]: boolean
-  [FieldType.Date]: DateArray
   [FieldType.DateTime]: DateTimeArray
   [FieldType.Duration]: DateTimeArray
   [FieldType.Image]: string[]
@@ -72,28 +90,16 @@ type RawBooleanFieldAndValue = RawBaseField & {
   config: {}
 }
 
-type RawDateFieldAndValue = RawBaseField & {
-  type: typeof FieldType.Date
-  value?: FieldValueMap[typeof FieldType.Date]
-  min?: DateArray
-  max?: DateArray
-  config: {}
-}
-
 type RawDateTimeFieldAndValue = RawBaseField & {
   type: typeof FieldType.DateTime
   value?: FieldValueMap[typeof FieldType.DateTime]
-  config: {
-    parts: DateTimeParts
-  }
+  config: DateTimeFieldConfig
 }
 
 type RawDurationFieldAndValue = RawBaseField & {
   type: typeof FieldType.Duration
   value?: FieldValueMap[typeof FieldType.Duration]
-  config: {
-    parts: DateTimeParts
-  }
+  config: DurationFieldConfig
 }
 
 type RawImageFieldAndValue = RawBaseField & {
@@ -116,7 +122,6 @@ type RawTextFieldAndValue = RawBaseField & {
 
 export type RawFieldAndValue =
   | RawBooleanFieldAndValue
-  | RawDateFieldAndValue
   | RawDateTimeFieldAndValue
   | RawDurationFieldAndValue
   | RawImageFieldAndValue

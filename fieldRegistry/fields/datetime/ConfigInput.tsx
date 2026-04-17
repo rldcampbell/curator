@@ -5,12 +5,10 @@ export const ConfigInput = ({
   config,
   onConfigChange,
 }: ConfigInputProps<"datetime">) => {
-  const parts = config.parts ?? [true, true, true, true, true, true, false]
-
   return (
     <DatePartsPicker
-      parts={parts}
-      onPartsChange={parts => onConfigChange({ parts })}
+      config={config}
+      onConfigChange={nextConfig => onConfigChange(nextConfig)}
     />
   )
 }

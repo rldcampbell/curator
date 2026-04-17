@@ -8,9 +8,9 @@ export const text: FieldDefinition<"text"> = {
   label: "Text",
   defaultValue: "",
   defaultConfig: {},
-  display: Display,
+  display: ({ value }) => Display({ value }),
   input: Input,
-  validate,
-  fromText: text => text || undefined,
-  toText: value => value,
+  validate: (_field, value): value is string => validate(value),
+  fromText: (_field, text) => text || undefined,
+  toText: (_field, value) => value,
 } satisfies FieldDefinition<"text">

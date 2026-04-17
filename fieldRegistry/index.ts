@@ -17,7 +17,6 @@
 import { FieldType } from "@/types"
 
 import { boolean } from "./fields/boolean"
-import { date } from "./fields/date"
 import { datetime } from "./fields/datetime"
 import { duration } from "./fields/duration"
 import { image } from "./fields/image"
@@ -29,7 +28,6 @@ export const fieldRegistry: {
   [K in FieldType]: FieldDefinition<K>
 } = {
   boolean,
-  date,
   datetime,
   duration,
   image,

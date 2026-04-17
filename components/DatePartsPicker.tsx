@@ -3,72 +3,73 @@ import React from "react"
 import { StyleSheet, View } from "react-native"
 import DropDownPicker from "react-native-dropdown-picker"
 
-import { DateTimeParts } from "@/types"
 import AppText from "@/components/AppText"
+import {
+  TEMPORAL_UNIT_LABELS,
+  getTemporalUnitIndex,
+} from "@/helpers/temporal"
 import { formStyles, spacing } from "@/styles"
-
-const LABELS = [
-  "Year",
-  "Month",
-  "Day",
-  "Hour",
-  "Minute",
-  "Second",
-  "Millisecond",
-] as const
-
-const KEYS = [0, 1, 2, 3, 4, 5, 6] as const
-
-type PartIndex = (typeof KEYS)[number]
+import { TEMPORAL_UNITS, TemporalFieldConfig, TemporalUnit } from "@/types"
 
 export interface DatePartsPickerProps {
-  parts: DateTimeParts
-  onPartsChange: (parts: DateTimeParts) => void
+  config: TemporalFieldConfig
+  onConfigChange: (config: TemporalFieldConfig) => void
 }
 
 export default function DatePartsPicker({
-  parts,
-  onPartsChange,
+  config,
+  onConfigChange,
 }: DatePartsPickerProps) {
-  const initialMax = parts.findIndex(p => p)
-  const initialMin = (() => {
-    for (let i = parts.length - 1; i >= 0; i--) {
-      if (parts[i]) return i
-    }
-    return 0
-  })()
-
-  const [maxPart, setMaxPart] = React.useState<PartIndex>(
-    initialMax as PartIndex,
-  )
-  const [minPart, setMinPart] = React.useState<PartIndex>(
-    initialMin as PartIndex,
+  const [topUnit, setTopUnit] = React.useState<TemporalUnit>(config.topUnit)
+  const [bottomUnit, setBottomUnit] = React.useState<TemporalUnit>(
+    config.bottomUnit,
   )
 
   const [maxOpen, setMaxOpen] = React.useState(false)
   const [minOpen, setMinOpen] = React.useState(false)
 
-  const updateParts = (max: PartIndex, min: PartIndex) => {
-    setMaxPart(max)
-    setMinPart(min)
-    onPartsChange(
-      KEYS.map(index => index >= max && index <= min) as DateTimeParts,
-    )
+  React.useEffect(() => {
+    setTopUnit(config.topUnit)
+    setBottomUnit(config.bottomUnit)
+  }, [config.bottomUnit, config.topUnit])
+
+  const updateConfig = (nextTopUnit: TemporalUnit, nextBottomUnit: TemporalUnit) => {
+    setTopUnit(nextTopUnit)
+    setBottomUnit(nextBottomUnit)
+    onConfigChange({
+      topUnit: nextTopUnit,
+      bottomUnit: nextBottomUnit,
+    })
   }
 
-  const handleMaxChange = (value: (prevState: PartIndex) => PartIndex) => {
-    const newMax = value(maxPart)
-    const adjustedMin = Math.max(newMax, minPart) as PartIndex
-    updateParts(newMax, adjustedMin)
+  const handleTopUnitChange = (
+    value: (prevState: TemporalUnit) => TemporalUnit,
+  ) => {
+    const nextTopUnit = value(topUnit)
+    const adjustedBottomUnit =
+      getTemporalUnitIndex(nextTopUnit) > getTemporalUnitIndex(bottomUnit)
+        ? nextTopUnit
+        : bottomUnit
+
+    updateConfig(nextTopUnit, adjustedBottomUnit)
   }
 
-  const handleMinChange = (value: (prevState: PartIndex) => PartIndex) => {
-    const newMin = value(minPart)
-    const adjustedMax = Math.min(newMin, maxPart) as PartIndex
-    updateParts(adjustedMax, newMin)
+  const handleBottomUnitChange = (
+    value: (prevState: TemporalUnit) => TemporalUnit,
+  ) => {
+    const nextBottomUnit = value(bottomUnit)
+    const adjustedTopUnit =
+      getTemporalUnitIndex(nextBottomUnit) < getTemporalUnitIndex(topUnit)
+        ? nextBottomUnit
+        : topUnit
+
+    updateConfig(adjustedTopUnit, nextBottomUnit)
   }
 
-  const dropdownItems = KEYS.map((key, i) => ({ label: LABELS[i], value: key }))
+  const dropdownItems = TEMPORAL_UNITS.map(unit => ({
+    label: TEMPORAL_UNIT_LABELS[unit],
+    value: unit,
+  }))
 
   return (
     <View style={styles.container}>
@@ -78,8 +79,8 @@ export default function DatePartsPicker({
           <DropDownPicker
             open={maxOpen}
             setOpen={setMaxOpen}
-            value={maxPart}
-            setValue={handleMaxChange}
+            value={topUnit}
+            setValue={handleTopUnitChange}
             items={dropdownItems}
             onOpen={() => setMinOpen(false)}
             zIndex={3000}
@@ -91,8 +92,8 @@ export default function DatePartsPicker({
           <DropDownPicker
             open={minOpen}
             setOpen={setMinOpen}
-            value={minPart}
-            setValue={handleMinChange}
+            value={bottomUnit}
+            setValue={handleBottomUnitChange}
             items={dropdownItems}
             onOpen={() => setMaxOpen(false)}
             zIndex={2000}

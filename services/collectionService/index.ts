@@ -82,7 +82,7 @@ export const collectionService = {
     if (!field) return ""
 
     const def = fieldRegistry[field.type]
-    return def.toText(rawValue) ?? ""
+    return def.toText(field, rawValue) ?? ""
   },
 
   async exportToCsvFile(collection: RawCollection) {

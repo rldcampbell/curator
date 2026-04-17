@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 
-import { DateTimeArray, FieldType } from "@/types"
+import { DateTimeArray, FieldType, TEMPORAL_UNITS } from "@/types"
 import AppText from "@/components/AppText"
 import FieldWrapper from "@/components/FieldWrapper"
 import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"
 import { WheelPickerProps } from "@/components/WheelPicker"
 import { InputProps } from "@/fieldRegistry/types"
 import { formatDateTimeArray } from "@/helpers/date"
+import {
+  TEMPORAL_UNIT_SHORT_LABELS,
+  getTemporalIndicesInRange,
+  temporalConfigToParts,
+} from "@/helpers/temporal"
 import { colors, modalStyles, surfaceStyles } from "@/styles"
 
-const LABELS = ["Y", "M", "D", "h", "m", "s", "ms"] as const
 const MIN = [0, 1, 1, 0, 0, 0, 0] as const
 const MAX = [9999, 12, 31, 23, 59, 59, 999] as const
 const LEAP_YEAR = 2000
@@ -27,7 +31,9 @@ export const Input = ({
 }: InputProps<typeof FieldType.DateTime>) => {
   const [value, setValue] = useState(initialValue)
   const [pickerVisible, setPickerVisible] = useState(false)
-  const { parts } = field.config
+  const config = field.config
+  const parts = temporalConfigToParts(config)
+  const activeIndices = getTemporalIndicesInRange(config)
 
   const now = new Date()
   const fallback = [
@@ -44,7 +50,7 @@ export const Input = ({
   useEffect(() => {
     const dayIndex = 2
     if (value !== undefined)
-      if (parts[dayIndex] && (parts[1] || parts[0])) {
+      if (activeIndices.includes(dayIndex) && (parts[1] || parts[0])) {
         const daysInMonth = getDaysInMonth(value[0] ?? LEAP_YEAR, value[1] ?? 1)
         if ((value[dayIndex] ?? 1) > daysInMonth) {
           const updated: DateTimeArray = [...value]
@@ -56,30 +62,26 @@ export const Input = ({
 
   const pickerConfigs: Omit<WheelPickerProps, "value" | "onChange">[] = []
 
-  for (const [index, enabled] of parts.entries()) {
-    if (enabled) {
-      let max: number = MAX[index]
-      if (index === 2) {
-        const year = value?.[0] ?? LEAP_YEAR
-        const month = value?.[1] ?? 1
-        max = new Date(year, month, 0).getDate()
-      }
-
-      pickerConfigs.push({
-        min: MIN[index],
-        max,
-        label: LABELS[index],
-        showUndefined: false,
-      })
+  for (const index of activeIndices) {
+    let max: number = MAX[index]
+    if (index === 2) {
+      const year = value?.[0] ?? LEAP_YEAR
+      const month = value?.[1] ?? 1
+      max = new Date(year, month, 0).getDate()
     }
+
+    pickerConfigs.push({
+      min: MIN[index],
+      max,
+      label: TEMPORAL_UNIT_SHORT_LABELS[TEMPORAL_UNITS[index]],
+      showUndefined: false,
+    })
   }
 
   const handlePickerSubmit = (newValues: (number | undefined)[]) => {
     const fullArray: DateTimeArray = []
-    let cursor = 0
-
-    for (const v of parts) {
-      fullArray.push(v ? newValues[cursor++] : undefined)
+    for (const [cursor, index] of activeIndices.entries()) {
+      fullArray[index] = newValues[cursor]
     }
 
     setValue(fullArray)
@@ -93,11 +95,11 @@ export const Input = ({
     setPickerVisible(false)
   }
 
-  const displayedValue = formatDateTimeArray(value)
+  const displayedValue = formatDateTimeArray(value, parts)
 
-  const initialPickerValues = fallback
-    .map((v, i) => (parts[i] ? (value?.[i] ?? v) : undefined))
-    .filter(v => v !== undefined)
+  const initialPickerValues = activeIndices.map(
+    index => value?.[index] ?? fallback[index],
+  )
 
   return (
     <View>

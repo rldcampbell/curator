@@ -10,9 +10,9 @@ export const image: FieldDefinition<"image"> = {
   label: "Image",
   defaultValue: [],
   defaultConfig: {},
-  display: Display,
+  display: ({ value }) => Display({ value }),
   input: Input,
-  validate,
+  validate: (_field, value): value is string[] => validate(value),
   fromText: () => undefined,
   toText: () => undefined,
 }

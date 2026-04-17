@@ -1,16 +1,21 @@
-import { FieldType, FieldValue, FieldValueMap } from "@/types"
+import {
+  FieldType,
+  FieldValue,
+  FieldValueMap,
+  RawField,
+  RawFieldAndValue,
+} from "@/types"
 import { fieldRegistry } from "@/fieldRegistry"
 import { ConfigInputProps, InputProps } from "@/fieldRegistry/types"
 
 export const fieldService = {
-  display<T extends FieldType>({
-    type,
-    value,
-  }: {
-    type: T
-    value?: FieldValueMap[T]
-  }) {
-    return fieldRegistry[type].display({ value })
+  display<T extends FieldType>(field: Extract<RawFieldAndValue, { type: T }>) {
+    return field.value === undefined
+      ? fieldRegistry[field.type].display({ field })
+      : fieldRegistry[field.type].display({
+          field,
+          value: field.value as FieldValueMap[T],
+        })
   },
 
   input<T extends FieldType>(props: InputProps<T>) {
@@ -28,29 +33,35 @@ export const fieldService = {
     return fieldRegistry[type].defaultValue
   },
 
-  validate(type: FieldType, value: unknown): boolean {
-    return fieldRegistry[type].validate(value)
+  validate<T extends FieldType>(
+    field: Extract<RawField, { type: T }>,
+    value: unknown,
+  ): boolean {
+    return fieldRegistry[field.type].validate(field, value)
   },
 
   fromText<T extends FieldType>(
-    type: T,
+    field: Extract<RawField, { type: T }>,
     value: string | undefined,
   ): FieldValueMap[T] | undefined {
-    return fieldRegistry[type].fromText(value)
+    return fieldRegistry[field.type].fromText(field, value)
   },
 
   toText<T extends FieldType>(
-    type: T,
+    field: Extract<RawField, { type: T }>,
     value: FieldValueMap[T] | undefined,
   ): string | undefined {
-    return fieldRegistry[type].toText(value)
+    return fieldRegistry[field.type].toText(field, value)
   },
 
   convert<From extends FieldType, To extends FieldType>(
-    from: From,
-    to: To,
+    fromField: Extract<RawField, { type: From }>,
+    toField: Extract<RawField, { type: To }>,
     value: FieldValueMap[From] | undefined,
   ): FieldValueMap[To] | undefined {
-    return fieldService.fromText(to, fieldService.toText(from, value))
+    return fieldService.fromText(
+      toField,
+      fieldService.toText(fromField, value),
+    )
   },
 }
