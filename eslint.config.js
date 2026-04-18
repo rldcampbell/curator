@@ -1,7 +1,6 @@
 import tsPlugin from "@typescript-eslint/eslint-plugin"
 import tsParser from "@typescript-eslint/parser"
 import prettierConfig from "eslint-config-prettier"
-import importPlugin from "eslint-plugin-import"
 import unusedImports from "eslint-plugin-unused-imports"
 
 export default [
@@ -26,7 +25,6 @@ export default [
     },
     plugins: {
       "unused-imports": unusedImports,
-      import: importPlugin,
       "@typescript-eslint": tsPlugin,
     },
     rules: {
