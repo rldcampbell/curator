@@ -59,7 +59,7 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
   }
 
   func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-    return 34
+    return 40
   }
 
   func pickerView(
@@ -69,18 +69,25 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     reusing view: UIView?
   ) -> UIView {
     let label = (view as? UILabel) ?? UILabel()
+    let selectedRow = normalizedSelectedIndexes()[component]
+    let isSelected = selectedRow == row
 
     label.backgroundColor = .clear
-    label.font = UIFont.systemFont(ofSize: 22, weight: .medium)
-    label.textColor = .label
+    label.font = isSelected
+      ? UIFont.systemFont(ofSize: 28, weight: .semibold)
+      : UIFont.systemFont(ofSize: 23, weight: .medium)
+    label.textColor = isSelected
+      ? UIColor.label
+      : UIColor.secondaryLabel.withAlphaComponent(0.72)
     label.textAlignment = .center
     label.adjustsFontSizeToFitWidth = true
-    label.minimumScaleFactor = 0.7
+    label.minimumScaleFactor = 0.65
+    label.alpha = isSelected ? 1.0 : 0.92
     label.frame = CGRect(
       x: 0,
       y: 0,
-      width: componentWidth(for: component),
-      height: 34
+      width: componentWidth(for: component) - 8,
+      height: 40
     )
     label.text = titleForRow(row, component: component)
 
@@ -101,6 +108,12 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     selectedIndexes = normalizedSelectedIndexes()
     selectedIndexes[component] = row
 
+    UIView.performWithoutAnimation {
+      pickerView.reloadComponent(component)
+      pickerView.selectRow(row, inComponent: component, animated: false)
+      pickerView.layoutIfNeeded()
+    }
+
     onSelectionChange([
       "selectedIndexes": selectedIndexes,
       "changedColumn": component
@@ -111,6 +124,7 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     pickerView.dataSource = self
     pickerView.delegate = self
     pickerView.backgroundColor = .clear
+    pickerView.clipsToBounds = true
     pickerView.translatesAutoresizingMaskIntoConstraints = false
     addSubview(pickerView)
 

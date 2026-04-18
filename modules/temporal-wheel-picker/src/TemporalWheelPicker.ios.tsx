@@ -1,6 +1,12 @@
 import { requireNativeViewManager } from "expo-modules-core"
 import React, { useCallback } from "react"
-import { NativeSyntheticEvent, StyleSheet, Text, View } from "react-native"
+import {
+  NativeSyntheticEvent,
+  StyleSheet,
+  Text,
+  View,
+  ViewProps,
+} from "react-native"
 
 import {
   NativeTemporalWheelPickerProps,
@@ -23,9 +29,15 @@ try {
 export const isTemporalWheelPickerAvailable =
   NativeTemporalWheelPicker !== null
 
+const PICKER_HEIGHT = 216
+const LABEL_ROW_HEIGHT = 28
+
 export default function TemporalWheelPicker({
+  columns,
+  selectedIndexes,
   onSelectionChange,
-  ...props
+  style,
+  ...containerProps
 }: TemporalWheelPickerProps) {
   const handleSelectionChange = useCallback(
     (event: NativeSyntheticEvent<TemporalWheelPickerChange>) => {
@@ -33,10 +45,11 @@ export default function TemporalWheelPicker({
     },
     [onSelectionChange],
   )
+  const hasVisibleLabels = columns.some(column => column.label.trim().length > 0)
 
   if (!NativeTemporalWheelPicker) {
     return (
-      <View style={[styles.fallback, props.style]}>
+      <View style={[styles.fallback, style]}>
         <Text style={styles.fallbackText}>
           TemporalWheelPicker requires an iOS development build.
         </Text>
@@ -44,21 +57,96 @@ export default function TemporalWheelPicker({
     )
   }
 
-  if (onSelectionChange) {
-    return (
-      <NativeTemporalWheelPicker
-        {...props}
-        onSelectionChange={handleSelectionChange}
-      />
-    )
+  const nativePickerProps: NativeTemporalWheelPickerProps = {
+    columns,
+    selectedIndexes,
+    style: styles.nativePicker,
   }
 
-  return <NativeTemporalWheelPicker {...props} />
+  if (onSelectionChange) {
+    nativePickerProps.onSelectionChange = handleSelectionChange
+  }
+
+  return (
+    <View
+      {...(containerProps as ViewProps)}
+      style={[
+        styles.shell,
+        hasVisibleLabels && styles.shellWithLabels,
+        style,
+      ]}
+    >
+      <View style={styles.pickerFrame}>
+        <NativeTemporalWheelPicker {...nativePickerProps} />
+        <View pointerEvents="none" style={styles.selectionOverlay} />
+      </View>
+      {hasVisibleLabels ? (
+        <View style={styles.labelRow}>
+          {columns.map(column => (
+            <View key={column.key} style={styles.labelCell}>
+              <Text style={styles.labelText}>{column.label}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
+  shell: {
+    minHeight: PICKER_HEIGHT,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#d8dee9",
+    backgroundColor: "#fbfcfe",
+    overflow: "hidden",
+  },
+  shellWithLabels: {
+    minHeight: PICKER_HEIGHT + LABEL_ROW_HEIGHT,
+  },
+  pickerFrame: {
+    height: PICKER_HEIGHT,
+    justifyContent: "center",
+    backgroundColor: "#fbfcfe",
+  },
+  nativePicker: {
+    height: PICKER_HEIGHT,
+    width: "100%",
+  },
+  selectionOverlay: {
+    position: "absolute",
+    left: 12,
+    right: 12,
+    top: (PICKER_HEIGHT - 44) / 2,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#d7deea",
+    backgroundColor: "rgba(255,255,255,0.72)",
+  },
+  labelRow: {
+    height: LABEL_ROW_HEIGHT,
+    flexDirection: "row",
+    alignItems: "center",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#e5e9f0",
+    backgroundColor: "#f5f7fb",
+  },
+  labelCell: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  labelText: {
+    fontSize: 12,
+    fontWeight: "600",
+    letterSpacing: 0.3,
+    color: "#5d6b82",
+    textTransform: "lowercase",
+  },
   fallback: {
-    minHeight: 216,
+    minHeight: PICKER_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 16,

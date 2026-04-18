@@ -204,7 +204,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   nativePicker: {
-    height: 216,
+    width: "100%",
+    alignSelf: "stretch",
   },
   helperText: {
     marginTop: 12,
