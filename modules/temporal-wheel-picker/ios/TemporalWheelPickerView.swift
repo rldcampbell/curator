@@ -9,10 +9,23 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
   private var columns: [TemporalWheelPickerColumnRecord] = []
   private var selectedIndexes: [Int] = []
   private var isApplyingProps = false
+  private var previousBoundsSize: CGSize = .zero
 
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
     setupPickerView()
+  }
+
+  override func layoutSubviews() {
+    super.layoutSubviews()
+
+    guard bounds.size != previousBoundsSize else {
+      return
+    }
+
+    previousBoundsSize = bounds.size
+    pickerView.reloadAllComponents()
+    applySelectedIndexes(animated: false)
   }
 
   func setColumns(_ columns: [TemporalWheelPickerColumnRecord]) {
@@ -41,31 +54,37 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     return columns[component].options.count
   }
 
-  func pickerView(
-    _ pickerView: UIPickerView,
-    attributedTitleForRow row: Int,
-    forComponent component: Int
-  ) -> NSAttributedString? {
-    guard let title = titleForRow(row, component: component) else {
-      return nil
-    }
-
-    return NSAttributedString(
-      string: title,
-      attributes: [
-        .foregroundColor: UIColor.label,
-        .font: UIFont.systemFont(ofSize: 22, weight: .medium)
-      ]
-    )
-  }
-
   func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-    let componentCount = max(columns.count, 1)
-    return bounds.width / CGFloat(componentCount)
+    return componentWidth(for: component)
   }
 
   func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
     return 34
+  }
+
+  func pickerView(
+    _ pickerView: UIPickerView,
+    viewForRow row: Int,
+    forComponent component: Int,
+    reusing view: UIView?
+  ) -> UIView {
+    let label = (view as? UILabel) ?? UILabel()
+
+    label.backgroundColor = .clear
+    label.font = UIFont.systemFont(ofSize: 22, weight: .medium)
+    label.textColor = .label
+    label.textAlignment = .center
+    label.adjustsFontSizeToFitWidth = true
+    label.minimumScaleFactor = 0.7
+    label.frame = CGRect(
+      x: 0,
+      y: 0,
+      width: componentWidth(for: component),
+      height: 34
+    )
+    label.text = titleForRow(row, component: component)
+
+    return label
   }
 
   func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
@@ -91,6 +110,7 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
   private func setupPickerView() {
     pickerView.dataSource = self
     pickerView.delegate = self
+    pickerView.backgroundColor = .clear
     pickerView.translatesAutoresizingMaskIntoConstraints = false
     addSubview(pickerView)
 
@@ -142,6 +162,16 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     }
 
     return options[row]
+  }
+
+  private func componentWidth(for component: Int) -> CGFloat {
+    guard columns.indices.contains(component) else {
+      return max(bounds.width, 96)
+    }
+
+    let componentCount = max(columns.count, 1)
+    let availableWidth = max(bounds.width, 96 * CGFloat(componentCount))
+    return availableWidth / CGFloat(componentCount)
   }
 
   private func updateAccessibilityLabel() {
