@@ -6,8 +6,12 @@
   "scripts": {
     "start": "expo start",
     "start:clean": "expo start -c",
+    "start:dev-client": "expo start --dev-client --lan",
     "deps:check": "expo install --check",
     "deps:fix": "expo install --fix",
+    "ios:prebuild": "expo prebuild -p ios",
+    "ios:prebuild:clean": "expo prebuild -p ios --clean",
+    "ios:run:device": "expo run:ios --device",
     "postinstall": "node scripts/apply-local-patches.mjs",
     "test": "jest --watchAll",
     "lint": "eslint",
