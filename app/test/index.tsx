@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import {
   Button,
   ScrollView,
@@ -11,6 +11,10 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import * as SQLite from "expo-sqlite"
 
 import AppText from "@/components/AppText"
+import TemporalWheelPicker, {
+  TemporalWheelPickerColumn,
+  isTemporalWheelPickerAvailable,
+} from "@/components/TemporalWheelPicker"
 import MultiWheelPicker from "@/components/MultiWheelPicker"
 
 // adjust path if needed
@@ -19,6 +23,34 @@ const TestScreen = () => {
   const [rows, setRows] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
   const [testTime, setTestTime] = useState<(number | undefined)[]>([0, 0, 0])
+  const [nativeTimeIndexes, setNativeTimeIndexes] = useState([0, 0, 0])
+
+  const nativeColumns = useMemo<TemporalWheelPickerColumn[]>(
+    () => [
+      {
+        key: "hour",
+        label: "hrs",
+        options: Array.from({ length: 24 }, (_, index) =>
+          index.toString().padStart(2, "0"),
+        ),
+      },
+      {
+        key: "minute",
+        label: "min",
+        options: Array.from({ length: 60 }, (_, index) =>
+          index.toString().padStart(2, "0"),
+        ),
+      },
+      {
+        key: "second",
+        label: "sec",
+        options: Array.from({ length: 60 }, (_, index) =>
+          index.toString().padStart(2, "0"),
+        ),
+      },
+    ],
+    [],
+  )
 
   useEffect(() => {
     fetchTable()
@@ -65,6 +97,31 @@ const TestScreen = () => {
         <Text style={styles.testValue}>
           Selected: {testTime.join(" : ")}
         </Text>
+      </View>
+
+      <View style={styles.testPickerContainer}>
+        <AppText weight="semiBold" style={styles.testTitle}>
+          🎛️ UIPickerView Prototype
+        </AppText>
+        <TemporalWheelPicker
+          columns={nativeColumns}
+          selectedIndexes={nativeTimeIndexes}
+          onSelectionChange={({ selectedIndexes }) =>
+            setNativeTimeIndexes(selectedIndexes)
+          }
+          style={styles.nativePicker}
+        />
+        <Text style={styles.testValue}>
+          Selected:{" "}
+          {nativeTimeIndexes
+            .map((index, columnIndex) => nativeColumns[columnIndex].options[index])
+            .join(" : ")}
+        </Text>
+        <AppText style={styles.helperText}>
+          {isTemporalWheelPickerAvailable
+            ? "Running native UIPickerView-backed prototype."
+            : "Native view not loaded in this build yet. Create an iOS development build to exercise it."}
+        </AppText>
       </View>
 
       <View style={styles.header}>
@@ -144,6 +201,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     fontFamily: "Courier",
+    textAlign: "center",
+  },
+  nativePicker: {
+    width: "100%",
+    alignSelf: "stretch",
+  },
+  helperText: {
+    marginTop: 12,
+    fontSize: 13,
+    color: "#666",
     textAlign: "center",
   },
 })

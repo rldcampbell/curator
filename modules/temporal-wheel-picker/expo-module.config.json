@@ -1,0 +1,8 @@
+{
+  "platforms": ["apple"],
+  "apple": {
+    "modules": ["CuratorTemporalWheelPickerModule"],
+    "podspecPath": "ios/CuratorTemporalWheelPicker.podspec"
+  },
+  "android": {}
+}

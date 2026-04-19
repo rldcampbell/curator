@@ -1,0 +1,11 @@
+{
+  "name": "curator-temporal-wheel-picker",
+  "version": "1.0.0",
+  "description": "Local native UIPickerView-backed temporal wheel picker for Curator.",
+  "main": "index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "author": "Curator",
+  "license": "UNLICENSED",
+  "homepage": "https://example.invalid/curator"
+}
