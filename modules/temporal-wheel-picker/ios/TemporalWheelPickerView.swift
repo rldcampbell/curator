@@ -10,6 +10,8 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
   private var selectedIndexes: [Int] = []
   private var isApplyingProps = false
   private var previousBoundsSize: CGSize = .zero
+  private var previousColumnsSignature = ""
+  private var lastEmittedSelectedIndexes: [Int]?
 
   required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
@@ -37,9 +39,22 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
   }
 
   func applyProps() {
-    pickerView.reloadAllComponents()
-    selectedIndexes = normalizedSelectedIndexes()
-    applySelectedIndexes(animated: false)
+    let normalizedIndexes = normalizedSelectedIndexes()
+    let columnsSignature = makeColumnsSignature()
+    let columnsChanged = columnsSignature != previousColumnsSignature
+    let isNativeEventEcho = lastEmittedSelectedIndexes == normalizedIndexes
+
+    selectedIndexes = normalizedIndexes
+
+    if columnsChanged {
+      previousColumnsSignature = columnsSignature
+      pickerView.reloadAllComponents()
+    }
+
+    if columnsChanged || !isNativeEventEcho {
+      applySelectedIndexes(animated: false)
+    }
+
     updateAccessibilityLabel()
   }
 
@@ -105,8 +120,8 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
       return
     }
 
-    selectedIndexes = normalizedSelectedIndexes()
-    selectedIndexes[component] = row
+    selectedIndexes = currentPickerSelectedIndexes()
+    lastEmittedSelectedIndexes = selectedIndexes
 
     UIView.performWithoutAnimation {
       pickerView.reloadComponent(component)
@@ -165,6 +180,21 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     }
   }
 
+  private func currentPickerSelectedIndexes() -> [Int] {
+    return columns.enumerated().map { component, column in
+      guard !column.options.isEmpty else {
+        return 0
+      }
+
+      let rawIndex = pickerView.selectedRow(inComponent: component)
+      let fallbackIndex = selectedIndexes.indices.contains(component)
+        ? selectedIndexes[component]
+        : 0
+      let resolvedIndex = rawIndex >= 0 ? rawIndex : fallbackIndex
+      return min(max(resolvedIndex, 0), column.options.count - 1)
+    }
+  }
+
   private func titleForRow(_ row: Int, component: Int) -> String? {
     guard columns.indices.contains(component) else {
       return nil
@@ -186,6 +216,15 @@ internal final class TemporalWheelPickerView: ExpoView, UIPickerViewDataSource, 
     let componentCount = max(columns.count, 1)
     let availableWidth = max(bounds.width, 96 * CGFloat(componentCount))
     return availableWidth / CGFloat(componentCount)
+  }
+
+  private func makeColumnsSignature() -> String {
+    return columns
+      .map { column in
+        let options = column.options.joined(separator: "\u{1F}")
+        return "\(column.key)\u{1E}\(options)"
+      }
+      .joined(separator: "\u{1D}")
   }
 
   private func updateAccessibilityLabel() {
