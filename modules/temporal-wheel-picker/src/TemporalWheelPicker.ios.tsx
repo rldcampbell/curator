@@ -78,7 +78,6 @@ export default function TemporalWheelPicker({
     >
       <View style={styles.pickerFrame}>
         <NativeTemporalWheelPicker {...nativePickerProps} />
-        <View pointerEvents="none" style={styles.selectionOverlay} />
       </View>
       {hasVisibleLabels ? (
         <View style={styles.labelRow}>
@@ -113,17 +112,6 @@ const styles = StyleSheet.create({
   nativePicker: {
     height: PICKER_HEIGHT,
     width: "100%",
-  },
-  selectionOverlay: {
-    position: "absolute",
-    left: 12,
-    right: 12,
-    top: (PICKER_HEIGHT - 44) / 2,
-    height: 44,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#d7deea",
-    backgroundColor: "rgba(255,255,255,0.72)",
   },
   labelRow: {
     height: LABEL_ROW_HEIGHT,
