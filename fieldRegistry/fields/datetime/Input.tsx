@@ -4,8 +4,9 @@ import { Pressable, StyleSheet, View } from "react-native"
 import { DateTimeArray, FieldType } from "@/types"
 import AppText from "@/components/AppText"
 import FieldWrapper from "@/components/FieldWrapper"
-import MultiWheelPickerModal from "@/components/MultiWheelPickerModal"
-import { WheelPickerProps } from "@/components/WheelPicker"
+import MultiWheelPickerModal, {
+  NumericWheelPickerConfig,
+} from "@/components/MultiWheelPickerModal"
 import { InputProps } from "@/fieldRegistry/types"
 import {
   TEMPORAL_UNIT_SHORT_LABELS,
@@ -45,7 +46,7 @@ export const Input = ({
   }, [config, dayIndex, value])
 
   const pickerValue = value ?? fallback
-  const pickerConfigs: Omit<WheelPickerProps, "value" | "onChange">[] = []
+  const pickerConfigs: NumericWheelPickerConfig[] = []
 
   for (const unit of units) {
     const { min, max } = getDateTimeUnitBounds(config, pickerValue, unit)

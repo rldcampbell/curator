@@ -15,14 +15,12 @@ import TemporalWheelPicker, {
   TemporalWheelPickerColumn,
   isTemporalWheelPickerAvailable,
 } from "@/components/TemporalWheelPicker"
-import MultiWheelPicker from "@/components/MultiWheelPicker"
 
 // adjust path if needed
 
 const TestScreen = () => {
   const [rows, setRows] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [testTime, setTestTime] = useState<(number | undefined)[]>([0, 0, 0])
   const [nativeTimeIndexes, setNativeTimeIndexes] = useState([0, 0, 0])
 
   const nativeColumns = useMemo<TemporalWheelPickerColumn[]>(
@@ -80,25 +78,6 @@ const TestScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.testPickerContainer}>
-        <AppText weight="semiBold" style={styles.testTitle}>
-          ⏰ Test Picker (Hours, Minutes, Seconds)
-        </AppText>
-        <MultiWheelPicker
-          pickers={[
-            { min: 0, max: 999, label: "hrs" },
-            { min: 0, max: 59, label: "min" },
-            { min: 0, max: 59, label: "sec" },
-          ]}
-          value={testTime}
-          onChange={setTestTime}
-          gap={12}
-        />
-        <Text style={styles.testValue}>
-          Selected: {testTime.join(" : ")}
-        </Text>
-      </View>
-
       <View style={styles.testPickerContainer}>
         <AppText weight="semiBold" style={styles.testTitle}>
           🎛️ UIPickerView Prototype
